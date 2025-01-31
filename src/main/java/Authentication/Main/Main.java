@@ -1,6 +1,7 @@
 package Authentication.Main;
 
 import Authentication.Swing.PanelCover;
+import Authentication.Swing.PanelLoginAndRegister;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
@@ -17,9 +18,11 @@ public class Main extends JFrame {
 
     private MigLayout layout;
     private PanelCover cover;
+    private PanelLoginAndRegister loginAndRegister;
 
     private final int addSize = 30;
     private final int coverSize = 40;
+    private final int loginSize = 60;
 
     private boolean isLogin;
     // Specify how decimals will be formatted. This would round only if the value has 3 (###) decimals
@@ -49,6 +52,7 @@ public class Main extends JFrame {
         // Layout Constraints | Column Constraints
         this.layout = new MigLayout("fill, insets 0");
         this.cover = new PanelCover();
+        this.loginAndRegister = new PanelLoginAndRegister();
 
 
         TimingTarget target = createTimingTarget();
@@ -56,6 +60,7 @@ public class Main extends JFrame {
 
         this.backGround.setLayout(layout);
         this.backGround.add(cover, "width " + coverSize + "%, pos 0al 0 n 100%");
+        this.backGround.add(loginAndRegister, "width " + loginSize + "%, pos 1al 0 n 100%");
         this.cover.addEvent(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -84,6 +89,7 @@ public class Main extends JFrame {
 
     private void updateEveryFrameAnimation(float fraction) {
         double fractionCover;
+        double fractionLogin;
         double size = coverSize;
 
         // First half of the animation (0.5f) it will grow (expand)
@@ -95,11 +101,22 @@ public class Main extends JFrame {
         }
         // Determines where the Panel will move
         // when isLogin it will revert the animation (setting fraction back to 0.0)
-        fractionCover = isLogin ? 1f - fraction : fraction;
+        // Covers are opposed to each other
+        if (isLogin) {
+            fractionCover = 1f - fraction;
+            fractionLogin = fraction;
+        } else {
+            fractionCover = fraction;
+            fractionLogin = 1f - fraction;
+        }
         fractionCover = Double.valueOf(decimalFormat.format(fractionCover));
+        fractionLogin = Double.valueOf(decimalFormat.format(fractionLogin));
 
         layout.setComponentConstraints(cover, "width " + size
                 + "%, pos " + fractionCover + "al 0 n 100%");
+        layout.setComponentConstraints(loginAndRegister, "width " + loginSize
+                + "%, pos " + fractionLogin + "al 0 n 100%");
+
         backGround.revalidate(); // Redraw every frame
     }
 

@@ -5,11 +5,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static Utils.Utils.MAIN_FONT;
+import static Utils.Colors.*;
+import static Utils.Fonts.MAIN_FONT;
 
 public class PanelCover extends JPanel {
-    private Color startColor;
-    private Color endColor;
 
     private JButton actionButton;
     private ActionListener actionlistener;
@@ -18,10 +17,6 @@ public class PanelCover extends JPanel {
         setOpaque(false);
         setLayout(new FlowLayout(FlowLayout.LEFT, 20, 20));
         initButton();
-
-        // #00A6A0 | #485697
-        this.startColor = new Color(0, 166, 160);
-        this.endColor = new Color(72, 86, 151);
     }
 
     private void initButton() {
@@ -48,7 +43,7 @@ public class PanelCover extends JPanel {
         super.paintComponent(g);
 
         Graphics2D g2d = (Graphics2D) g;
-        GradientPaint gradientPaint = new GradientPaint(0,0,startColor,100,100,endColor);
+        GradientPaint gradientPaint = new GradientPaint(0,0,MAIN_APP_COLOUR,100,100, SECONDARY_APP_COLOUR);
         g2d.setPaint(gradientPaint);
         g2d.fillRect(0, 0, getWidth(), getHeight());
     }

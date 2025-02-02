@@ -5,6 +5,7 @@ import Authentication.Components.CustomizedButton;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 import static Utils.Colors.MAIN_APP_COLOUR;
 import static Utils.Fonts.MAIN_FONT;
@@ -12,11 +13,11 @@ import static Utils.Fonts.MAIN_FONT;
 public class PanelLoginAndRegister extends JLayeredPane {
     private JPanel login, register;
 
-    public PanelLoginAndRegister() {
+    public PanelLoginAndRegister(ActionListener eventRegister) {
         setOpaque(false);
         setLayout(new CardLayout());
         initComponents();
-        initRegister();
+        initRegister(eventRegister);
         initLogin();
 
         // Register by default
@@ -36,7 +37,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
     }
 
     // TODO: Add the logo at the top
-    private void initRegister() {
+    private void initRegister(ActionListener eventRegister) {
         // Adjust space between elements
         this.register.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]10[]10[]40[]push"));
         JLabel registerLabel = new JLabel("Registrarse");
@@ -75,6 +76,8 @@ public class PanelLoginAndRegister extends JLayeredPane {
         registerButton.setBackground(MAIN_APP_COLOUR); // TODO: Colours?
         registerButton.setForeground(Color.red); // TODO: Font?
         registerButton.setFont(MAIN_FONT);
+        registerButton.addActionListener(eventRegister);
+        // TODO: setText vs setLabel?
         registerButton.setLabel("Registrarse"); // TODO: How to make it round
         this.register.add(registerButton, "w 40%, h 40");
 

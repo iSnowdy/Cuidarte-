@@ -8,6 +8,7 @@ TODO: Make it so that the window pops up in the middle of the screen and of a ce
  */
 
 import Authentication.Swing.PanelCover;
+import Authentication.Swing.PanelLoading;
 import Authentication.Swing.PanelLoginAndRegister;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
@@ -26,6 +27,7 @@ public class Main extends JFrame {
     private MigLayout layout;
     private PanelCover cover;
     private PanelLoginAndRegister loginAndRegister;
+    private PanelLoading panelLoading;
 
     private final int addSize = 30;
     private final int coverSize = 40;
@@ -55,17 +57,30 @@ public class Main extends JFrame {
         this.add(backGround, BorderLayout.CENTER);
     }
 
+    // TODO: Refactor PanelLoading. Too much code here
+
     private void start() {
         // Layout Constraints | Column Constraints
         this.layout = new MigLayout("fill, insets 0");
         this.cover = new PanelCover();
-        this.loginAndRegister = new PanelLoginAndRegister();
+        this.panelLoading = new PanelLoading();
+
+        ActionListener eventRegister = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                register();
+            }
+        };
+        this.loginAndRegister = new PanelLoginAndRegister(eventRegister);
 
 
         TimingTarget target = createTimingTarget();
         Animator animator = createAnimator(target);
 
         this.backGround.setLayout(layout);
+        this.backGround.setLayer(panelLoading, JLayeredPane.POPUP_LAYER); // what is this?
+        // Cover the whole window with the loading GIF
+        this.backGround.add(panelLoading, "pos 0 0 100% 100%");
         this.backGround.add(cover, "width " + coverSize + "%, pos 0al 0 n 100%");
         this.backGround.add(loginAndRegister, "width " + loginSize + "%, pos 1al 0 n 100%");
         this.cover.addEvent(new ActionListener() {
@@ -75,6 +90,11 @@ public class Main extends JFrame {
                 if (!animator.isRunning()) animator.start();
             }
         });
+    }
+
+    private void register() {
+        this.panelLoading.setVisible(true);
+        System.out.println("Clicked on register");
     }
 
     // TimingTarget is an interface to define methods executed during an animation

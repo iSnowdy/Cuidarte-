@@ -7,9 +7,9 @@ TODO: Make it so that the window pops up in the middle of the screen and of a ce
 
  */
 
-import Authentication.Swing.PanelCover;
-import Authentication.Swing.PanelLoading;
-import Authentication.Swing.PanelLoginAndRegister;
+import Authentication.DataExample.UserExample;
+import Authentication.MessageTypes;
+import Authentication.Swing.*;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
@@ -28,6 +28,7 @@ public class Main extends JFrame {
     private PanelCover cover;
     private PanelLoginAndRegister loginAndRegister;
     private PanelLoading panelLoading;
+    private PanelVerifyCode panelVerifyCode;
 
     private final int addSize = 30;
     private final int coverSize = 40;
@@ -64,6 +65,7 @@ public class Main extends JFrame {
         this.layout = new MigLayout("fill, insets 0");
         this.cover = new PanelCover();
         this.panelLoading = new PanelLoading();
+        this.panelVerifyCode = new PanelVerifyCode();
 
         ActionListener eventRegister = new ActionListener() {
             @Override
@@ -75,12 +77,14 @@ public class Main extends JFrame {
 
 
         TimingTarget target = createTimingTarget();
-        Animator animator = createAnimator(target);
+        Animator animator = createAnimator(target, 1000);
 
         this.backGround.setLayout(layout);
         this.backGround.setLayer(panelLoading, JLayeredPane.POPUP_LAYER); // what is this?
+        this.backGround.setLayer(panelVerifyCode, JLayeredPane.POPUP_LAYER);
         // Cover the whole window with the loading GIF
         this.backGround.add(panelLoading, "pos 0 0 100% 100%");
+        this.backGround.add(panelVerifyCode, "pos 0 0 100% 100%");
         this.backGround.add(cover, "width " + coverSize + "%, pos 0al 0 n 100%");
         this.backGround.add(loginAndRegister, "width " + loginSize + "%, pos 1al 0 n 100%");
         this.cover.addEvent(new ActionListener() {
@@ -93,8 +97,56 @@ public class Main extends JFrame {
     }
 
     private void register() {
-        this.panelLoading.setVisible(true);
-        System.out.println("Clicked on register");
+        UserExample user = loginAndRegister.getUser();
+        showMessage(MessageTypes.SUCCESS, "Testing Message");
+        //this.panelLoading.setVisible(true);
+        //this.panelVerifyCode.setVisible(true);
+        System.out.println(user.getName());
+        System.out.println(user.getEmail());
+    }
+
+    private void showMessage(MessageTypes messageType, String message) {
+        Message messageToShow = new Message();
+        messageToShow.showMessage(messageType, message);
+        TimingTarget target = new TimingTargetAdapter() {
+            @Override
+            public void begin() {
+                if (!messageToShow.isShowing()) {
+                    // Adds the message to the background
+                    backGround.add(messageToShow, "pos 0.5al -10", 0); // Starting position
+                    messageToShow.setVisible(true);
+                    backGround.repaint();
+                }
+            }
+
+            @Override
+            public void timingEvent(float fraction) {
+                // Distance, in px, that the message will move throughout the animation
+                float value;
+                if (messageToShow.isShowing()) {
+                    value = 40 * (1f - fraction); // Moves up the message if it's showing
+                } else {
+                    value = 40 * fraction; // Moves down the message to show it
+                }
+                layout.setComponentConstraints(messageToShow, "pos 0.5al " + (int) (value - 10));
+                backGround.repaint(); // Redraws the component
+                backGround.revalidate(); // Updates the position and size of the components
+            }
+
+            @Override
+            public void end() {
+                if (messageToShow.isShowing()) {
+                    backGround.remove(messageToShow);
+                    backGround.repaint();
+                    backGround.revalidate();
+                } else {
+                    messageToShow.setShow(true);
+                }
+            }
+        };
+        int animationDuration = 2000;
+        Animator messageAnimator = createAnimator(target, animationDuration);
+        messageAnimator.start();
     }
 
     // TimingTarget is an interface to define methods executed during an animation
@@ -144,7 +196,7 @@ public class Main extends JFrame {
             fractionLogin = 1f - fraction;
 
             if (fraction <= 0.5f) {
-                cover.registerLeft(fraction * 100); // ??
+                cover.registerLeft(fraction * 100);
             } else {
                 cover.loginLeft((1f - fraction) * 100);
             }
@@ -164,8 +216,8 @@ public class Main extends JFrame {
     }
 
     // Click on Login / Register triggers the slide animation
-    private Animator createAnimator(TimingTarget target) {
-        final int ANIMATION_DURATION = 1000; // Adjust it?
+    private Animator createAnimator(TimingTarget target, int duration) {
+        final int ANIMATION_DURATION = duration; // Adjust it?
         final float ANIMATION_ACELERATION = 0.5f;
         final float ANIMATION_DECELERATION = 0.5f;
 

@@ -2,9 +2,11 @@ package Authentication.Swing;
 
 import Authentication.Components.CustomTextField;
 import Authentication.Components.CustomizedButton;
+import Authentication.DataExample.UserExample;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import static Utils.Colors.MAIN_APP_COLOUR;
@@ -12,6 +14,8 @@ import static Utils.Fonts.MAIN_FONT;
 
 public class PanelLoginAndRegister extends JLayeredPane {
     private JPanel login, register;
+
+    private UserExample user;
 
     public PanelLoginAndRegister(ActionListener eventRegister) {
         setOpaque(false);
@@ -80,7 +84,19 @@ public class PanelLoginAndRegister extends JLayeredPane {
         // TODO: setText vs setLabel?
         registerButton.setLabel("Registrarse"); // TODO: How to make it round
         this.register.add(registerButton, "w 40%, h 40");
-
+        // TODO: Refactor this
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                String username = userName.getText().trim();
+                String email = userEmail.getText().trim();
+                String phoneNumber = userPhoneNumber.getText().trim();
+                String dateOfBirth = userDateOfBirth.getText().trim();
+                String password = userPassword.getText().trim();
+                // IDs?
+                user = new UserExample(0, username, email, phoneNumber, dateOfBirth, password);
+            }
+        });
     }
 
     private void initLogin() {
@@ -126,5 +142,9 @@ public class PanelLoginAndRegister extends JLayeredPane {
             this.register.setVisible(false);
             this.login.setVisible(true);
         }
+    }
+
+    public UserExample getUser() {
+        return user;
     }
 }

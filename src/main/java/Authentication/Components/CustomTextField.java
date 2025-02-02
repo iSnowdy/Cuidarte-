@@ -19,27 +19,29 @@ public class CustomTextField extends JTextField {
         setFont(MAIN_FONT); // TODO: Font
         //setSelectionColor(new Color(75, 175, 152));
     }
-
+    // Paints the TextField
     @Override
     protected void paintComponent(Graphics graphics) {
         Graphics2D graphics2D = (Graphics2D) graphics;
-        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // ?
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics2D.setColor(new Color(230, 245, 241));
         graphics2D.fillRoundRect(0, 0, getWidth(), getHeight(), 5, 5);
         paintIcon(graphics);
         super.paintComponent(graphics);
     }
-
+    // Adds the text to the TextField
     @Override
     public void paint(Graphics graphics) {
         super.paint(graphics);
         if (getText().isEmpty()) {
-            int h = getHeight();
+            int userInputTextHeight = getHeight();
+            // Casting Graphics to Graphics2D so we can enable antialiasing
             ((Graphics2D) graphics).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            // Space between the border and the text
             Insets insets = getInsets();
-            FontMetrics fm = graphics.getFontMetrics();
-            graphics.setColor(new Color(200, 200, 200));
-            graphics.drawString(hintText, insets.left, h / 2 + fm.getAscent() / 2 - 2);
+            FontMetrics fontMetrics = graphics.getFontMetrics();
+            graphics.setColor(HINT_GREY); // Placeholder text colour
+            graphics.drawString(hintText, insets.left, userInputTextHeight / 2 + fontMetrics.getAscent() / 2 - 2);
         }
     }
 
@@ -58,7 +60,8 @@ public class CustomTextField extends JTextField {
         }
     }
 
-    private void initBorder() {
+    // Border surrounding the Icon
+    private void setIconBorder() {
         int leftSideIconSize = 15;
         int rightSideIconSize = 15;
 
@@ -70,6 +73,8 @@ public class CustomTextField extends JTextField {
         }
         setBorder(new EmptyBorder(10, leftSideIconSize, 10, rightSideIconSize));
     }
+
+    // Getters and Setters
 
     public String getHintText() {
         return hintText;
@@ -85,7 +90,7 @@ public class CustomTextField extends JTextField {
 
     public void setPrefixIcon(Icon prefixIcon) {
         this.prefixIcon = prefixIcon;
-        initBorder();
+        setIconBorder();
     }
 
     public Icon getSuffixIcon() {
@@ -94,6 +99,6 @@ public class CustomTextField extends JTextField {
 
     public void setSuffixIcon(Icon suffixIcon) {
         this.suffixIcon = suffixIcon;
-        initBorder();
+        setIconBorder();
     }
 }

@@ -1,5 +1,12 @@
 package Authentication.Main;
 
+/*
+TODO: Make it so that the window pops up in the middle of the screen and of a certain size. As a pop-up
+      login/register kind of thing
+
+
+ */
+
 import Authentication.Swing.PanelCover;
 import Authentication.Swing.PanelLoginAndRegister;
 import net.miginfocom.swing.MigLayout;
@@ -86,7 +93,7 @@ public class Main extends JFrame {
             }
         };
     }
-
+    // TODO: Too much going on here. Extract methods!
     private void updateEveryFrameAnimation(float fraction) {
         double fractionCover;
         double fractionLogin;
@@ -105,10 +112,26 @@ public class Main extends JFrame {
         if (isLogin) {
             fractionCover = 1f - fraction;
             fractionLogin = fraction;
+
+            // According to where the frame of the animation is, move the text according to it
+            if (fraction >= 0.5f) {
+                cover.registerRight(fractionCover * 100);
+            } else {
+                cover.loginRight(fractionLogin * 100);
+            }
         } else {
             fractionCover = fraction;
             fractionLogin = 1f - fraction;
+
+            if (fraction <= 0.5f) {
+                cover.registerLeft(fraction * 100); // ??
+            } else {
+                cover.loginLeft((1f - fraction) * 100);
+            }
         }
+
+        if (fraction >= 0.5f) loginAndRegister.showRegisterForm(isLogin);
+
         fractionCover = Double.valueOf(decimalFormat.format(fractionCover));
         fractionLogin = Double.valueOf(decimalFormat.format(fractionLogin));
 
@@ -122,7 +145,7 @@ public class Main extends JFrame {
 
     // Click on Login / Register triggers the slide animation
     private Animator createAnimator(TimingTarget target) {
-        final int ANIMATION_DURATION = 1000;
+        final int ANIMATION_DURATION = 1000; // Adjust it?
         final float ANIMATION_ACELERATION = 0.5f;
         final float ANIMATION_DECELERATION = 0.5f;
 

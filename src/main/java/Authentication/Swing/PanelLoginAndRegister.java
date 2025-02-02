@@ -1,6 +1,7 @@
 package Authentication.Swing;
 
 import Authentication.Components.CustomTextField;
+import Authentication.Components.CustomizedButton;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
@@ -34,10 +35,12 @@ public class PanelLoginAndRegister extends JLayeredPane {
         add(register, "register");
     }
 
+    // TODO: Add the logo at the top
     private void initRegister() {
-        this.register.setLayout(new MigLayout("wrap", "push[center]push", "push[]25[]push"));
+        // Adjust space between elements
+        this.register.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]10[]10[]40[]push"));
         JLabel registerLabel = new JLabel("Registrarse");
-        registerLabel.setFont(MAIN_FONT); // TODO: FOnt
+        registerLabel.setFont(MAIN_FONT); // TODO: Font
         registerLabel.setForeground(MAIN_APP_COLOUR);
         this.register.add(registerLabel);
 
@@ -46,7 +49,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
         CustomTextField userName = new CustomTextField();
         userName.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/usuario.png")));
         userName.setHintText("Nombre completo");
-        this.register.add(userName, "w 60%");
+        this.register.add(userName, "w 60%"); // TODO: Consider editing the width
 
         CustomTextField userEmail = new CustomTextField();
         userEmail.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/correo.png")));
@@ -67,10 +70,20 @@ public class PanelLoginAndRegister extends JLayeredPane {
         userPassword.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/contraseña.png")));
         userPassword.setHintText("Contraseña");
         this.register.add(userPassword, "w 60%");
+
+        CustomizedButton registerButton = new CustomizedButton();
+        registerButton.setBackground(MAIN_APP_COLOUR); // TODO: Colours?
+        registerButton.setForeground(Color.red); // TODO: Font?
+        registerButton.setFont(MAIN_FONT);
+        registerButton.setLabel("Registrarse"); // TODO: How to make it round
+        this.register.add(registerButton, "w 40%, h 40");
+
     }
 
     private void initLogin() {
-        this.login.setLayout(new MigLayout("wrap", "push[center]push", "push[]push"));
+        // Adjust space between elements
+        // TODO: Check the amount of elements present. Login Button or Forgot Password first? Separation between them?
+        this.login.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]40[]push"));
         JLabel loginLabel = new JLabel("Iniciar Sesión");
         loginLabel.setFont(MAIN_FONT); // TODO: Font
         loginLabel.setForeground(MAIN_APP_COLOUR);
@@ -86,7 +99,29 @@ public class PanelLoginAndRegister extends JLayeredPane {
         userPassword.setHintText("Contraseña");
         this.login.add(userPassword, "w 60%");
 
-        JButton buttonLoger = new JButton("Login");
-        this.login.add(buttonLoger);
+        CustomizedButton loginButton = new CustomizedButton();
+        loginButton.setBackground(MAIN_APP_COLOUR);
+        loginButton.setForeground(Color.red);
+        loginButton.setFont(MAIN_FONT);
+        loginButton.setLabel("Login");
+        this.login.add(loginButton, "w 40%, h 40");
+
+        JButton forgotPasswordButton = new JButton("¿Olvidó su contraseña?"); // TODO: JMail?
+        forgotPasswordButton.setFont(MAIN_FONT);
+        forgotPasswordButton.setForeground(Color.YELLOW); // TODO: Stylize it
+        forgotPasswordButton.setBackground(MAIN_APP_COLOUR);
+        forgotPasswordButton.setContentAreaFilled(false); // ?
+        forgotPasswordButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        this.login.add(forgotPasswordButton);
+    }
+
+    public void showRegisterForm(boolean show) {
+        if (show) {
+            this.register.setVisible(true);
+            this.login.setVisible(false);
+        } else {
+            this.register.setVisible(false);
+            this.login.setVisible(true);
+        }
     }
 }

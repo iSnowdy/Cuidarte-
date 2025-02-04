@@ -9,8 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 
-import static Utils.Colors.*;
-import static Utils.Fonts.MAIN_FONT;
+import static Utils.Swing.Colors.*;
+import static Utils.Swing.Fonts.MAIN_FONT;
 
 public class PanelCover extends JPanel {
     private MigLayout migLayout;

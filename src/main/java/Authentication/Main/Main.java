@@ -3,8 +3,6 @@ package Authentication.Main;
 /*
 TODO: Make it so that the window pops up in the middle of the screen and of a certain size. As a pop-up
       login/register kind of thing
-
-
  */
 
 import Authentication.DataExample.UserExample;
@@ -22,7 +20,7 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 
 public class Main extends JFrame {
-    private javax.swing.JLayeredPane backGround;
+    private JLayeredPane backGround;
 
     private MigLayout layout;
     private PanelCover cover;
@@ -100,7 +98,7 @@ public class Main extends JFrame {
         UserExample user = loginAndRegister.getUser();
         showMessage(MessageTypes.SUCCESS, "Testing Message");
         //this.panelLoading.setVisible(true);
-        //this.panelVerifyCode.setVisible(true);
+        this.panelVerifyCode.setVisible(true);
         System.out.println(user.getName());
         System.out.println(user.getEmail());
     }

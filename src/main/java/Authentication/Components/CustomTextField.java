@@ -4,8 +4,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-import static Utils.Colors.HINT_GREY;
-import static Utils.Fonts.MAIN_FONT;
+import static Utils.Swing.Colors.HINT_GREY;
+import static Utils.Swing.Fonts.MAIN_FONT;
 
 public class CustomTextField extends JTextField {
     private Icon prefixIcon;

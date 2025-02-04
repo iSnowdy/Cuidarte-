@@ -8,9 +8,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import static Utils.Colors.MAIN_APP_COLOUR;
-import static Utils.Colors.MY_RED;
-import static Utils.Fonts.MAIN_FONT;
+import static Utils.Swing.Colors.MAIN_APP_COLOUR;
+import static Utils.Swing.Colors.MY_RED;
+import static Utils.Swing.Fonts.MAIN_FONT;
 
 public class Message extends JPanel {
 

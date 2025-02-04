@@ -1,19 +1,17 @@
 package Authentication.Swing;
 
 import Authentication.Components.CustomTextField;
-import Authentication.Components.CustomizedButton;
 import Authentication.Components.CustomizedButtonOutline;
 import Authentication.Components.PanelRound;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.ActionListener;
 
-import static Utils.Colors.MY_RED;
-import static Utils.Fonts.MAIN_FONT;
+import static Utils.Swing.Colors.MY_RED;
+import static Utils.Swing.Fonts.MAIN_FONT;
 
 public class PanelVerifyCode extends JPanel {
     private JLabel titleLabel;

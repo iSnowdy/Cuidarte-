@@ -9,8 +9,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static Utils.Colors.MAIN_APP_COLOUR;
-import static Utils.Fonts.MAIN_FONT;
+import static Utils.Swing.Colors.MAIN_APP_COLOUR;
+import static Utils.Swing.Fonts.MAIN_FONT;
 
 public class PanelLoginAndRegister extends JLayeredPane {
     private JPanel login, register;

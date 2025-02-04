@@ -8,11 +8,19 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionManager implements DataBaseConnection {
+    // Singleton; only one instance of this class will be shared across the entire project
     private static ConnectionManager connectionManager;
     private Connection connection;
 
     // To avoid other classes from implementing this class
     private ConnectionManager() {}
+
+    public static ConnectionManager getConnectionManager() {
+        if (connectionManager == null) {
+            connectionManager = new ConnectionManager();
+        }
+        return connectionManager;
+    }
 
     // TODO: Somehow make more secure the username and password?
     @Override
@@ -35,14 +43,6 @@ public class ConnectionManager implements DataBaseConnection {
         } else {
             throw new DatabaseClosingException("No instance of MySQL connection");
         }
-    }
-
-    @Override
-    public ConnectionManager getConnectionManager() {
-        if (connectionManager == null) {
-            connectionManager = new ConnectionManager();
-        }
-        return connectionManager;
     }
 
     @Override

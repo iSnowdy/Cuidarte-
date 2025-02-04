@@ -1,12 +1,15 @@
 package Models;
 
+import java.util.Date;
+
 public class Patient extends User {
-    private String dateOfBirth, password;
+    private Date dateOfBirth;
+    private String password;
     private int age;
     private final int salt; // Maybe I will not use this
 
     public Patient(int id, String firstName, String surname, String phoneNumber, String email,
-                         String dateofBirth, String password, int age, int salt) {
+                         Date dateofBirth, String password, int age, int salt) {
         super(id, firstName, surname, phoneNumber, email);
         this.dateOfBirth = dateofBirth;
         this.password = password;
@@ -28,11 +31,10 @@ public class Patient extends User {
     }
 
     // Getters and Setters
-
     public String getDateOfBirth() {
-        return dateOfBirth;
+        return dateOfBirth.toString();
     }
-    public void setDateOfBirth(String dateOfBirth) {
+    public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 

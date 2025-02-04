@@ -22,7 +22,6 @@ public class Doctor extends User {
     }
 
     // Getters and Setters
-
     public String getSpecialty() {
         return specialty;
     }

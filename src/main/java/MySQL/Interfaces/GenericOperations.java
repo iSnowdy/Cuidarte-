@@ -1,16 +1,23 @@
 package MySQL.Interfaces;
 
+import Exceptions.DatabaseInsertException;
+
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 // Generic implementations of a CRUD for MySQL. If any other data model needs further specifications, it will implement
 // an additional interface that extends from this one
 
-public interface GenericOperations<T> {
-    int tupplesAffected = 0;
+/**
+ * Defines the behaviour of DAO's for the Database
+ * @param <T> Generic Object that we wish to persist into the Database
+ */
 
-    void save(T entity);
-    void update(T entity);
-    void delete(T entity);
-    T findById(int id);
+public interface GenericOperations<T> {
+    boolean save(T entity);
+    boolean update(T entity);
+    boolean delete(T entity);
+    Optional<T> findById(int id);
     List<T> findAll();
 }

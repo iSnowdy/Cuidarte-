@@ -3,7 +3,7 @@ package Models;
 import java.util.Objects;
 
 public abstract class User {
-    private final int id;
+    private int id;
     private String
             firstName, surname, phoneNumber, email;
 
@@ -46,9 +46,11 @@ public abstract class User {
     }
 
     // Getters and Setters
-
     public int getId() {
         return id;
+    }
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getFirstName() {

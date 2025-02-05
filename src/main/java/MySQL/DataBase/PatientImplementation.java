@@ -20,7 +20,7 @@ import java.util.Optional;
 public class PatientImplementation extends BaseImplementation<Patient> implements GenericOperations<Patient> {
 
     /**
-     * Saves a new patient into the database and assigns the correct ID to the entity.
+     * Saves a new patient into the database.
      *
      * @param entity The patient entity to be saved.
      * @return True if the entity was successfully saved, false otherwise.
@@ -30,23 +30,21 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
     public boolean save(Patient entity) {
         String sql =
                 "INSERT INTO pacientes " +
-                        "(Nombre, Apellidos, Fecha_Nacimiento, Edad, Numero_Telefono, Contraseña, Salt) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        "(DNI_Paciente, Nombre, Apellidos, Numero_Telefono, Email, Fecha_Nacimiento, Edad,  Contraseña, Salt) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        boolean isSaved = executeUpdate(
+        return executeUpdate(
                 sql,
+                entity.getDNI(),
                 entity.getFirstName(),
                 entity.getSurname(),
+                entity.getPhoneNumber(),
+                entity.getEmail(),
                 entity.getDateOfBirth(),
                 entity.getAge(),
-                entity.getPhoneNumber(),
                 entity.getPassword(),
                 entity.getSalt()
         );
-        if (isSaved) {
-            entity.setId(super.getGeneratedID());
-        }
-        return isSaved;
     }
 
     /**
@@ -60,8 +58,8 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
     public boolean update(Patient entity) {
         String sql =
                 "UPDATE pacientes " +
-                        "SET Nombre = ?, Apellidos = ?, Fecha_Nacimiento = ?, Edad = ?, Numero_Telefono = ? " +
-                        "WHERE ID_Paciente = ?";
+                "SET Nombre = ?, Apellidos = ?, Fecha_Nacimiento = ?, Edad = ?, Numero_Telefono = ? " +
+                "WHERE DNI_Paciente = ?";
 
         return executeUpdate(
                 sql,
@@ -69,7 +67,8 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
                 entity.getSurname(),
                 entity.getDateOfBirth(),
                 entity.getAge(),
-                entity.getPhoneNumber()
+                entity.getPhoneNumber(),
+                entity.getDNI()
         );
     }
 
@@ -84,35 +83,35 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
     public boolean delete(Patient entity) {
         String sql =
                 "DELETE FROM pacientes " +
-                        "WHERE ID_Paciente = ?";
+                "WHERE DNI_Paciente = ?";
 
         return executeUpdate(
                 sql,
-                entity.getId()
+                entity.getDNI()
         );
     }
 
     /**
-     * Finds a specific patient given its ID.
+     * Finds a specific patient given its DNI.
      *
-     * @param id The ID of the patient to be retrieved from the database.
+     * @param DNI The ID of the patient to be retrieved from the database.
      * @return Optional<Patient> An Optional containing the found patient if present. Otherwise, it will be an empty
      * Optional. Implementation should check if it is empty or not using isPresent(), isFalse() or ifPresent().
      */
 
     @Override
-    public Optional<Patient> findById(int id) {
+    public Optional<Patient> findByDNI(String DNI) {
         String sql =
                 "SELECT * FROM pacientes " +
-                        "WHERE ID_Paciente = ?";
+                "WHERE DNI_Paciente = ?";
 
-        try (ResultSet resultSet = executeQuery(sql, id)) {
+        try (ResultSet resultSet = executeQuery(sql, DNI)) {
             if (resultSet.next()) {
                 Patient patientFound = mapResultSetToPatient(resultSet);
                 return Optional.of(patientFound);
             }
         } catch (SQLException e) {
-            System.out.println("Error retrieving Patient (ID: " + id + ") by ID.\n " + e.getMessage());
+            System.out.println("Error retrieving Patient (DNI: " + DNI + ") by DNI.\n " + e.getMessage());
             e.printStackTrace();
             return Optional.empty();
         }
@@ -155,14 +154,14 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
 
     private Patient mapResultSetToPatient(ResultSet resultSet) throws SQLException {
         return new Patient(
-                resultSet.getInt("ID_Paciente"),
+                resultSet.getString("DNI_Paciente"),
                 resultSet.getString("Nombre"),
                 resultSet.getString("Apellidos"),
                 resultSet.getString("Numero_Telefono"),
                 resultSet.getString("Email"),
                 resultSet.getDate("Fecha_Nacimiento"),
-                resultSet.getString("Contraseña"),
                 resultSet.getInt("Edad"),
+                resultSet.getString("Contraseña"),
                 resultSet.getInt("Salt")
         );
     }

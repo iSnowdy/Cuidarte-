@@ -3,12 +3,12 @@ package Models;
 import java.util.Objects;
 
 public abstract class User {
-    private int id;
+    private final String DNI;
     private String
             firstName, surname, phoneNumber, email;
 
-    public User(int id, String firstName, String surname, String phoneNumber, String email) {
-        this.id = id;
+    public User(String DNI, String firstName, String surname, String phoneNumber, String email) {
+        this.DNI = DNI;
         this.firstName = firstName;
         this.surname = surname;
         this.phoneNumber = phoneNumber;
@@ -25,12 +25,13 @@ public abstract class User {
         if (object == null || getClass() != object.getClass()) return false;
 
         User user = (User) object;
-        return this.id == user.id; // Compares based on unique ID
+        return this.DNI == user.DNI; // Compares based on unique ID
     }
 
+    // Not sure if it will work
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(DNI);
     }
 
     @Override
@@ -38,7 +39,7 @@ public abstract class User {
         return "---------------------------------" + "\n" +
                 "Información del Usuario:\n" +
                 "---------------------------------" + "\n" +
-                "ID: " + id + "\n" +
+                "ID: " + DNI + "\n" +
                 "Nombre: " + firstName + "\n" +
                 "Apellidos: " + surname + "\n" +
                 "Telefono: " + phoneNumber + "\n" +
@@ -46,18 +47,13 @@ public abstract class User {
     }
 
     // Getters and Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+    public String getDNI() {
+        return DNI;
     }
 
     public String getFirstName() {
         return firstName;
     }
-
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -65,7 +61,6 @@ public abstract class User {
     public String getSurname() {
         return surname;
     }
-
     public void setSurname(String surname) {
         this.surname = surname;
     }
@@ -73,7 +68,6 @@ public abstract class User {
     public String getPhoneNumber() {
         return phoneNumber;
     }
-
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
@@ -81,7 +75,6 @@ public abstract class User {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }

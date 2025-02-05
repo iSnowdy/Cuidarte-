@@ -1,8 +1,5 @@
 package MySQL.Interfaces;
 
-import Exceptions.DatabaseInsertException;
-
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +19,7 @@ public interface GenericOperations<T> {
 
     boolean delete(T entity);
 
-    Optional<T> findById(int id);
+    Optional<T> findByDNI(String DNI);
 
     List<T> findAll();
 }

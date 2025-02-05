@@ -41,10 +41,10 @@ public class ConnectionManager implements DataBaseConnection {
     @Override
     public void connectToDatabase() throws SQLException {
         String server = "localhost";
-        String port = "5432";
+        String port = "3306";
         String databaseName = "CuidarteDB";
         String username = "root";
-        String password = "root";
+        String password = "admin";
 
         String connectionString = String.format("jdbc:mysql://%s:%s/%s", server, port, databaseName);
 

@@ -8,12 +8,12 @@ public class Patient extends User {
     private int age;
     private final int salt; // Maybe I will not use this
 
-    public Patient(int id, String firstName, String surname, String phoneNumber, String email,
-                   Date dateofBirth, String password, int age, int salt) {
-        super(id, firstName, surname, phoneNumber, email);
-        this.dateOfBirth = dateofBirth;
-        this.password = password;
+    public Patient(String DNI, String firstName, String surname, String phoneNumber, String email,
+                   Date dateOfBirth, int age, String password, int salt) {
+        super(DNI, firstName, surname, phoneNumber, email);
+        this.dateOfBirth = dateOfBirth;
         this.age = age;
+        this.password = password;
         this.salt = salt;
     }
 

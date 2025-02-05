@@ -3,9 +3,9 @@ package Models;
 public class Doctor extends User {
     private String specialty;
 
-    public Doctor(int id, String firstName, String surname, String phoneNumber, String email,
+    public Doctor(String DNI, String firstName, String surname, String phoneNumber, String email,
                   String specialty) {
-        super(id, firstName, surname, phoneNumber, email);
+        super(DNI, firstName, surname, phoneNumber, email);
         this.specialty = specialty;
     }
 
@@ -25,7 +25,6 @@ public class Doctor extends User {
     public String getSpecialty() {
         return specialty;
     }
-
     public void setSpecialty(String specialty) {
         this.specialty = specialty;
     }

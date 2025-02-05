@@ -25,8 +25,8 @@ public class DoctorServices {
         return doctorImplementation.update(doctor);
     }
 
-    public Optional<Doctor> getDoctor(int id) {
-        return doctorImplementation.findById(id);
+    public Optional<Doctor> getDoctor(String DNI) {
+        return doctorImplementation.findByDNI(DNI);
     }
 
     public List<Doctor> getAllDoctors() {

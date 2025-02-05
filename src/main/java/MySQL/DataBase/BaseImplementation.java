@@ -1,9 +1,6 @@
 package MySQL.DataBase;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 /**
  * Base implementation to manage queries in classes that extend it.
@@ -14,55 +11,44 @@ import java.sql.SQLException;
 public abstract class BaseImplementation<T> {
     protected final Connection connection;
     protected int tuplesAffected = 0;
-    protected int generatedID;
+    protected String generatedID;
 
     public BaseImplementation() {
-        this.connection = ConnectionManager.getConnectionManager().getConnection();
+        Connection temporaryConnection;
+        try {
+            ConnectionManager.getConnectionManager().connectToDatabase();
+            temporaryConnection = ConnectionManager.getConnectionManager().getConnection();
+            System.out.println("Connected!");
+        } catch (SQLException e) {
+            System.out.println("Could not connect to the database in BaseImplementation");
+            temporaryConnection = null;
+            e.printStackTrace();
+        }
+        this.connection = temporaryConnection;
     }
 
     /**
-     * Executes an SQL INSERT, UPDATE or DELETE statement and stores how many tuples were affected.
+     * Executes an SQL INSERT, UPDATE or DELETE statement.
      *
      * @param sql    The SQL query to execute (must be an INSERT, UPDATE, or DELETE statement).
      * @param params The parameters to bind in the PreparedStatement.
-     * @return True if at least one row was affected and ID generated, false otherwise.
+     * @return True if at least one row was affected, false otherwise.
      */
 
     protected boolean executeUpdate(String sql, Object... params) {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < params.length; i++) {
                 statement.setObject(i + 1, params[i]);
             }
 
             tuplesAffected = statement.executeUpdate();
 
-            return isPatientInserted(statement);
+            return tuplesAffected > 0;
         } catch (SQLException e) {
             System.out.println("Error while executing update: " + e.getMessage() + "\n");
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * Method that will recover the ID of the inserted Object in the database if the operation was
-     * successful.
-     *
-     * @param statement PreparedStatement previously executed on the caller method.
-     * @return True if the insert has been executed and the ID retrieved from the database, false otherwise.
-     * @throws SQLException If a database access error occurs.
-     */
-
-    private boolean isPatientInserted(PreparedStatement statement) throws SQLException {
-        if (tuplesAffected > 0) {
-            try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                if (resultSet.next()) {
-                    generatedID = resultSet.getInt(1);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -83,7 +69,6 @@ public abstract class BaseImplementation<T> {
         return preparedStatement.executeQuery();
     }
 
-
     /**
      * Returns the amount of tuples affected in an operation.
      */
@@ -92,7 +77,7 @@ public abstract class BaseImplementation<T> {
         return tuplesAffected;
     }
 
-    public int getGeneratedID() {
+    public String getGeneratedID() {
         return generatedID;
     }
 }

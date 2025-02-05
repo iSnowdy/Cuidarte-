@@ -7,6 +7,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Singleton class (one instance only across the project) that is in charge of managing the connection driver
+ * to the database.
+ * <p>
+ * It will open the Connection to MySQL. And share it when needed using getters.
+ */
+
 public class ConnectionManager implements DataBaseConnection {
     // Singleton; only one instance of this class will be shared across the entire project
     private static ConnectionManager connectionManager;
@@ -14,6 +21,12 @@ public class ConnectionManager implements DataBaseConnection {
 
     // To avoid other classes from implementing this class
     private ConnectionManager() {}
+
+    /**
+     * If the ConnectionManager class was not implemented yet, it will do it. Then, it will return the
+     * class so the caller can use the Connection.
+     * @return ConnectionManager Returns the class itself. It has a private constructor, so this is needed.
+     */
 
     public static ConnectionManager getConnectionManager() {
         if (connectionManager == null) {

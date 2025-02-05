@@ -45,7 +45,7 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
     }
 
     /**
-     * Updates all the information of an existing patient in the database.
+     * Updates all the information of an existing patient in the database. Some fields may not be updated.
      *
      * @param entity The patient entity to be updated.
      * @return true if the entity was successfully updated, false otherwise.
@@ -115,7 +115,7 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
                 return Optional.of(patientFound);
             }
         } catch (SQLException e) {
-            System.out.println("Error retrieving patient (" + id + ") by ID: " + e.getMessage());
+            System.out.println("Error retrieving Patient (ID: " + id + ") by ID.\n " + e.getMessage());
             e.printStackTrace();
             return Optional.empty();
         }

@@ -20,19 +20,20 @@ import java.util.Optional;
 public class PatientImplementation extends BaseImplementation<Patient> implements GenericOperations<Patient> {
 
     /**
-     * Saves a new patient into the database.
+     * Saves a new patient into the database and assigns the correct ID to the entity.
+     *
      * @param entity The patient entity to be saved.
-     * @return true if the entity was successfully saved, false otherwise.
+     * @return True if the entity was successfully saved, false otherwise.
      */
 
     @Override
     public boolean save(Patient entity) {
         String sql =
                 "INSERT INTO pacientes " +
-                "(Nombre, Apellidos, Fecha_Nacimiento, Edad, Numero_Telefono, Contraseña, Salt) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        "(Nombre, Apellidos, Fecha_Nacimiento, Edad, Numero_Telefono, Contraseña, Salt) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        return executeUpdate(
+        boolean isSaved = executeUpdate(
                 sql,
                 entity.getFirstName(),
                 entity.getSurname(),
@@ -42,21 +43,25 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
                 entity.getPassword(),
                 entity.getSalt()
         );
+        if (isSaved) {
+            entity.setId(super.getGeneratedID());
+        }
+        return isSaved;
     }
 
     /**
      * Updates all the information of an existing patient in the database. Some fields may not be updated.
      *
      * @param entity The patient entity to be updated.
-     * @return true if the entity was successfully updated, false otherwise.
+     * @return True if the entity was successfully updated, false otherwise.
      */
 
     @Override
     public boolean update(Patient entity) {
         String sql =
                 "UPDATE pacientes " +
-                "SET Nombre = ?, Apellidos = ?, Fecha_Nacimiento = ?, Edad = ?, Numero_Telefono = ? " +
-                "WHERE ID_Paciente = ?";
+                        "SET Nombre = ?, Apellidos = ?, Fecha_Nacimiento = ?, Edad = ?, Numero_Telefono = ? " +
+                        "WHERE ID_Paciente = ?";
 
         return executeUpdate(
                 sql,
@@ -70,15 +75,16 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
 
     /**
      * Deletes an existing patient from the database.
+     *
      * @param entity The patient entity to be deleted.
-     * @return true if it was successfully deleted, false otherwise.
+     * @return True if it was successfully deleted, false otherwise.
      */
 
     @Override
     public boolean delete(Patient entity) {
         String sql =
                 "DELETE FROM pacientes " +
-                "WHERE ID_Paciente = ?";
+                        "WHERE ID_Paciente = ?";
 
         return executeUpdate(
                 sql,
@@ -88,30 +94,21 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
 
     /**
      * Finds a specific patient given its ID.
+     *
      * @param id The ID of the patient to be retrieved from the database.
      * @return Optional<Patient> An Optional containing the found patient if present. Otherwise, it will be an empty
-            * Optional. Implementation should check if it is empty or not using isPresent(), isFalse() or ifPresent().
+     * Optional. Implementation should check if it is empty or not using isPresent(), isFalse() or ifPresent().
      */
 
     @Override
     public Optional<Patient> findById(int id) {
         String sql =
                 "SELECT * FROM pacientes " +
-                "WHERE ID_Paciente = ?";
+                        "WHERE ID_Paciente = ?";
 
         try (ResultSet resultSet = executeQuery(sql, id)) {
             if (resultSet.next()) {
-                Patient patientFound = new Patient(
-                        resultSet.getInt("ID_Paciente"),
-                        resultSet.getString("Nombre"),
-                        resultSet.getString("Apellidos"),
-                        resultSet.getString("Numero_Telefono"),
-                        resultSet.getString("Email"),
-                        resultSet.getDate("Fecha_Nacimiento"),
-                        resultSet.getString("Contraseña"),
-                        resultSet.getInt("Edad"),
-                        resultSet.getInt("Salt")
-                );
+                Patient patientFound = mapResultSetToPatient(resultSet);
                 return Optional.of(patientFound);
             }
         } catch (SQLException e) {
@@ -124,6 +121,7 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
 
     /**
      * Retrieves all patients from the database.
+     *
      * @return List<Patient> A list containing all the patients, or empty if no patients were found.
      */
 
@@ -136,17 +134,7 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
 
         try (ResultSet resultSet = executeQuery(sql)) {
             while (resultSet.next()) {
-                Patient patient = new Patient(
-                        resultSet.getInt("ID_Paciente"),
-                        resultSet.getString("Nombre"),
-                        resultSet.getString("Apellidos"),
-                        resultSet.getString("Numero_Telefono"),
-                        resultSet.getString("Email"),
-                        resultSet.getDate("Fecha_Nacimiento"),
-                        resultSet.getString("Contraseña"),
-                        resultSet.getInt("Edad"),
-                        resultSet.getInt("Salt")
-                );
+                Patient patient = mapResultSetToPatient(resultSet);
                 patients.add(patient);
             }
             return patients;
@@ -155,5 +143,27 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
             e.printStackTrace();
         }
         return patients; // Returns an empty list
+    }
+
+    /**
+     * Auxiliary method to map a given ResultSet obtained from a SELECT query to the Patient object.
+     *
+     * @param resultSet The ResultSet that contains the information in the database of the object.
+     * @return Patient The object that is being mapped from the database to memory.
+     * @throws SQLException If a database access error occurs.
+     */
+
+    private Patient mapResultSetToPatient(ResultSet resultSet) throws SQLException {
+        return new Patient(
+                resultSet.getInt("ID_Paciente"),
+                resultSet.getString("Nombre"),
+                resultSet.getString("Apellidos"),
+                resultSet.getString("Numero_Telefono"),
+                resultSet.getString("Email"),
+                resultSet.getDate("Fecha_Nacimiento"),
+                resultSet.getString("Contraseña"),
+                resultSet.getInt("Edad"),
+                resultSet.getInt("Salt")
+        );
     }
 }

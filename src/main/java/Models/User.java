@@ -35,7 +35,7 @@ public abstract class User {
 
     @Override
     public String toString() {
-        return  "---------------------------------" + "\n" +
+        return "---------------------------------" + "\n" +
                 "Información del Usuario:\n" +
                 "---------------------------------" + "\n" +
                 "ID: " + id + "\n" +
@@ -49,6 +49,7 @@ public abstract class User {
     public int getId() {
         return id;
     }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -56,6 +57,7 @@ public abstract class User {
     public String getFirstName() {
         return firstName;
     }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -63,6 +65,7 @@ public abstract class User {
     public String getSurname() {
         return surname;
     }
+
     public void setSurname(String surname) {
         this.surname = surname;
     }
@@ -70,6 +73,7 @@ public abstract class User {
     public String getPhoneNumber() {
         return phoneNumber;
     }
+
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
@@ -77,6 +81,7 @@ public abstract class User {
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }

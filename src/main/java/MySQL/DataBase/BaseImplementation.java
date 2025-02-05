@@ -7,12 +7,14 @@ import java.sql.SQLException;
 
 /**
  * Base implementation to manage queries in classes that extend it.
+ *
  * @param <T> Generic Object. Depending on which class is extending, it will be a Patient, Doctor...
  */
 
 public abstract class BaseImplementation<T> {
     protected final Connection connection;
     protected int tuplesAffected = 0;
+    protected int generatedID;
 
     public BaseImplementation() {
         this.connection = ConnectionManager.getConnectionManager().getConnection();
@@ -23,7 +25,7 @@ public abstract class BaseImplementation<T> {
      *
      * @param sql    The SQL query to execute (must be an INSERT, UPDATE, or DELETE statement).
      * @param params The parameters to bind in the PreparedStatement.
-     * @return true if at least one row was affected, false otherwise.
+     * @return True if at least one row was affected and ID generated, false otherwise.
      */
 
     protected boolean executeUpdate(String sql, Object... params) {
@@ -34,7 +36,7 @@ public abstract class BaseImplementation<T> {
 
             tuplesAffected = statement.executeUpdate();
 
-            return tuplesAffected > 0;
+            return isPatientInserted(statement);
         } catch (SQLException e) {
             System.out.println("Error while executing update: " + e.getMessage() + "\n");
             e.printStackTrace();
@@ -43,12 +45,34 @@ public abstract class BaseImplementation<T> {
     }
 
     /**
+     * Method that will recover the ID of the inserted Object in the database if the operation was
+     * successful.
+     *
+     * @param statement PreparedStatement previously executed on the caller method.
+     * @return True if the insert has been executed and the ID retrieved from the database, false otherwise.
+     * @throws SQLException If a database access error occurs.
+     */
+
+    private boolean isPatientInserted(PreparedStatement statement) throws SQLException {
+        if (tuplesAffected > 0) {
+            try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                if (resultSet.next()) {
+                    generatedID = resultSet.getInt(1);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Executes an SQL SELECT statement. The ResultSet is not closed on purpose so that classes that implement
      * it can map the ResultSet to an Object.
-     * @param sql     The SQL query that will be executed (INSERT type statement).
-     * @param params  The parameters to bind to the PreparedStatement.
+     *
+     * @param sql    The SQL query that will be executed (INSERT type statement).
+     * @param params The parameters to bind to the PreparedStatement.
      * @return ResultSet if it has any information in it, null otherwise.
-     * @throws SQLException if a database access error occurs.
+     * @throws SQLException If a database access error occurs.
      */
 
     protected ResultSet executeQuery(String sql, Object... params) throws SQLException {
@@ -66,5 +90,9 @@ public abstract class BaseImplementation<T> {
 
     public int getTuplesAffected() {
         return tuplesAffected;
+    }
+
+    public int getGeneratedID() {
+        return generatedID;
     }
 }

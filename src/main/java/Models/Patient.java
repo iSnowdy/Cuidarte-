@@ -9,7 +9,7 @@ public class Patient extends User {
     private final int salt; // Maybe I will not use this
 
     public Patient(int id, String firstName, String surname, String phoneNumber, String email,
-                         Date dateofBirth, String password, int age, int salt) {
+                   Date dateofBirth, String password, int age, int salt) {
         super(id, firstName, surname, phoneNumber, email);
         this.dateOfBirth = dateofBirth;
         this.password = password;
@@ -26,14 +26,15 @@ public class Patient extends User {
     public String toString() {
         return
                 super.toString() + "\n" +
-                "Date of Birth: " + dateOfBirth + "\n" +
-                "Age: " + age;
+                        "Date of Birth: " + dateOfBirth + "\n" +
+                        "Age: " + age;
     }
 
     // Getters and Setters
     public String getDateOfBirth() {
         return dateOfBirth.toString();
     }
+
     public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
@@ -41,6 +42,7 @@ public class Patient extends User {
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -48,6 +50,7 @@ public class Patient extends User {
     public int getAge() {
         return age;
     }
+
     public void setAge(int age) {
         this.age = age;
     }

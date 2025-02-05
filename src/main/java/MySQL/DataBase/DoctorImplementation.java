@@ -20,19 +20,20 @@ import java.util.Optional;
 public class DoctorImplementation extends BaseImplementation<Doctor> implements GenericOperations<Doctor> {
 
     /**
-     * Saves a new doctor into the database.
+     * Saves a new doctor into the database and assigns the correct ID to the entity.
+     *
      * @param entity The doctor entity to be persisted.
-     * @return true if the query was executed successfully, false otherwise
+     * @return True if the query was executed successfully, false otherwise
      */
 
     @Override
     public boolean save(Doctor entity) {
         String sql =
                 "INSERT INTO medicos " +
-                "(Nombre, Apellidos, Numero_Telefono, Email, Especialidad) " +
-                "VALUES (?, ?, ?, ? , ?)";
+                        "(Nombre, Apellidos, Numero_Telefono, Email, Especialidad) " +
+                        "VALUES (?, ?, ?, ? , ?)";
 
-        return executeUpdate(
+        boolean isSaved = executeUpdate(
                 sql,
                 entity.getFirstName(),
                 entity.getSurname(),
@@ -40,12 +41,18 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
                 entity.getEmail(),
                 entity.getSpecialty()
         );
+
+        if (isSaved) {
+            entity.setId(super.getGeneratedID());
+        }
+        return isSaved;
     }
 
     /**
      * Updates all the information related to an existing doctor in the database. Some fields may not be updated.
+     *
      * @param entity The doctor to be updated.
-     * @return true if the entity was updated, false otherwise
+     * @return True if the entity was updated, false otherwise
      */
 
     @Override
@@ -67,15 +74,16 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
 
     /**
      * Deletes an existing doctor entity from the database.
+     *
      * @param entity The doctor to be deleted.
-     * @return true if the operation was successful, false otherwise
+     * @return True if the operation was successful, false otherwise
      */
 
     @Override
     public boolean delete(Doctor entity) {
         String sql =
                 "DELETE FROM medicos " +
-                "WHERE ID_Medico = ?";
+                        "WHERE ID_Medico = ?";
 
         return executeUpdate(
                 sql,
@@ -85,6 +93,7 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
 
     /**
      * Finds a specific doctor in the database given their ID.
+     *
      * @param id The ID of the doctor to be retrieved from the database.
      * @return Optional<Patient> An Optional Object containing the doctor if it was present. Otherwise,
      * it will be an empty Optional. Implementation of this method should check if it is empty or not using
@@ -95,17 +104,10 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
     public Optional<Doctor> findById(int id) {
         String sql =
                 "SELECT * FROM medicos " +
-                "WHERE ID_Medico = ?";
+                        "WHERE ID_Medico = ?";
 
         try (ResultSet resultSet = executeQuery(sql, id)) {
-            Doctor doctor = new Doctor(
-                    resultSet.getInt("ID_Medico"),
-                    resultSet.getString("Nombre"),
-                    resultSet.getString("Apellidos"),
-                    resultSet.getString("Numero_Telefono"),
-                    resultSet.getString("Email"),
-                    resultSet.getString("Especialidad")
-            );
+            Doctor doctor = mapResultSetToDoctor(resultSet);
             return Optional.of(doctor);
         } catch (SQLException e) {
             System.out.println("Error retrieving Doctor (ID: " + id + ") by ID.\n " + e.getMessage());
@@ -116,6 +118,7 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
 
     /**
      * Retrieves all the doctors from the database.
+     *
      * @return List<Doctor> A list containing all the doctors found in the database. If none was found, it will be
      * an empty List.
      */
@@ -129,14 +132,7 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
 
         try (ResultSet resultSet = executeQuery(sql)) {
             while (resultSet.next()) {
-                Doctor doctor = new Doctor(
-                        resultSet.getInt("ID_Medico"),
-                        resultSet.getString("Nombre"),
-                        resultSet.getString("Apellidos"),
-                        resultSet.getString("Numero_Telefono"),
-                        resultSet.getString("Email"),
-                        resultSet.getString("Especialidad")
-                );
+                Doctor doctor = mapResultSetToDoctor(resultSet);
                 doctors.add(doctor);
             }
         } catch (SQLException e) {
@@ -144,5 +140,24 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
             e.printStackTrace();
         }
         return doctors;
+    }
+
+    /**
+     * Auxiliary method to map a given ResultSet obtained from a SELECT query to the Doctor object.
+     *
+     * @param resultSet The ResultSet that contains the information in the database of the object.
+     * @return Patient The object that is being mapped from the database to memory.
+     * @throws SQLException If a database access error occurs.
+     */
+
+    private Doctor mapResultSetToDoctor(ResultSet resultSet) throws SQLException {
+        return new Doctor(
+                resultSet.getInt("ID_Medico"),
+                resultSet.getString("Nombre"),
+                resultSet.getString("Apellidos"),
+                resultSet.getString("Numero_Telefono"),
+                resultSet.getString("Email"),
+                resultSet.getString("Especialidad")
+        );
     }
 }

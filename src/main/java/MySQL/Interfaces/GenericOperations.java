@@ -11,13 +11,18 @@ import java.util.Optional;
 
 /**
  * Defines the behaviour of DAO's for the Database
+ *
  * @param <T> Generic Object that we wish to persist into the Database
  */
 
 public interface GenericOperations<T> {
     boolean save(T entity);
+
     boolean update(T entity);
+
     boolean delete(T entity);
+
     Optional<T> findById(int id);
+
     List<T> findAll();
 }

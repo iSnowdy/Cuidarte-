@@ -18,13 +18,14 @@ public class Doctor extends User {
     public String toString() {
         return
                 super.toString() + "\n" +
-                "Doctor Specialty: " + specialty;
+                        "Doctor Specialty: " + specialty;
     }
 
     // Getters and Setters
     public String getSpecialty() {
         return specialty;
     }
+
     public void setSpecialty(String specialty) {
         this.specialty = specialty;
     }

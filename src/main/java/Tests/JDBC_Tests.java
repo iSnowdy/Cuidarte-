@@ -4,8 +4,11 @@ import Models.Doctor;
 import Models.Patient;
 import Services.DB.DoctorServices;
 import Services.DB.PatientServices;
+import Utils.Validation.AuthenticationValidator;
+
 import java.time.LocalDate;
 import java.sql.Date;
+import java.util.Optional;
 
 /**
  * Hello world!
@@ -16,18 +19,25 @@ public class JDBC_Tests {
         PatientServices patientServices = new PatientServices();
         DoctorServices doctorServices = new DoctorServices();
 
+        Optional<Date> date1 = AuthenticationValidator.validateAndParseDate( "1979-07-20");
+        Optional<Date> date2 = AuthenticationValidator.validateAndParseDate( "1961-01-11");
+        Optional<Date> date3 = AuthenticationValidator.validateAndParseDate( "2022-11-15");
+        Optional<Date> date4 = AuthenticationValidator.validateAndParseDate( "2010-04-17");
+        Optional<Date> date5 = AuthenticationValidator.validateAndParseDate( "1995-12-24");
+
+
         System.out.println("Creating new patients");
         System.out.println("Inserting...");
         Patient p1 = new Patient("12345678A", "John", "Doe", "123456789", "john.doe@example.com",
-                Date.valueOf(LocalDate.of(1990, 6, 15)), 33,"password123",  5);
+                date1, 33,"password123",  5);
         Patient p2 = new Patient("87654321B", "Jane", "Smith", "987654321", "jane.smith@example.com",
-                Date.valueOf(LocalDate.of(1985, 11, 20)), 38,"securePass!",  6);
+                date2, 38,"securePass!",  6);
         Patient p3 = new Patient("23456789C", "Carlos", "García", "654321987", "carlos.garcia@example.com",
-                Date.valueOf(LocalDate.of(1995, 3, 8)), 29,"qwerty2023",  9);
+                date3, 29,"qwerty2023",  9);
         Patient p4 = new Patient("98765432D", "Emily", "Johnson", "321654987", "emily.johnson@example.com",
-                Date.valueOf(LocalDate.of(1988, 8, 3)), 35,"helloWorld",  10);
+                date4, 35,"helloWorld",  10);
         Patient p5 = new Patient("34567890E", "Liam", "Brown", "789123456", "liam.brown@example.com",
-                Date.valueOf(LocalDate.of(1992, 12, 25)), 31,"password456",  23);
+                date5, 31,"password456",  23);
 
         patientServices.registerPatient(p1);
         patientServices.registerPatient(p2);

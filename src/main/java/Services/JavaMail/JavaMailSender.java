@@ -2,6 +2,7 @@ package Services.JavaMail;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +18,9 @@ public class JavaMailSender {
     private Session session;
     private ExecutorService backgroundExecutor;
 
-    public JavaMailSender() {
+    public JavaMailSender(final String emailTo) {
+        this.emailTo = emailTo;
+
         // System User Environment Variables
         this.emailFrom = System.getenv("TEST_EMAIL_USERNAME");
         this.hostUserName = System.getenv("TEST_EMAIL_USERNAME");
@@ -42,15 +45,17 @@ public class JavaMailSender {
         this.emailBody = emailBody;
     }
 
-    public void sendEmailInBackground() {
+    // TODO: How to check if the email is sent and return boolean?
+    public boolean sendEmailInBackground() {
         this.backgroundExecutor.execute(new Runnable() {
             public void run() {
                 sendEmail();
             }
         });
+        return true;
     }
 
-    private void sendEmail() {
+    private boolean sendEmail() {
         if (isAbleToSendEmail()) {
             createProperties();
             createSession();
@@ -63,13 +68,17 @@ public class JavaMailSender {
                 message.setSubject(this.emailSubject); // Subject
                 message.setText(this.emailBody); // Body
 
+
                 Transport.send(message);
+                return true;
             } catch (MessagingException e) {
                 System.out.println("Error while trying to send the email");
                 e.printStackTrace();
+                return false;
             }
         }  else {
             System.out.println("Insufficient data to send the email");
+            return false;
         }
     }
 
@@ -96,5 +105,31 @@ public class JavaMailSender {
                         return new PasswordAuthentication(hostUserName, hostPassword);
                     }
                 });
+    }
+
+    // TODO: I doubt this works. We need to somehow say that the message body is sent in HTML format
+    public void generateVerificationEmail(String patientName, int verificationCode) {
+        this.emailSubject = String.format(
+                "Correo de verificación para el Paciente %s - Cuidarte+", patientName
+        );
+
+        this.emailBody = String.format(
+                """
+                <html>
+                <body style="font-family: Arial, sans-serif; color: #333;">
+                    <p>Buenas,</p>
+                    
+                    <p>Le queremos dar la bienvenida a nuestro <strong>Portal de Pacientes de Cuidarte+</strong>. 
+                    Para finalizar su registro correctamente, le pedimos que por favor introduzca el siguiente 
+                    código de verificación en la aplicación:</p>
+        
+                    <p style="font-size: 18px; font-weight: bold; color: blue;">%s</p>
+        
+                    <p>Saludos,<br><em>El equipo de Cuidarte+</em></p>
+                </body>
+                </html>
+                """, verificationCode
+        );
+
     }
 }

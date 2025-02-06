@@ -16,9 +16,14 @@ package Utils.Validation;
 //
 
 
+import Models.Patient;
+import Services.DB.DoctorServices;
+import Services.DB.PatientServices;
+
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,6 +31,11 @@ import java.util.Optional;
  */
 
 public class AuthenticationValidator {
+    // TODO: Should these services really be static?
+    private static final PatientServices patientService = new PatientServices();
+    private static final DoctorServices doctorService = new DoctorServices();
+
+
     private static final int NAME_SURNAME_ADDRESS_LENGTH = 100;
     private static final int SPECIALITY_LENGTH = 50;
     private static final int ALLERGIES_DIAGNOSIS_LENGTH = 500;
@@ -34,24 +44,26 @@ public class AuthenticationValidator {
     private final static SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     // Prevents things such as out of bounds Feb day
-    static {
+    /*static {
         SQL_DATE_FORMAT.setLenient(false);
-    }
+    }*/
 
     private static boolean isValidTextLength(String text, int lengthToValidate) {
         return text != null && text.length() >= lengthToValidate;
     }
 
-    // Returns an Optional of Date if the String format is correct and parsed (2000-01-01)
+    // Returns an Optional of Date if the String format is correct and parsed (yyyy-MM-dd)
     public static Optional<Date> validateAndParseDate(String dobToValidate) {
+        System.out.println("String to validate in date is: " + dobToValidate);
+
         if (dobToValidate == null || dobToValidate.isEmpty()) {
             return Optional.empty();
         }
 
-        try {
-            return Optional.of((Date) SQL_DATE_FORMAT.parse(dobToValidate));
-
-        } catch (ParseException e) {
+        if (dobToValidate.matches("^\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$")) {
+            System.out.println("Correct match!");
+            return Optional.of(java.sql.Date.valueOf(dobToValidate));
+        } else {
             return Optional.empty();
         }
     }
@@ -81,6 +93,21 @@ public class AuthenticationValidator {
         return emailAddressToValidate.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$\n");
     }
 
+
+    // TODO: Should these methods be here?
+    public static boolean verifyPatientCode(Patient patient, int code) {
+        return patient.getVerificationCode() == code;
+    }
+
+    // Extracts all the patients from the DB and then through a stream checks if there is
+    // any Patient with the same DNI as the one we are trying to insert
+    public static boolean checkForDuplicatePatient(Patient patient) {
+        List<Patient> allPatientsFromDB = patientService.getAllPatients();
+        allPatientsFromDB.stream()
+                .filter(p -> p.getDNI().equals(patient.getDNI()))
+                .findFirst();
+        return allPatientsFromDB.size() > 1;
+    }
 
 
 

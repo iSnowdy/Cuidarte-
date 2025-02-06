@@ -3,6 +3,11 @@ package Authentication.Swing;
 import Authentication.Components.CustomTextField;
 import Authentication.Components.CustomizedButton;
 import Authentication.DataExample.UserExample;
+import Models.Doctor;
+import Models.Patient;
+import Utils.Utility.ImageIconRedrawer;
+import Utils.Utility.Validations;
+import Utils.Validation.AuthenticationValidator;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +20,8 @@ import static Utils.Swing.Fonts.MAIN_FONT;
 public class PanelLoginAndRegister extends JLayeredPane {
     private JPanel login, register;
 
-    private UserExample user;
+    private Patient patient;
+    private Doctor doctor;
 
     public PanelLoginAndRegister(ActionListener eventRegister) {
         setOpaque(false);
@@ -43,7 +49,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
     // TODO: Add the logo at the top
     private void initRegister(ActionListener eventRegister) {
         // Adjust space between elements
-        this.register.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]10[]10[]40[]push"));
+        this.register.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]10[]10[]10[]40[]push"));
         JLabel registerLabel = new JLabel("Registrarse");
         registerLabel.setFont(MAIN_FONT); // TODO: Font
         registerLabel.setForeground(MAIN_APP_COLOUR);
@@ -51,8 +57,19 @@ public class PanelLoginAndRegister extends JLayeredPane {
 
         // TODO: Data Validation. Data Input to DB. Hash password. Use another thing for password and email?
         // TODO: Refactor this? Too many blocks of code very similar to each other
+        // TODO: Use ImageIconRedrawer to redraw images
+        CustomTextField userDNI = new CustomTextField();
+        ImageIconRedrawer imageIconRedrawer = new ImageIconRedrawer();
+        imageIconRedrawer.setImageIcon(new ImageIcon("C:\\DAM\\identification-card-fill-svgrepo-com(1).png"));
+        ImageIcon imageIconDNI = imageIconRedrawer.redrawImageIcon(20, 20);
+        //System.out.println("Sizes are: " + imageIconDNI.getIconWidth() + " : " + imageIconDNI.getIconHeight());
+        userDNI.setPrefixIcon(imageIconDNI);
+        userDNI.setHintText("DNI: ");
+        this.register.add(userDNI, "w 60%");
+
         CustomTextField userName = new CustomTextField();
-        userName.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/usuario.png")));
+        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/LoginRegisterImgs/usuario.png"));
+        userName.setPrefixIcon(imageIcon);
         userName.setHintText("Nombre completo");
         this.register.add(userName, "w 60%"); // TODO: Consider editing the width
 
@@ -88,13 +105,17 @@ public class PanelLoginAndRegister extends JLayeredPane {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                String dni = userDNI.getText().trim();
                 String username = userName.getText().trim();
                 String email = userEmail.getText().trim();
                 String phoneNumber = userPhoneNumber.getText().trim();
                 String dateOfBirth = userDateOfBirth.getText().trim();
                 String password = userPassword.getText().trim();
-                // IDs?
-                user = new UserExample(0, username, email, phoneNumber, dateOfBirth, password);
+
+                // TODO: Do this properly please ty. Validate all data before inserting
+                var formattedDate = AuthenticationValidator.validateAndParseDate(dateOfBirth);
+                System.out.println("Formatted date is: " + formattedDate);
+                patient = new Patient(dni, username, "Test Apellido", phoneNumber, email, formattedDate, 50, password, 50);
             }
         });
     }
@@ -144,7 +165,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
         }
     }
 
-    public UserExample getUser() {
-        return user;
+    public Patient getPatient() {
+        return patient;
     }
 }

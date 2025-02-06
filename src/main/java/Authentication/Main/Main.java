@@ -8,6 +8,11 @@ TODO: Make it so that the window pops up in the middle of the screen and of a ce
 import Authentication.DataExample.UserExample;
 import Authentication.MessageTypes;
 import Authentication.Swing.*;
+import Models.Patient;
+import Services.DB.DoctorServices;
+import Services.DB.PatientServices;
+import Services.JavaMail.JavaMailSender;
+import Utils.Validation.AuthenticationValidator;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
@@ -27,6 +32,12 @@ public class Main extends JFrame {
     private PanelLoginAndRegister loginAndRegister;
     private PanelLoading panelLoading;
     private PanelVerifyCode panelVerifyCode;
+
+    private PatientServices patientServices;
+    private DoctorServices doctorServices;
+
+    private JavaMailSender javaMailSender;
+
 
     private final int addSize = 30;
     private final int coverSize = 40;
@@ -57,8 +68,11 @@ public class Main extends JFrame {
     }
 
     // TODO: Refactor PanelLoading. Too much code here
-
     private void start() {
+        // Surround with try-catch?
+        this.patientServices = new PatientServices();
+        this.doctorServices = new DoctorServices();
+
         // Layout Constraints | Column Constraints
         this.layout = new MigLayout("fill, insets 0");
         this.cover = new PanelCover();
@@ -92,15 +106,55 @@ public class Main extends JFrame {
                 if (!animator.isRunning()) animator.start();
             }
         });
+        this.panelVerifyCode.addEventButtonOK(new ActionListener() {
+
+        });
     }
 
     private void register() {
-        UserExample user = loginAndRegister.getUser();
-        showMessage(MessageTypes.SUCCESS, "Testing Message");
+        Patient patient = loginAndRegister.getPatient();
+
+        try {
+            if (AuthenticationValidator.checkForDuplicatePatient(patient)) {
+                showMessage(MessageTypes.ERROR, "Paciente ya registrado con ese DNI o correo");
+            } else {
+                patientServices.registerPatient(patient);
+                showMessage(MessageTypes.SUCCESS, "Paciente con DNI " + patient.getDNI() + " registrado correctamente");
+                System.out.println("Patient email is: " + patient.getEmail());
+                sendMain(patient);
+            }
+        } catch (Exception e) {
+            showMessage(MessageTypes.ERROR, "Error al registrar el usuario");
+        }
+
+        //showMessage(MessageTypes.SUCCESS, "Testing Message");
         //this.panelLoading.setVisible(true);
         this.panelVerifyCode.setVisible(true);
-        System.out.println(user.getName());
-        System.out.println(user.getEmail());
+        System.out.println(patient.getFirstName());
+        System.out.println(patient.getEmail());
+    }
+
+    private void sendMain(Patient patient) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    panelLoading.setVisible(true);
+                    javaMailSender = new JavaMailSender(patient.getEmail());
+                    javaMailSender.generateVerificationEmail(patient.getFirstName(), patient.getVerificationCode());
+                    if (javaMailSender.sendEmailInBackground()) {
+                        panelLoading.setVisible(false);
+                        panelVerifyCode.setVisible(true);
+                    } else {
+                        panelLoading.setVisible(false);
+                        showMessage(MessageTypes.ERROR, "Error al enviar correo al usuario");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Error during thread for loading panel");
+                }
+            }
+        }).start();
     }
 
     private void showMessage(MessageTypes messageType, String message) {

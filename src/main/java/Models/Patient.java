@@ -1,6 +1,7 @@
 package Models;
 
 import java.sql.Date;
+import java.util.Optional;
 
 public class Patient extends User {
     private Date dateOfBirth;
@@ -9,9 +10,10 @@ public class Patient extends User {
     private final int salt; // Maybe I will not use this
 
     public Patient(String DNI, String firstName, String surname, String phoneNumber, String email,
-                   Date dateOfBirth, int age, String password, int salt) {
+                   Optional<Date> dateOfBirth, int age, String password, int salt) {
         super(DNI, firstName, surname, phoneNumber, email);
-        this.dateOfBirth = Date.valueOf(dateOfBirth.toLocalDate());
+        System.out.println("Date inside constructor: " + dateOfBirth);
+        this.dateOfBirth = dateOfBirth.get();
         this.age = age;
         this.password = password;
         this.salt = salt;

@@ -30,8 +30,8 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
     public boolean save(Patient entity) {
         String sql =
                 "INSERT INTO pacientes " +
-                        "(DNI_Paciente, Nombre, Apellidos, Numero_Telefono, Email, Fecha_Nacimiento, Edad,  Contraseña, Salt) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        "(DNI_Paciente, Nombre, Apellidos, Numero_Telefono, Email, Fecha_Nacimiento, Edad,  Contraseña, Salt, Codigo_Verificacion) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         return executeUpdate(
                 sql,
@@ -58,7 +58,7 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
     public boolean update(Patient entity) {
         String sql =
                 "UPDATE pacientes " +
-                "SET Nombre = ?, Apellidos = ?, Fecha_Nacimiento = ?, Edad = ?, Numero_Telefono = ? " +
+                "SET Nombre = ?, Apellidos = ?, Fecha_Nacimiento = ?, Edad = ?, Numero_Telefono = ?, Codigo_Verificacion = ? " +
                 "WHERE DNI_Paciente = ?";
 
         return executeUpdate(
@@ -68,6 +68,7 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
                 entity.getDateOfBirth(),
                 entity.getAge(),
                 entity.getPhoneNumber(),
+                entity.getVerificationCode(),
                 entity.getDNI()
         );
     }
@@ -162,7 +163,8 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
                 resultSet.getDate("Fecha_Nacimiento"),
                 resultSet.getInt("Edad"),
                 resultSet.getString("Contraseña"),
-                resultSet.getInt("Salt")
+                resultSet.getInt("Salt"),
+                resultSet.getInt("Codigo_Verificacion")
         );
     }
 }

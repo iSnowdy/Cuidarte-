@@ -32,4 +32,8 @@ public class PatientServices {
     public List<Patient> getAllPatients() {
         return patientImplementation.findAll();
     }
+
+    public boolean verifyPatientCode(Patient patient, int code) {
+        return patient.getVerificationCode() == code;
+    }
 }

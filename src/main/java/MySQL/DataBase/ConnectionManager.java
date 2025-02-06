@@ -43,8 +43,8 @@ public class ConnectionManager implements DataBaseConnection {
         String server = "localhost";
         String port = "3306";
         String databaseName = "CuidarteDB";
-        String username = "root";
-        String password = "admin";
+        String username = System.getenv("MySQL_Username");
+        String password = System.getenv("MySQL_Password");
 
         String connectionString = String.format("jdbc:mysql://%s:%s/%s", server, port, databaseName);
 

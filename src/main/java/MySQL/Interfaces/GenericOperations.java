@@ -1,5 +1,6 @@
 package MySQL.Interfaces;
 
+import javax.management.openmbean.InvalidOpenTypeException;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,9 @@ import java.util.Optional;
  *
  * @param <T> Generic Object that we wish to persist into the Database
  */
+
+// TODO: Consider implementing a method to check whether an object that is about to be inserted into the DB is already
+//       there or not. Example: call to findAll(). Comparator with each with a call to equals()
 
 public interface GenericOperations<T> {
     boolean save(T entity);

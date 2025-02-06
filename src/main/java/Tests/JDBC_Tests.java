@@ -11,7 +11,7 @@ import java.sql.Date;
  * Hello world!
  */
 
-public class App {
+public class JDBC_Tests {
     public static void main(String[] args) {
         PatientServices patientServices = new PatientServices();
         DoctorServices doctorServices = new DoctorServices();

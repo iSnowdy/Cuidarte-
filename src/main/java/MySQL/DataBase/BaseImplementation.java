@@ -11,7 +11,6 @@ import java.sql.*;
 public abstract class BaseImplementation<T> {
     protected final Connection connection;
     protected int tuplesAffected = 0;
-    protected String generatedID;
 
     public BaseImplementation() {
         Connection temporaryConnection;
@@ -69,15 +68,7 @@ public abstract class BaseImplementation<T> {
         return preparedStatement.executeQuery();
     }
 
-    /**
-     * Returns the amount of tuples affected in an operation.
-     */
-
     public int getTuplesAffected() {
         return tuplesAffected;
-    }
-
-    public String getGeneratedID() {
-        return generatedID;
     }
 }

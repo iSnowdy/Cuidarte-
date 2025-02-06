@@ -1,6 +1,6 @@
 package Models;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class Patient extends User {
     private Date dateOfBirth;
@@ -11,7 +11,7 @@ public class Patient extends User {
     public Patient(String DNI, String firstName, String surname, String phoneNumber, String email,
                    Date dateOfBirth, int age, String password, int salt) {
         super(DNI, firstName, surname, phoneNumber, email);
-        this.dateOfBirth = dateOfBirth;
+        this.dateOfBirth = Date.valueOf(dateOfBirth.toLocalDate());
         this.age = age;
         this.password = password;
         this.salt = salt;

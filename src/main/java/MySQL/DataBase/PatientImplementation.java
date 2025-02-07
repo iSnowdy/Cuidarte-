@@ -43,7 +43,8 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
                 entity.getDateOfBirth(),
                 entity.getAge(),
                 entity.getPassword(),
-                entity.getSalt()
+                entity.getSalt(),
+                entity.getVerificationCode()
         );
     }
 

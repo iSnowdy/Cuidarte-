@@ -2,18 +2,15 @@ package Authentication.Swing;
 
 import Authentication.Components.CustomTextField;
 import Authentication.Components.CustomizedButton;
-import Authentication.DataExample.UserExample;
 import Models.Doctor;
 import Models.Patient;
 import Utils.Utility.ImageIconRedrawer;
-import Utils.Utility.Validations;
 import Utils.Validation.AuthenticationValidator;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 import static Utils.Swing.Fonts.MAIN_FONT;
 

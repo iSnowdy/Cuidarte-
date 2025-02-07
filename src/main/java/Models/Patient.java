@@ -12,7 +12,6 @@ public class Patient extends User {
     public Patient(String DNI, String firstName, String surname, String phoneNumber, String email,
                    Optional<Date> dateOfBirth, int age, String password, int salt) {
         super(DNI, firstName, surname, phoneNumber, email);
-        System.out.println("Date inside constructor: " + dateOfBirth);
         this.dateOfBirth = dateOfBirth.get();
         this.age = age;
         this.password = password;

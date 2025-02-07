@@ -121,6 +121,10 @@ public class PanelVerifyCode extends JPanel {
         return inputCode.getText().trim();
     }
 
+    public int getInputCodeAsInt() {
+        return Integer.parseInt(inputCode.getText().trim());
+    }
+
     public void addEventButtonOK(ActionListener event) {
         acceptButton.addActionListener(event);
     }

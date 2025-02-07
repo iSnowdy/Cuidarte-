@@ -54,14 +54,11 @@ public class AuthenticationValidator {
 
     // Returns an Optional of Date if the String format is correct and parsed (yyyy-MM-dd)
     public static Optional<Date> validateAndParseDate(String dobToValidate) {
-        System.out.println("String to validate in date is: " + dobToValidate);
-
         if (dobToValidate == null || dobToValidate.isEmpty()) {
             return Optional.empty();
         }
 
         if (dobToValidate.matches("^\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$")) {
-            System.out.println("Correct match!");
             return Optional.of(java.sql.Date.valueOf(dobToValidate));
         } else {
             return Optional.empty();
@@ -96,6 +93,8 @@ public class AuthenticationValidator {
 
     // TODO: Should these methods be here?
     public static boolean verifyPatientCode(Patient patient, int code) {
+        System.out.println("The verification code in the patient is: " + patient.getVerificationCode());
+        System.out.println("The verification code typed is: " + code);
         return patient.getVerificationCode() == code;
     }
 

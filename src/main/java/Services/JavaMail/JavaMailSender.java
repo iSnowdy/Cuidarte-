@@ -83,9 +83,10 @@ public class JavaMailSender {
     }
 
     private boolean isAbleToSendEmail() {
-        return  this.emailTo != null && this.emailTo.isEmpty()
-                && this.emailFrom != null && this.emailFrom.isEmpty()
-                && this.emailSubject != null && this.emailSubject.isEmpty();
+        return  this.emailTo != null && !this.emailTo.isEmpty()
+                && this.emailFrom != null && !this.emailFrom.isEmpty()
+                && this.emailSubject != null && !this.emailSubject.isEmpty()
+                && this.emailBody != null && !this.emailBody.isEmpty();
     }
 
     private void createProperties() {
@@ -107,29 +108,18 @@ public class JavaMailSender {
                 });
     }
 
-    // TODO: I doubt this works. We need to somehow say that the message body is sent in HTML format
     public void generateVerificationEmail(String patientName, int verificationCode) {
-        this.emailSubject = String.format(
-                "Correo de verificación para el Paciente %s - Cuidarte+", patientName
-        );
+        this.emailSubject =
+                "Correo de verificación para el Paciente " + patientName + " - Cuidarte+";
 
-        this.emailBody = String.format(
-                """
-                <html>
-                <body style="font-family: Arial, sans-serif; color: #333;">
-                    <p>Buenas,</p>
-                    
-                    <p>Le queremos dar la bienvenida a nuestro <strong>Portal de Pacientes de Cuidarte+</strong>. 
-                    Para finalizar su registro correctamente, le pedimos que por favor introduzca el siguiente 
-                    código de verificación en la aplicación:</p>
-        
-                    <p style="font-size: 18px; font-weight: bold; color: blue;">%s</p>
-        
-                    <p>Saludos,<br><em>El equipo de Cuidarte+</em></p>
-                </body>
-                </html>
-                """, verificationCode
-        );
-
+        this.emailBody =
+                "Buenas,\n\n" +
+                        "Le queremos dar la bienvenida a nuestro Portal de Pacientes de Cuidarte+.\n" +
+                        "Para finalizar su registro correctamente, le pedimos que por favor introduzca " +
+                        "el siguiente codigo de verificación en la aplicación:\n\n" +
+                        verificationCode +
+                        "\n\n" +
+                        "Saludos,\n" +
+                        "El equipo de Cuidarte+";
     }
 }

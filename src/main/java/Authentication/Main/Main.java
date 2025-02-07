@@ -5,7 +5,6 @@ TODO: Make it so that the window pops up in the middle of the screen and of a ce
       login/register kind of thing
  */
 
-import Authentication.DataExample.UserExample;
 import Authentication.MessageTypes;
 import Authentication.Swing.*;
 import Models.Patient;
@@ -99,6 +98,7 @@ public class Main extends JFrame {
         this.backGround.add(panelVerifyCode, "pos 0 0 100% 100%");
         this.backGround.add(cover, "width " + coverSize + "%, pos 0al 0 n 100%");
         this.backGround.add(loginAndRegister, "width " + loginSize + "%, pos 1al 0 n 100%");
+
         this.cover.addEvent(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -106,8 +106,26 @@ public class Main extends JFrame {
                 if (!animator.isRunning()) animator.start();
             }
         });
-        this.panelVerifyCode.addEventButtonOK(new ActionListener() {
 
+        // TODO: Refactor this. And the one above to extract the methods
+        this.panelVerifyCode.addEventButtonOK(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // Verify if the code matches or not
+                    Patient patient = loginAndRegister.getPatient();
+                    if (AuthenticationValidator.verifyPatientCode(patient, panelVerifyCode.getInputCodeAsInt())) {
+                        patientServices.registerPatient(patient);
+                        showMessage(MessageTypes.SUCCESS, "Código correcto. Registro completado.");
+                        panelVerifyCode.setVisible(false);
+                    } else {
+                        showMessage(MessageTypes.ERROR, "Código incorrecto. Inténtelo nuevamente.");
+                    }
+                } catch (Exception exception) {
+                    showMessage(MessageTypes.ERROR, "Error");
+                    exception.printStackTrace();
+                }
+            }
         });
     }
 
@@ -118,23 +136,16 @@ public class Main extends JFrame {
             if (AuthenticationValidator.checkForDuplicatePatient(patient)) {
                 showMessage(MessageTypes.ERROR, "Paciente ya registrado con ese DNI o correo");
             } else {
-                patientServices.registerPatient(patient);
-                showMessage(MessageTypes.SUCCESS, "Paciente con DNI " + patient.getDNI() + " registrado correctamente");
-                System.out.println("Patient email is: " + patient.getEmail());
-                sendMain(patient);
+                showMessage(MessageTypes.SUCCESS, "Se le ha enviado un código de verificación a su correo " +
+                        "(" + patient.getEmail() + ") para finalizar el proceso.");
+                sendEmailToPatient(patient);
             }
         } catch (Exception e) {
             showMessage(MessageTypes.ERROR, "Error al registrar el usuario");
         }
-
-        //showMessage(MessageTypes.SUCCESS, "Testing Message");
-        //this.panelLoading.setVisible(true);
-        this.panelVerifyCode.setVisible(true);
-        System.out.println(patient.getFirstName());
-        System.out.println(patient.getEmail());
     }
 
-    private void sendMain(Patient patient) {
+    private void sendEmailToPatient(Patient patient) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -142,6 +153,7 @@ public class Main extends JFrame {
                     panelLoading.setVisible(true);
                     javaMailSender = new JavaMailSender(patient.getEmail());
                     javaMailSender.generateVerificationEmail(patient.getFirstName(), patient.getVerificationCode());
+
                     if (javaMailSender.sendEmailInBackground()) {
                         panelLoading.setVisible(false);
                         panelVerifyCode.setVisible(true);
@@ -282,7 +294,6 @@ public class Main extends JFrame {
     }
 
     public static void main(String[] args) {
-
 
 
         java.awt.EventQueue.invokeLater(new Runnable() {

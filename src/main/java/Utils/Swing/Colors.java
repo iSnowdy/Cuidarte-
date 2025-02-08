@@ -10,5 +10,6 @@ public class Colors {
     public static final Color HINT_GREY = new Color(179, 179, 179); // #B3B3B3
     public static final Color TEXTFIELD_BACKGROUND_COLOUR = new Color(204, 237, 236); // #CCEDEC
 
+    public static final Color SUBTITLE_COLOUR = new Color(181, 187, 213); // #B5BBD5
 
 }

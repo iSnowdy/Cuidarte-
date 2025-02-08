@@ -17,6 +17,7 @@ import static Utils.Swing.Fonts.MAIN_FONT;
 public class PanelLoginAndRegister extends JLayeredPane {
     private JPanel login, register;
 
+    private ImageIconRedrawer imageIconRedrawer;
     private Patient patient;
     private Doctor doctor;
 
@@ -33,11 +34,13 @@ public class PanelLoginAndRegister extends JLayeredPane {
     }
 
     private void initComponents() {
-        login = new JPanel();
-        register = new JPanel();
+        this.imageIconRedrawer = new ImageIconRedrawer();
 
-        login.setBackground(Color.WHITE);
-        register.setBackground(Color.WHITE);
+        this.login = new JPanel();
+        this.register = new JPanel();
+
+        this.login.setBackground(Color.WHITE);
+        this.register.setBackground(Color.WHITE);
 
         add(login, "login");
         add(register, "register");
@@ -55,40 +58,58 @@ public class PanelLoginAndRegister extends JLayeredPane {
         // TODO: Data Validation. Data Input to DB. Hash password. Use another thing for password and email?
         // TODO: Refactor this? Too many blocks of code very similar to each other
         // TODO: Use ImageIconRedrawer to redraw images
-        CustomTextField userDNI = new CustomTextField();
-        ImageIconRedrawer imageIconRedrawer = new ImageIconRedrawer();
-        imageIconRedrawer.setImageIcon(new ImageIcon("C:\\DAM\\identification-card-fill-svgrepo-com(1).png"));
-        ImageIcon imageIconDNI = imageIconRedrawer.redrawImageIcon(20, 20);
-        //System.out.println("Sizes are: " + imageIconDNI.getIconWidth() + " : " + imageIconDNI.getIconHeight());
-        userDNI.setPrefixIcon(imageIconDNI);
-        userDNI.setHintText("DNI: ");
-        this.register.add(userDNI, "w 60%");
-
-        CustomTextField userName = new CustomTextField();
-        ImageIcon imageIcon = new ImageIcon(getClass().getResource("/LoginRegisterImgs/usuario.png"));
-        userName.setPrefixIcon(imageIcon);
-        userName.setHintText("Nombre completo");
-        this.register.add(userName, "w 60%"); // TODO: Consider editing the width
+        CustomTextField dniTextField = generateCustomTextField(
+                "C:\\DAM\\identification-card-fill-svgrepo-com(1).png",
+                20,
+                20,
+                "DNI: "
+        );
+        this.register.add(dniTextField, "w 60%");  // TODO: Consider editing the width
+        
+        CustomTextField usernameTextField = generateCustomTextField(
+                "/LoginRegisterImgs/usuario.png",
+                20,
+                20,
+                "Nombre completo: "
+        );
+        this.register.add(usernameTextField, "w 60");
 
         CustomTextField userEmail = new CustomTextField();
         userEmail.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/correo.png")));
         userEmail.setHintText("Email");
         this.register.add(userEmail, "w 60%");
+        
+        CustomTextField emailTextField = generateCustomTextField(
+                "/LoginRegisterImgs/correo.png",
+                20,
+                20,
+                "Email: "
+        );
+        this.register.add(emailTextField, "w 60%");
 
-        CustomTextField userPhoneNumber = new CustomTextField();
-        userPhoneNumber.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/telefono.png")));
-        userPhoneNumber.setHintText("Número de teléfono");
-        this.register.add(userPhoneNumber, "w 60%");
+        CustomTextField phoneNumberTExtField = generateCustomTextField(
+                "/LoginRegisterImgs/telefono.png",
+                20,
+                20,
+                "Número de teléfono: "
+        );
+        this.register.add(phoneNumberTExtField, "w 60%");
+        
+        CustomTextField dateOfBirthTextField = generateCustomTextField(
+                "/LoginRegisterImgs/calendario.png",
+                20,
+                20,
+                "Fecha de nacimiento: "
+        );
+        this.register.add(dateOfBirthTextField, "w 60%");
 
-        CustomTextField userDateOfBirth = new CustomTextField();
-        userDateOfBirth.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/calendario.png")));
-        userDateOfBirth.setHintText("Fecha de nacimiento");
-        this.register.add(userDateOfBirth, "w 60%");
-
-        CustomTextField userPassword = new CustomTextField();
-        userPassword.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/contraseña.png")));
-        userPassword.setHintText("Contraseña");
-        this.register.add(userPassword, "w 60%");
+        CustomTextField passwordTextField = generateCustomTextField(
+                "/LoginRegisterImgs/contraseña.png",
+                20,
+                20,
+                "Contraseña: "
+        );
+        this.register.add(passwordTextField, "w 60%");
 
         CustomizedButton registerButton = new CustomizedButton();
         registerButton.setBackground(MAIN_APP_COLOUR); // TODO: Colours?
@@ -96,23 +117,24 @@ public class PanelLoginAndRegister extends JLayeredPane {
         registerButton.setFont(MAIN_FONT);
         registerButton.addActionListener(eventRegister);
         // TODO: setText vs setLabel?
-        registerButton.setLabel("Registrarse"); // TODO: How to make it round
+        registerButton.setLabel("Registrarse");
         this.register.add(registerButton, "w 40%, h 40");
         // TODO: Refactor this
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                String dni = userDNI.getText().trim();
-                String username = userName.getText().trim();
+                String dni = dniTextField.getText().trim();
+                String username = usernameTextField.getText().trim();
                 String email = userEmail.getText().trim();
-                String phoneNumber = userPhoneNumber.getText().trim();
-                String dateOfBirth = userDateOfBirth.getText().trim();
-                String password = userPassword.getText().trim();
+                String phoneNumber = phoneNumberTExtField.getText().trim();
+                String dateOfBirth = dateOfBirthTextField.getText().trim();
+                String password = passwordTextField.getText().trim();
+
+                String[] nameAndSurname = nameAndSurnamesSplitted(username);
 
                 // TODO: Do this properly please ty. Validate all data before inserting
                 var formattedDate = AuthenticationValidator.validateAndParseDate(dateOfBirth);
-                System.out.println("Formatted date is: " + formattedDate);
-                patient = new Patient(dni, username, "Test Apellido", phoneNumber, email, formattedDate, 50, password, 50);
+                patient = new Patient(dni, nameAndSurname[0], nameAndSurname[1], phoneNumber, email, formattedDate, 50, password, 50);
             }
         });
     }
@@ -164,5 +186,25 @@ public class PanelLoginAndRegister extends JLayeredPane {
 
     public Patient getPatient() {
         return patient;
+    }
+    
+    private CustomTextField generateCustomTextField(String imagePath, int width, int height, String textHint) {
+        CustomTextField generatedTextField = new CustomTextField();
+        imageIconRedrawer.setImageIcon(new ImageIcon(imagePath));
+        ImageIcon imageIcon = imageIconRedrawer.redrawImageIcon(width, height);
+        generatedTextField.setPrefixIcon(imageIcon);
+        
+        generatedTextField.setHintText(textHint);
+        
+        return generatedTextField;
+    }
+
+    private String[] nameAndSurnamesSplitted(String fullname) {
+        String [] parts = fullname.split(" ", 2); // Max split it twice
+
+        String name = parts[0].trim();
+        String surnames = parts.length > 1 ? parts[1].trim() : "";
+
+        return new String[]{name, surnames};
     }
 }

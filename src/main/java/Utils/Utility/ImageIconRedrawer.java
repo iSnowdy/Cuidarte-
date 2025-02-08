@@ -14,6 +14,7 @@ public class ImageIconRedrawer {
         Image currentImage = imageIcon.getImage();
         Image scaledImage = currentImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         ImageIcon scaledImageIcon = new ImageIcon(scaledImage);
+        this.imageIcon = null; // Clears it for future implementations
         return scaledImageIcon;
     }
 }

@@ -41,13 +41,6 @@ public class AuthenticationValidator {
     private static final int ALLERGIES_DIAGNOSIS_LENGTH = 500;
     private static final int RECORD_MOTIF_PHYSICAL_EXPLORATION_TREATMENT_LENGTH = 2000;
 
-    private final static SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
-    // Prevents things such as out of bounds Feb day
-    /*static {
-        SQL_DATE_FORMAT.setLenient(false);
-    }*/
-
     private static boolean isValidTextLength(String text, int lengthToValidate) {
         return text != null && text.length() >= lengthToValidate;
     }
@@ -93,8 +86,6 @@ public class AuthenticationValidator {
 
     // TODO: Should these methods be here?
     public static boolean verifyPatientCode(Patient patient, int code) {
-        System.out.println("The verification code in the patient is: " + patient.getVerificationCode());
-        System.out.println("The verification code typed is: " + code);
         return patient.getVerificationCode() == code;
     }
 

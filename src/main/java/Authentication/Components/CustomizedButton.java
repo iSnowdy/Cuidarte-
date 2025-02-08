@@ -13,17 +13,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import static Utils.Swing.Colors.SUBTITLE_COLOUR;
+
 public class CustomizedButton extends JButton {
     private Animator buttonAnimator;
     private Point pressedPoint;
     private int targetSize;
     private float animationOpacity;
     private float animationSize;
-    private Color effectColour = new Color(255, 150, 100); // TODO: Colour for the animation?
+    private Color effectColour = SUBTITLE_COLOUR; // TODO: Colour for the animation?
 
     public CustomizedButton() {
         setContentAreaFilled(false);
-        setBorder(new EmptyBorder(5, 0, 5, 0));
+        setBorder(new EmptyBorder(5, 10, 5, 10));
         setBackground(Color.WHITE);
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -85,29 +87,26 @@ public class CustomizedButton extends JButton {
         });
     }
 
-
     @Override
     protected void paintComponent(Graphics graphics) {
-        int width = getWidth();
-        int height = getHeight();
-
-        // Creates a buffered image of the same size of the component
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D graphics2D = image.createGraphics();
-
+        Graphics2D graphics2D = (Graphics2D) graphics.create();
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setColor(getBackground());
-        graphics2D.fillRoundRect(0, 0, width, height, height, height);
+        graphics2D.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        graphics2D.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        graphics2D.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-        // Draws the ripple effect
+        graphics2D.setColor(getBackground());
+        graphics2D.fillRoundRect(0, 0, getWidth(), getHeight(), getHeight(), getHeight());
+
+        // Ripple effect
         if (pressedPoint != null) {
             graphics2D.setColor(effectColour);
             graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, animationOpacity));
-            graphics2D.fillOval((int) (pressedPoint.x - animationSize / 2), (int) (pressedPoint.y - animationSize / 2), (int) animationSize, (int) animationSize);
+            graphics2D.fillOval((int) (pressedPoint.x - animationSize / 2), (int) (pressedPoint.y - animationSize / 2),
+                    (int) animationSize, (int) animationSize);
         }
 
         graphics2D.dispose();
-        graphics.drawImage(image, 0, 0, width, height, null);
         super.paintComponent(graphics);
     }
 }

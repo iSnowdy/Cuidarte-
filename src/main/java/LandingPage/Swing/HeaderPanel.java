@@ -2,7 +2,6 @@ package LandingPage.Swing;
 
 import Authentication.Components.CustomizedButton;
 import Utils.Utility.ImageIconRedrawer;
-import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,17 +23,16 @@ public class HeaderPanel extends JPanel {
     private ImageIconRedrawer iconRedrawer;
 
     public HeaderPanel() {
-        setOpaque(false);
+        setBackground(Color.WHITE);
+        setOpaque(true);
         initComponents();
         addComponentsToLayout();
     }
 
     private void initComponents() {
-        setLayout(new MigLayout("wrap, insets 10", "[center]", "[]10[]10[]10[]"));
         iconRedrawer = new ImageIconRedrawer();
         iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/General/Logo-Temp.png")));
         ImageIcon logoIcon = iconRedrawer.redrawImageIcon(50, 50);
-
         appLogo = new JLabel(logoIcon);
 
         registerButton = new CustomizedButton();
@@ -50,8 +48,6 @@ public class HeaderPanel extends JPanel {
         loginButton.setForeground(Color.WHITE);
         loginButton.addHoverEffectToButton(SECONDARY_APP_COLOUR);
         loginButton.setText("Iniciar Sesión");
-
-
 
         // Dropdown Menu (future implementation)
         iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/dropdown-menu.png")));
@@ -69,7 +65,6 @@ public class HeaderPanel extends JPanel {
         separator = new JSeparator();
         separator.setForeground(Color.GRAY);
         separator.setPreferredSize(new Dimension(500, 2));
-
 
         titleLabel = new JLabel("Cuidarte+");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // TODO: Font
@@ -99,25 +94,62 @@ public class HeaderPanel extends JPanel {
     }
 
     private void addComponentsToLayout() {
-        JPanel headerPanel = new JPanel(new MigLayout("insets 0, fillx", "[left]push[right]10[right]10[right]", "[]"));
-        headerPanel.setOpaque(false);
-        headerPanel.add(appLogo);
-        headerPanel.add(loginButton);
-        headerPanel.add(registerButton);
-        headerPanel.add(menuIcon);
+        setLayout(new BorderLayout(0, 0));
 
-        add(headerPanel, "growx, wrap");
+        // Top panel with centered layout
+        JPanel topPanel = new JPanel(new GridBagLayout());
+        topPanel.setOpaque(false);
 
-        add(separator, "center, wrap");
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0, 10, 0, 10); // Horizontal spacing between components
+        gbc.anchor = GridBagConstraints.CENTER; // Center components vertically and horizontally
 
-        add(titleLabel, "center, wrap");
-        add(subtitleLabel, "center, wrap");
+        // Add logo to the left
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0.5; // Push logo to the left
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        topPanel.add(appLogo, gbc);
 
-        JPanel buttonPanel = new JPanel(new MigLayout("fillx, insets 0", "[center]10[center]", "[]"));
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(appointmentButton);
-        buttonPanel.add(callButton);
+        // Add buttons and dropdown menu to the right
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0)); // Horizontal spacing
+        rightPanel.setOpaque(false);
+        rightPanel.add(loginButton);
+        rightPanel.add(registerButton);
+        rightPanel.add(menuIcon);
 
-        add(buttonPanel, "center, wrap");
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 0.5; // Push buttons to the right
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        topPanel.add(rightPanel, gbc);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        // Separator
+        JPanel separatorPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        separatorPanel.setOpaque(false);
+        separatorPanel.add(separator);
+        add(separatorPanel, BorderLayout.CENTER);
+
+        // Center panel containing the text
+        JPanel centerPanel = new JPanel(new GridBagLayout());
+        centerPanel.setOpaque(false);
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(20, 0, 20, 0); // Vertical spacing between components
+        centerPanel.add(titleLabel, gbc);
+
+        gbc.gridy = 1;
+        centerPanel.add(subtitleLabel, gbc);
+        add(centerPanel, BorderLayout.CENTER);
+
+        // Bottom panel containing the other two buttons
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 50)); // Horizontal spacing
+        bottomPanel.setOpaque(false);
+        bottomPanel.add(appointmentButton);
+        bottomPanel.add(callButton);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 }

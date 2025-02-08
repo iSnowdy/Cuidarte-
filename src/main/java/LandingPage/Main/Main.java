@@ -2,6 +2,7 @@ package LandingPage.Main;
 
 import LandingPage.Swing.HeaderPanel;
 import LandingPage.Swing.ImageCarousel;
+import LandingPage.Swing.TextPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +13,7 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Landing Page");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(800, 600);
+            frame.setSize(800, 700);
             frame.setLayout(new BorderLayout());
 
             // HeaderPanel
@@ -30,7 +31,17 @@ public class Main {
 
             // Carousel
             ImageCarousel carousel = new ImageCarousel(imageList);
-            frame.add(carousel, BorderLayout.CENTER);
+
+            // TextPanel (Quiénes somos + botones)
+            TextPanel textPanel = new TextPanel();
+
+            // Container panel to center everything
+            JPanel contentPanel = new JPanel();
+            contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+            contentPanel.add(carousel);
+            contentPanel.add(textPanel);
+
+            frame.add(contentPanel, BorderLayout.CENTER);
 
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

@@ -1,32 +1,49 @@
 package LandingPage.Swing;
 
-import Authentication.Components.CustomizedButton;
+import Utils.Utility.ImageIconRedrawer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
+
+import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 
 public class ImageCarousel extends JPanel {
     private List<ImageIcon> images;
-    private JLabel imageLabel;
+
+    private JPanel imageContainer;
     private JPanel indicatorPanel;
-    private JButton previousButton;
-    private JButton nextButton;
+    private JPanel navigationPanel;
+
+    private JLabel
+            imageLabel, previousImageLabel, nextImageLabel;
+
     private int currentIndex;
+
     private Timer autoSlideTimer;
+    private final int AUTO_SLIDE_DELAY = 5000;
 
-
+    private final int IMAGE_WIDTH = 600;
+    private final int IMAGE_HEIGHT = 300;
 
     public ImageCarousel(List<ImageIcon> images) {
-        this.images = images;
+        setBackground(Color.WHITE);
+        this.images = resizeImageList(images); // Resizes all images to a standard size
         initComponents();
         startAutoSlide();
     }
 
     private void initComponents() {
+        ImageIconRedrawer iconRedrawer = new ImageIconRedrawer();
+
         setLayout(new BorderLayout());
+
+        imageContainer = new JPanel(new BorderLayout());
+        imageContainer.setOpaque(false);
 
         // Each instance of an image will be contained here
         imageLabel = new JLabel();
@@ -36,12 +53,28 @@ public class ImageCarousel extends JPanel {
         indicatorPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         indicatorPanel.setOpaque(false);
 
-        // TODO: Consider making this SVG or stylize it a bit
-        previousButton = new JButton("<");
-        previousButton.addActionListener(e -> showPreviousImage());
+        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/previous.png")));
+        ImageIcon prevIcon = iconRedrawer.redrawImageIcon(10, 10);
+        previousImageLabel = new JLabel(prevIcon);
+        previousImageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        previousImageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showPreviousImage();
+            }
+        });
 
-        nextButton = new JButton(">");
-        nextButton.addActionListener(e -> showNextImage());
+
+        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/next.png")));
+        ImageIcon nextIcon = iconRedrawer.redrawImageIcon(10, 10);
+        nextImageLabel = new JLabel(nextIcon);
+        nextImageLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        nextImageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showNextImage();
+            }
+        });
 
         setUpLayout();
         updateImage();
@@ -61,7 +94,7 @@ public class ImageCarousel extends JPanel {
         for (int i = 0; i < images.size(); i++) {
             JLabel dotLabel = new JLabel("●");
             dotLabel.setForeground(
-                    i == currentIndex ? Color.RED : Color.YELLOW // TODO: Adapt colours
+                    i == currentIndex ? MAIN_APP_COLOUR : Color.GRAY //
             );
             indicatorPanel.add(dotLabel);
         }
@@ -80,18 +113,27 @@ public class ImageCarousel extends JPanel {
     }
 
     private void setUpLayout() {
-        JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(previousButton, BorderLayout.WEST);
-        buttonPanel.add(nextButton, BorderLayout.EAST);
+        imageContainer.add(imageLabel, BorderLayout.CENTER);
 
-        add(imageLabel, BorderLayout.CENTER);
-        add(indicatorPanel, BorderLayout.NORTH);
-        add(buttonPanel, BorderLayout.SOUTH);
+        navigationPanel = new JPanel(new BorderLayout());
+        navigationPanel.setOpaque(false);
+
+
+        JPanel indicatorContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        indicatorContainer.setOpaque(false);
+        indicatorContainer.add(indicatorPanel);
+
+
+        navigationPanel.add(previousImageLabel, BorderLayout.WEST);
+        navigationPanel.add(indicatorContainer, BorderLayout.CENTER);
+        navigationPanel.add(nextImageLabel, BorderLayout.EAST);
+
+        add(imageContainer, BorderLayout.CENTER);
+        add(navigationPanel, BorderLayout.SOUTH);
     }
 
     private void startAutoSlide() {
-        autoSlideTimer = new Timer(5000, new ActionListener() {
+        autoSlideTimer = new Timer(AUTO_SLIDE_DELAY, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showNextImage();
@@ -104,5 +146,16 @@ public class ImageCarousel extends JPanel {
         if (autoSlideTimer != null) {
             autoSlideTimer.stop();
         }
+    }
+
+    private List<ImageIcon> resizeImageList(List<ImageIcon> originalImages) {
+        return originalImages.stream()
+                .map(this::resizeImage)
+                .toList();
+    }
+
+    private ImageIcon resizeImage(ImageIcon originalImage) {
+        Image newImage = originalImage.getImage().getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGHT, Image.SCALE_SMOOTH);
+        return new ImageIcon(newImage);
     }
 }

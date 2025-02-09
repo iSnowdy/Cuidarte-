@@ -6,6 +6,8 @@ import Utils.Utility.ImageIconRedrawer;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 
@@ -91,6 +93,24 @@ public class PatientPortalPanel extends JPanel {
         cardPanel.add(iconLabel, BorderLayout.CENTER);
         cardPanel.add(titleLabel, BorderLayout.SOUTH);
 
+        addHoverEffect(cardPanel);
+
         return cardPanel;
+    }
+
+    private void addHoverEffect(JPanel cardPanel) {
+        cardPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                cardPanel.setBackground(Color.LIGHT_GRAY);
+                cardPanel.repaint();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                cardPanel.setBackground(Color.WHITE);
+                cardPanel.repaint();
+            }
+        });
     }
 }

@@ -3,6 +3,8 @@ package Utils.Utility;
 import javax.swing.*;
 import java.awt.*;
 
+// TODO: I'm using this class A LOT. Maybe consider making the method static
+
 public class ImageIconRedrawer {
     ImageIcon imageIcon;
 

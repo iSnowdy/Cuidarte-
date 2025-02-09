@@ -25,6 +25,7 @@ public class CustomizedButton extends JButton {
 
     public CustomizedButton() {
         setContentAreaFilled(false);
+        setFocusPainted(false);
         setBorder(new EmptyBorder(5, 10, 5, 10));
         setBackground(Color.WHITE);
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

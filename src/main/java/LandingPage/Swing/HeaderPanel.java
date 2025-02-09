@@ -1,10 +1,13 @@
 package LandingPage.Swing;
 
 import Authentication.Components.CustomizedButton;
+import LandingPage.Components.DropDownMenu;
+import LandingPage.Components.NotificationPopUp;
 import Utils.Utility.ImageIconRedrawer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 import static Utils.Swing.Colors.*;
 import static Utils.Swing.Fonts.MAIN_FONT;
@@ -58,6 +61,8 @@ public class HeaderPanel extends JPanel {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 // TODO: Future implementation
                 System.out.println("Menú desplegable clicado");
+                DropDownMenu dropDownMenu = new DropDownMenu();
+                dropDownMenu.showMenu(menuIcon);
             }
         });
 
@@ -81,6 +86,20 @@ public class HeaderPanel extends JPanel {
         appointmentButton.addHoverEffectToButton(MY_RED.darker());
         appointmentButton.setIcon(appointmentIcon);
         appointmentButton.setText("Pedir Cita");
+
+        // Example on how to use the Notification Pop Up class
+        appointmentButton.addActionListener(e -> {
+            Window window = SwingUtilities.getWindowAncestor(this);
+            if (window instanceof JFrame) {
+                NotificationPopUp.invokeNotification(
+                        (JFrame) window, // Casting Window to JFrame
+                        "Cita médica", "Tu cita ha sido agendada.", "Aceptar",
+                        evt -> System.out.println("Notificación cerrada"));
+            } else {
+                System.err.println("Error: No se pudo obtener el JFrame principal.");
+            }
+        });
+
 
         iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/phone-call.png")));
         ImageIcon callIcon = iconRedrawer.redrawImageIcon(50, 50);

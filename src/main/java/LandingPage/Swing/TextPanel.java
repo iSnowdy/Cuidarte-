@@ -50,7 +50,7 @@ public class TextPanel extends JPanel {
         appointmentButton.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         appointmentButton.setText("Pedir Cita");
 
-        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/cancel.png")));
+        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/cancel-white.png")));
         ImageIcon cancelIcon = iconRedrawer.redrawImageIcon(30, 30);
 
         cancelAppointmentButton = new CustomizedButton();

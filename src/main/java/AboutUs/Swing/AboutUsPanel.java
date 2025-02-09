@@ -132,6 +132,8 @@ public class AboutUsPanel extends JPanel {
         return profilePanel;
     }
 
+    // TODO: Extract this information from MySQL
+
     private final String firstDescription = "Médico Cirujano, Especialista en Administración Hospitalaria\n" +
             "El Dr. Ramírez es un líder visionario con más de 20 años de experiencia en gestión hospitalaria. " +
             "Su formación en cirugía y administración le permite dirigir el hospital con un enfoque centrado en " +

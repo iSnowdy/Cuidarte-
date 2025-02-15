@@ -6,7 +6,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 public class PanelSlide extends JPanel {
-    private int animationSpeed = 1; // Per frame
+    private final int animationSpeed = 10; // Per frame
     private final Timer timer;
 
     private Component currentComponent;
@@ -16,6 +16,7 @@ public class PanelSlide extends JPanel {
         TO_RIGHT,
         TO_LEFT;
     }
+
     private AnimationType animationType;
 
     public PanelSlide() {
@@ -74,7 +75,6 @@ public class PanelSlide extends JPanel {
         }
     }
 
-
     // Slide animation
     private void animate() {
         if (animationType == AnimationType.TO_RIGHT) {
@@ -102,17 +102,8 @@ public class PanelSlide extends JPanel {
         currentComponent = newComponent;
     }
 
-
-
-
     // Getters and Setters
     public int getAnimationSpeed() {
         return animationSpeed;
     }
-    public void setAnimationSpeed(int animationSpeed) {
-        this.animationSpeed = animationSpeed;
-    }
-
-
-
 }

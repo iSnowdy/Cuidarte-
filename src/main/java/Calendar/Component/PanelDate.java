@@ -17,9 +17,12 @@ public class PanelDate extends JPanel {
         this.year = year;
 
         // 7x7 ---> 7 columns (days), 7 rows (days of the month)
-        setLayout(new GridLayout(7, 7));
+        setLayout(new GridLayout(7, 7, 5, 5));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         initComponents();
         setDate();
+
+        setPreferredSize(new Dimension(350, 300));
     }
 
     private void initComponents() {
@@ -52,12 +55,16 @@ public class PanelDate extends JPanel {
         today.updateToday();
 
         for (Cell cell : cellsList) {
-            cell.setText(String.valueOf(calendar.get(Calendar.DATE))); // Day of the day
+            int cellDay = calendar.get(Calendar.DATE);
+            int cellMonth = calendar.get(Calendar.MONTH) + 1;
+            int cellYear = calendar.get(Calendar.YEAR);
+
+            cell.setText(String.valueOf(cellDay));
             cell.setDate(calendar.getTime());
             cell.currentMonth(calendar.get(Calendar.MONTH) == month - 1);
 
-            if (today.isToday(new Today(calendar.get(Calendar.DATE), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.YEAR)))) {
-                cell.setAsToday(); // Marks the cell as if it's today
+            if (today.getDay() == cellDay && today.getMonth() == cellMonth && today.getYear() == cellYear) {
+                cell.setAsToday(); // Flag as today
             }
 
             calendar.add(Calendar.DATE, 1);

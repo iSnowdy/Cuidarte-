@@ -1,7 +1,5 @@
 package Calendar.Component;
 
-
-
 import Calendar.Swing.PanelSlide;
 import Utils.Utility.ImageIconRedrawer;
 
@@ -10,6 +8,8 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import static Utils.Swing.Colors.SECONDARY_APP_COLOUR;
 
 public class CalendarCustom extends JPanel {
     private int month;
@@ -25,6 +25,8 @@ public class CalendarCustom extends JPanel {
     private Timer clockTimer;
 
     private ImageIconRedrawer iconRedrawer;
+    private JPanel leftPanel;
+    private JPanel rightPanel;
 
     public CalendarCustom() {
         this.iconRedrawer = new ImageIconRedrawer();
@@ -32,51 +34,63 @@ public class CalendarCustom extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // Initializes to current date
         thisMonth();
 
-        initHeaderPanel();
-        initMonthPanel();
-        initCalendarPanel();
+        initLeftPanel();  // Left panel that will contain critical information and appointment selection
+        initRightPanel(); // Right panel containing the calendar
+
+        // Split line between both panels
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+        splitPane.setDividerLocation(250); // Left panel size
+        splitPane.setResizeWeight(0.3); // At least 30%
+        splitPane.setEnabled(false); // Prevents user from moving panels
+
+        add(splitPane, BorderLayout.CENTER);
+
         initClockUpdater();
     }
 
-    // TODO: Styling
-    private void initHeaderPanel() {
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        headerPanel.setBackground(new Color(97, 49, 237));
+    private void initLeftPanel() {
+        leftPanel = new JPanel();
+        leftPanel.setLayout(new BorderLayout());
+        leftPanel.setBackground(SECONDARY_APP_COLOUR);
 
-        timerLabel = new JLabel();
+        JPanel headerPanel = new JPanel(new GridLayout(3, 1));
+        headerPanel.setBackground(SECONDARY_APP_COLOUR);
+
+        timerLabel = new JLabel("", SwingConstants.CENTER);
         timerLabel.setFont(new Font("SansSerif", Font.BOLD, 48));
-        timerLabel.setForeground(new Color(201, 201, 201));
+        timerLabel.setForeground(Color.WHITE);
 
-        typeLabel = new JLabel();
+        typeLabel = new JLabel("", SwingConstants.CENTER);
         typeLabel.setFont(new Font("SansSerif", Font.BOLD, 25));
-        typeLabel.setForeground(new Color(201, 201, 201));
+        typeLabel.setForeground(Color.WHITE);
 
-        dateLabel = new JLabel();
+        dateLabel = new JLabel("", SwingConstants.CENTER);
         dateLabel.setFont(new Font("SansSerif", Font.PLAIN, 18));
-        dateLabel.setForeground(new Color(201, 201, 201));
+        dateLabel.setForeground(Color.WHITE);
 
         headerPanel.add(timerLabel);
         headerPanel.add(typeLabel);
         headerPanel.add(dateLabel);
-        add(headerPanel, BorderLayout.NORTH);
+
+        leftPanel.add(headerPanel, BorderLayout.NORTH);
     }
 
-    private void initMonthPanel() {
+    private void initRightPanel() {
+        rightPanel = new JPanel(new BorderLayout());
+
         JPanel monthPanel = new JPanel(new BorderLayout());
 
-
         iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/previous.png")));
-        ImageIcon backIcon = iconRedrawer.redrawImageIcon(30, 30);
+        ImageIcon backIcon = iconRedrawer.redrawImageIcon(20, 20);
         backButton = new JButton();
         backButton.setIcon(backIcon);
         styleNavigationButton(backButton);
         backButton.addActionListener(e -> goToPreviousMonth());
 
         iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/next.png")));
-        ImageIcon nextIcon = iconRedrawer.redrawImageIcon(30, 30);
+        ImageIcon nextIcon = iconRedrawer.redrawImageIcon(20, 20);
         nextButton = new JButton();
         nextButton.setIcon(nextIcon);
         styleNavigationButton(nextButton);
@@ -84,19 +98,16 @@ public class CalendarCustom extends JPanel {
 
         monthYearLabel = new JLabel("", SwingConstants.CENTER);
         monthYearLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
-        monthYearLabel.setForeground(new Color(97, 49, 237));
+        monthYearLabel.setForeground(SECONDARY_APP_COLOUR);
 
         monthPanel.add(backButton, BorderLayout.WEST);
         monthPanel.add(monthYearLabel, BorderLayout.CENTER);
         monthPanel.add(nextButton, BorderLayout.EAST);
-        add(monthPanel, BorderLayout.CENTER);
-    }
+        rightPanel.add(monthPanel, BorderLayout.NORTH);
 
-    // The Panel that slides
-    private void initCalendarPanel() {
         slide = new PanelSlide();
         slide.setBackground(Color.WHITE);
-        add(slide, BorderLayout.SOUTH);
+        rightPanel.add(slide, BorderLayout.CENTER);
 
         slide.show(new PanelDate(month, year), PanelSlide.AnimationType.TO_RIGHT);
         showMonthYear();
@@ -120,12 +131,13 @@ public class CalendarCustom extends JPanel {
         year = calendar.get(Calendar.YEAR);
     }
 
-    // Updates date
+    // TODO: To Spanish?
     private void showMonthYear() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MONTH, month - 1);
         calendar.set(Calendar.YEAR, year);
         SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
+        System.out.println("Month - year label: " + df.format(calendar.getTime()));
         monthYearLabel.setText(df.format(calendar.getTime()));
     }
 
@@ -136,13 +148,10 @@ public class CalendarCustom extends JPanel {
         } else {
             month--;
         }
-        slide.removeAll();
-        PanelDate panelDate = new PanelDate(month, year);
-        slide.show(panelDate, PanelSlide.AnimationType.TO_RIGHT);
         showMonthYear();
-
-        revalidate();
-        repaint();
+        PanelDate panelDate = new PanelDate(month, year);
+        panelDate.setSize(slide.getSize());
+        slide.show(panelDate, PanelSlide.AnimationType.TO_RIGHT);
     }
 
     private void goToNextMonth() {
@@ -152,13 +161,11 @@ public class CalendarCustom extends JPanel {
         } else {
             month++;
         }
-        slide.removeAll();
-        PanelDate panelDate = new PanelDate(month, year);
-        slide.show(panelDate, PanelSlide.AnimationType.TO_LEFT);
         showMonthYear();
 
-        revalidate();
-        repaint();
+        PanelDate panelDate = new PanelDate(month, year);
+        panelDate.setSize(slide.getSize());
+        slide.show(panelDate, PanelSlide.AnimationType.TO_LEFT);
     }
 
     private void updateClock() {

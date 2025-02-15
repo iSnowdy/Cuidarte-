@@ -23,7 +23,6 @@ public class Main extends JFrame {
         mainPanel.setBackground(Color.WHITE);
 
         calendarPanel = new CalendarCustom();
-        calendarPanel.setBorder(BorderFactory.createLineBorder(new Color(205, 205, 205)));
 
         mainPanel.add(calendarPanel, BorderLayout.CENTER);
 

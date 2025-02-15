@@ -20,8 +20,7 @@ public class ConnectionManager implements DataBaseConnection {
     private Connection connection;
 
     // To avoid other classes from implementing this class
-    private ConnectionManager() {
-    }
+    private ConnectionManager() {}
 
     /**
      * If the ConnectionManager class was not implemented yet, it will do it. Then, it will return the

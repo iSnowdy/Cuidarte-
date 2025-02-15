@@ -8,22 +8,14 @@ import java.sql.*;
  * @param <T> Generic Object. Depending on which class is extending, it will be a Patient, Doctor...
  */
 
+// TODO: Use ConnectionManager's connection. Do not create another one here
+
 public abstract class BaseImplementation<T> {
-    protected final Connection connection;
+    protected final ConnectionManager connectionManager = ConnectionManager.getConnectionManager();
     protected int tuplesAffected = 0;
 
     public BaseImplementation() {
-        Connection temporaryConnection;
-        try {
-            ConnectionManager.getConnectionManager().connectToDatabase();
-            temporaryConnection = ConnectionManager.getConnectionManager().getConnection();
-            System.out.println("Connected!");
-        } catch (SQLException e) {
-            System.out.println("Could not connect to the database in BaseImplementation");
-            temporaryConnection = null;
-            e.printStackTrace();
-        }
-        this.connection = temporaryConnection;
+
     }
 
     /**
@@ -35,7 +27,7 @@ public abstract class BaseImplementation<T> {
      */
 
     protected boolean executeUpdate(String sql, Object... params) {
-        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = connectionManager.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             for (int i = 0; i < params.length; i++) {
                 statement.setObject(i + 1, params[i]);
             }
@@ -61,7 +53,7 @@ public abstract class BaseImplementation<T> {
      */
 
     protected ResultSet executeQuery(String sql, Object... params) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        PreparedStatement preparedStatement = connectionManager.getConnection().prepareStatement(sql);
         for (int i = 0; i < params.length; i++) {
             preparedStatement.setObject(i + 1, params[i]);
         }

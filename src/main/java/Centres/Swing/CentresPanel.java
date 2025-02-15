@@ -1,6 +1,7 @@
 package Centres.Swing;
 
 import LandingPage.Swing.HeaderPanel;
+import Utils.Utility.GoogleMapsRedirect;
 import Utils.Utility.ImageIconRedrawer;
 
 import javax.swing.*;
@@ -131,13 +132,8 @@ public class CentresPanel extends JPanel {
         navigateButton.setForeground(Color.WHITE);
         navigateButton.setFocusPainted(false);
         navigateButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
-        // TODO: Future implementation. Redirect to Google Maps somehow :)
-        navigateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Navegando a: " + centerName + ". Dirección: " + address);
-            }
-        });
+        // TODO: Needs testing
+        navigateButton.addActionListener(e -> GoogleMapsRedirect.openGoogleMaps(address, this));
 
         textPanel.add(navigateButton, BorderLayout.SOUTH);
         centerPanel.add(textPanel, gbc);
@@ -163,6 +159,4 @@ public class CentresPanel extends JPanel {
 
     private final String description6 = "Cuenta con el mejor equipo de traumatología), Con las mejores vistas al mar para ofrecer una buena esencia a nuestros pacientes.";
     private final String address6 = "C/ San Antonio Mª Claret, 07760";
-
-
 }

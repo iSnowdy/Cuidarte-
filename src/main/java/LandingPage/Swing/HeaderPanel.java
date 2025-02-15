@@ -4,6 +4,7 @@ import Authentication.Components.CustomizedButton;
 import LandingPage.Components.DropDownMenu;
 import LandingPage.Components.NotificationPopUp;
 import Utils.Utility.ImageIconRedrawer;
+import Utils.Utility.PhoneDialer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +25,8 @@ public class HeaderPanel extends JPanel {
     private JSeparator separator;
 
     private ImageIconRedrawer iconRedrawer;
+
+    private final String mainPhoneNumber = "+34 800 500 220";
 
     public HeaderPanel() {
         setBackground(Color.WHITE);
@@ -109,7 +112,12 @@ public class HeaderPanel extends JPanel {
         callButton.setForeground(Color.WHITE);
         callButton.addHoverEffectToButton(SECONDARY_APP_COLOUR.darker());
         callButton.setIcon(callIcon);
-        callButton.setText("+34 800 500 220");
+        // TODO: Needs testing
+        callButton.addActionListener(e -> {
+            String formattedPhoneNUmber = PhoneDialer.obtainFormattedPhoneNumber(mainPhoneNumber);
+            PhoneDialer.makeCall(formattedPhoneNUmber, this);
+        });
+        callButton.setText(mainPhoneNumber);
     }
 
     private void addComponentsToLayout() {

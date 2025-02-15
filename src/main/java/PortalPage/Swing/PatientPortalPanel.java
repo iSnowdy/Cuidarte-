@@ -15,6 +15,7 @@ public class PatientPortalPanel extends JPanel {
     private JFrame parentFrame;
     private JPanel contentPanel;
     private JPanel gridPanel;
+    private JPanel detailsPanel;
     private ImageIconRedrawer iconRedrawer;
 
     public PatientPortalPanel(JFrame parentFrame) {
@@ -24,6 +25,7 @@ public class PatientPortalPanel extends JPanel {
         initPanel();
         addHeader();
         addContent();
+        addDetailsPanel();
     }
 
     private void initPanel() {
@@ -62,21 +64,21 @@ public class PatientPortalPanel extends JPanel {
         gbc.fill = GridBagConstraints.NONE; // Avoids resizing so I can do it manually
 
         gbc.gridx = 0; gbc.gridy = 0;
-        gridPanel.add(createCard("Historia Clínica", "/PortalPacienteImgs/healthcare-hospital-medical-43-svgrepo-com.png"), gbc);
+        gridPanel.add(createCard("Historia Clínica", "/PortalPacienteImgs/healthcare-hospital-medical-43-svgrepo-com.png", "HC"), gbc);
 
         gbc.gridx = 1;
-        gridPanel.add(createCard("Datos Paciente", "/PortalPacienteImgs/datos_pacientes.png"), gbc);
+        gridPanel.add(createCard("Datos Paciente", "/PortalPacienteImgs/datos_pacientes.png", "DP"), gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        gridPanel.add(createCard("Informes Hospitalización", "/PortalPacienteImgs/informes_hospitalizacion.png"), gbc);
+        gridPanel.add(createCard("Informes Hospitalización", "/PortalPacienteImgs/informes_hospitalizacion.png", "IH"), gbc);
 
         gbc.gridx = 1;
-        gridPanel.add(createCard("Pruebas Diagnósticas", "/PortalPacienteImgs/pruebas_diagnosticas.png"), gbc);
+        gridPanel.add(createCard("Pruebas Diagnósticas", "/PortalPacienteImgs/pruebas_diagnosticas.png", "PD"), gbc);
 
         contentPanel.add(gridPanel, BorderLayout.CENTER);
     }
 
-    private JPanel createCard(String title, String iconPath) {
+    private JPanel createCard(String title, String iconPath, String identifier) {
         JPanel cardPanel = new JPanel(new BorderLayout());
         cardPanel.setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1, true)); // Good thickness?
         cardPanel.setBackground(Color.WHITE);
@@ -95,6 +97,14 @@ public class PatientPortalPanel extends JPanel {
 
         addHoverEffect(cardPanel);
 
+        // Updates the details panel using the identifier to know what to show
+        cardPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                updateDetailsPanel(identifier);
+            }
+        });
+
         return cardPanel;
     }
 
@@ -112,5 +122,78 @@ public class PatientPortalPanel extends JPanel {
                 cardPanel.repaint();
             }
         });
+    }
+
+    private void addDetailsPanel() {
+        this.detailsPanel = new JPanel(new BorderLayout());
+        detailsPanel.setBackground(Color.WHITE);
+        detailsPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        add(detailsPanel, BorderLayout.SOUTH);
+    }
+
+    private void updateDetailsPanel(String identifier) {
+        detailsPanel.removeAll();
+
+        switch (identifier) {
+            case "HC" -> detailsPanel.add(createMedicalReportPanel());
+            case "DP" -> detailsPanel.add(createPatientDataPanel());
+            case "IH" -> detailsPanel.add(createHospitalizationReportsPanel());
+            case "PD" -> detailsPanel.add(createAnalyticsPanel());
+        }
+
+        detailsPanel.revalidate();
+        detailsPanel.repaint();
+    }
+
+    // TODO: Think about how to do these panels properly
+    // TODO: Stylize it, etc
+
+    private JPanel createMedicalReportPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JLabel label = new JLabel("Historial Clínico", JLabel.CENTER);
+        panel.add(label, BorderLayout.NORTH);
+
+        DefaultListModel<String> singleReportTitles = new DefaultListModel<>();
+        singleReportTitles.addElement("Consulta 3 - 10/01/2024");
+        singleReportTitles.addElement("Consulta 2 - 05/01/2024");
+        singleReportTitles.addElement("Consulta 1 - 29/10/2023");
+
+        JList<String> list = new JList<>(singleReportTitles);
+        panel.add(new JScrollPane(list), BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private JPanel createPatientDataPanel() {
+        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
+        panel.add(new JLabel("Nombre: Juan Pérez"));
+        panel.add(new JLabel("Edad: 45 años"));
+        panel.add(new JLabel("DNI: 12345678A"));
+        panel.add(new JLabel("Teléfono: 600123456"));
+        panel.add(new JLabel("Dirección: Calle Falsa 123"));
+
+        return panel;
+    }
+
+    private JPanel createHospitalizationReportsPanel() {
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Informes de hospitalización aún no disponibles."));
+        return panel;
+    }
+
+    private JPanel createAnalyticsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JLabel label = new JLabel("Pruebas Diagnósticas", JLabel.CENTER);
+        panel.add(label, BorderLayout.NORTH);
+
+        DefaultListModel<String> singleReportTitles = new DefaultListModel<>();
+        singleReportTitles.addElement("Hemograma - 10/01/2024");
+        singleReportTitles.addElement("Bioquímica - 05/01/2024");
+
+        JList<String> list = new JList<>(singleReportTitles);
+        panel.add(new JScrollPane(list), BorderLayout.CENTER);
+
+        return panel;
     }
 }

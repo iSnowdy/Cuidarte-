@@ -13,7 +13,7 @@ import java.sql.*;
 // TODO: Use ConnectionManager's connection. Do not create another one here
 
 public abstract class BaseImplementation<T> {
-    protected final ConnectionManager connectionManager = ConnectionManager.getConnectionManager();
+    protected final ConnectionManager connectionManager = ConnectionManager.getInstance();
     protected int tuplesAffected = 0;
 
     public BaseImplementation() {

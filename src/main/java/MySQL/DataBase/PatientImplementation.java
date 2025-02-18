@@ -1,7 +1,7 @@
 package MySQL.DataBase;
 
 import Models.Patient;
-import Interfaces.GenericOperations;
+import Interfaces.IGenericOperations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ import java.util.Optional;
  * of queryUpdate() and queryExecute().
  */
 
-public class PatientImplementation extends BaseImplementation<Patient> implements GenericOperations<Patient> {
+public class PatientImplementation extends BaseImplementation<Patient> implements IGenericOperations<Patient> {
 
     /**
      * Saves a new patient into the database.
@@ -127,7 +127,7 @@ public class PatientImplementation extends BaseImplementation<Patient> implement
      */
 
     @Override
-    public List<Patient> findAllPatients() {
+    public List<Patient> findAll() {
         String sql =
                 "SELECT * FROM pacientes";
 

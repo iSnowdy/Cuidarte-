@@ -30,6 +30,6 @@ public class PatientServices {
     }
 
     public List<Patient> getAllPatients() {
-        return patientImplementation.findAllPatients();
+        return patientImplementation.findAll();
     }
 }

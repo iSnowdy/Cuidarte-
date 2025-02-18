@@ -22,8 +22,8 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
     public boolean save(Doctor entity) throws DatabaseInsertException {
         String query =
                 "INSERT INTO medicos " +
-                "(DNI_Medico, Nombre, Apellidos, Numero_Telefono, Email, Especialidad) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                        "(DNI_Medico, Nombre, Apellidos, Numero_Telefono, Email, Especialidad) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
             boolean result = executeUpdate(query,
@@ -46,8 +46,8 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
     public boolean update(Doctor entity) throws DatabaseQueryException {
         String query =
                 "UPDATE medicos " +
-                "SET Nombre = ?, Apellidos = ?, Numero_Telefono = ?, Email = ?, Especialidad = ? " +
-                "WHERE DNI_Medico = ?";
+                        "SET Nombre = ?, Apellidos = ?, Numero_Telefono = ?, Email = ?, Especialidad = ? " +
+                        "WHERE DNI_Medico = ?";
 
         try {
             boolean result = executeUpdate(
@@ -83,8 +83,7 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
 
     @Override
     public Optional<Doctor> findById(String dni) throws DatabaseQueryException {
-        String query =
-                "SELECT * FROM medicos WHERE DNI_Medico = ?";
+        String query = "SELECT * FROM medicos WHERE DNI_Medico = ?";
 
         try (ResultSet resultSet = executeQuery(query, dni)) {
             if (resultSet.next()) {
@@ -96,6 +95,22 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
             throw new DatabaseQueryException("Error fetching Doctor");
         }
         return Optional.empty();
+    }
+
+    public List<Doctor> findBySpeciality(String speciality) throws DatabaseQueryException {
+        List<Doctor> doctorsBySpeciality = new ArrayList<>();
+        String query = "SELECT * FROM medicos WHERE Especialidad = ?";
+
+        try (ResultSet resultSet = executeQuery(query, speciality)) {
+            while (resultSet.next()) {
+                doctorsBySpeciality.add(mapResultSetToDoctor(resultSet));
+            }
+            LOGGER.info("Found " + doctorsBySpeciality.size() + " doctors with speciality: " + speciality);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching doctors with speciality " + speciality, e);
+            throw new DatabaseQueryException("Error fetching Doctor");
+        }
+        return doctorsBySpeciality;
     }
 
     @Override

@@ -5,19 +5,19 @@ import java.util.Optional;
 
 public class Patient extends User {
     private Date dateOfBirth;
-    private String password;
+    private String password; // It is hashed upon registering the patient to the DB
     private int age, verificationCode;
-    private final int salt; // Maybe I will not use this
+    private final int salt;
 
     public Patient(String DNI, String firstName, String surname, String phoneNumber, String email,
-                   Optional<Date> dateOfBirth, int age, String password, int salt) {
+                   Optional<Date> dateOfBirth, int age, String password) {
         super(DNI, firstName, surname, phoneNumber, email);
         this.dateOfBirth = dateOfBirth.get();
         this.age = age;
         this.password = password;
-        this.salt = salt;
         // TODO: Do not allow user registration if the code does not match the one generated here
-        this.verificationCode = generateVerificationCode();
+        this.salt = generateRandomNumber();
+        this.verificationCode = generateRandomNumber();
     }
 
     // Constructor to be able to build a Patient object when retrieving it from the DB
@@ -33,7 +33,7 @@ public class Patient extends User {
     }
 
     // 6 digit verification code to be sent to the user's email upon registration
-    private int generateVerificationCode() {
+    private int generateRandomNumber() {
         this.verificationCode = (int) (Math.random() * 999999);
         return this.verificationCode;
     }

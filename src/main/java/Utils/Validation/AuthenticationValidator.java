@@ -31,9 +31,6 @@ import java.util.Optional;
  */
 
 public class AuthenticationValidator {
-    // TODO: Should these services really be static?
-    private static final PatientServices patientService = new PatientServices();
-    private static final DoctorServices doctorService = new DoctorServices();
 
 
     private static final int NAME_SURNAME_ADDRESS_LENGTH = 100;
@@ -89,16 +86,7 @@ public class AuthenticationValidator {
         return patient.getVerificationCode() == code;
     }
 
-    // Extracts all the patients from the DB and then through a stream checks if there is
-    // any Patient with the same DNI as the one we are trying to insert
-    public static boolean checkForDuplicatePatient(Patient patient) {
-        List<Patient> allPatientsFromDB = patientService.getAllPatients();
-        allPatientsFromDB.stream()
-                .filter(p -> p.getDNI().equals(patient.getDNI()))
-                .findFirst();
-        return allPatientsFromDB.size() > 1;
+    public static boolean checkForDuplicatePatient(Patient patient, List<Patient> allPatientsFromDB) {
+        return allPatientsFromDB.stream().anyMatch(p -> p.getDNI().equals(patient.getDNI()));
     }
-
-
-
 }

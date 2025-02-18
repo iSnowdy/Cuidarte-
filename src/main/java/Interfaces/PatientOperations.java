@@ -1,4 +1,4 @@
-package MySQL.Interfaces;
+package Interfaces;
 
 public interface PatientOperations {
 }

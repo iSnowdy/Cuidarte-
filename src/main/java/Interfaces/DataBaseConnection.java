@@ -1,6 +1,4 @@
-package MySQL.Interfaces;
-
-import MySQL.DataBase.ConnectionManager;
+package Interfaces;
 
 import java.sql.Connection;
 import java.sql.SQLException;

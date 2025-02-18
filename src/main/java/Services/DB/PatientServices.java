@@ -26,10 +26,10 @@ public class PatientServices {
     }
 
     public Optional<Patient> getPatient(String DNI) {
-        return patientImplementation.findByDNI(DNI);
+        return patientImplementation.findPatientByDNI(DNI);
     }
 
     public List<Patient> getAllPatients() {
-        return patientImplementation.findAll();
+        return patientImplementation.findAllPatients();
     }
 }

@@ -1,7 +1,7 @@
-package MySQL.DataBase;
+package DatabaseConfig;
 
 import Exceptions.DatabaseClosingException;
-import MySQL.Interfaces.DataBaseConnection;
+import Interfaces.DataBaseConnection;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

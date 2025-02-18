@@ -49,6 +49,7 @@ public class Cell extends JButton {
         });
     }
 
+    // TODO: Consider additional styling. Such as bold and bigger text size
     public void maskAsTitleCell() {
         this.title = true;
     }

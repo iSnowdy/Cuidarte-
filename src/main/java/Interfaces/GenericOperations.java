@@ -1,6 +1,5 @@
-package MySQL.Interfaces;
+package Interfaces;
 
-import javax.management.openmbean.InvalidOpenTypeException;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +22,7 @@ public interface GenericOperations<T> {
 
     boolean delete(T entity);
 
-    Optional<T> findByDNI(String DNI);
+    Optional<T> findPatientByDNI(String DNI);
 
-    List<T> findAll();
+    List<T> findAllPatients();
 }

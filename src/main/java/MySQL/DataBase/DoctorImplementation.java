@@ -1,7 +1,7 @@
 package MySQL.DataBase;
 
 import Models.Doctor;
-import MySQL.Interfaces.GenericOperations;
+import Interfaces.GenericOperations;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -98,7 +98,7 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
      */
 
     @Override
-    public Optional<Doctor> findByDNI(String DNI) {
+    public Optional<Doctor> findPatientByDNI(String DNI) {
         String sql =
                 "SELECT * FROM medicos " +
                 "WHERE DNI_Medico = ?";
@@ -121,7 +121,7 @@ public class DoctorImplementation extends BaseImplementation<Doctor> implements 
      */
 
     @Override
-    public List<Doctor> findAll() {
+    public List<Doctor> findAllPatients() {
         String sql =
                 "SELECT * FROM medicos";
 

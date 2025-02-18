@@ -10,6 +10,13 @@ public class Speciality {
         this.description = description;
     }
 
+    // Constructor needed to map a ResultSet -> Speciality
+    public Speciality(int id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
+
 
     // Getters and Setters
     public int getId() {

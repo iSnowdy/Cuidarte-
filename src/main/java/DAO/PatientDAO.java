@@ -15,6 +15,7 @@ public class PatientDAO extends BaseDAO<Patient, String> {
         super();
     }
 
+
     @Override
     public boolean save(Patient entity) throws DatabaseInsertException {
         String query =
@@ -23,7 +24,8 @@ public class PatientDAO extends BaseDAO<Patient, String> {
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try {
-            boolean result = executeUpdate(query,
+            boolean result = executeUpdate(
+                    query,
                     entity.getDNI(),
                     entity.getFirstName(),
                     entity.getSurname(),
@@ -39,7 +41,7 @@ public class PatientDAO extends BaseDAO<Patient, String> {
             return result;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error inserting patient: " + entity.getDNI(), e);
-            throw new DatabaseInsertException("Failed to insert patient.");
+            throw new DatabaseInsertException("Failed to insert patient");
         }
     }
 
@@ -68,7 +70,7 @@ public class PatientDAO extends BaseDAO<Patient, String> {
             return result;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating patient: " + entity.getDNI(), e);
-            throw new DatabaseUpdateException("Failed to update patient.");
+            throw new DatabaseUpdateException("Failed to update patient");
         }
     }
 
@@ -82,7 +84,7 @@ public class PatientDAO extends BaseDAO<Patient, String> {
             return result;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error deleting patient with DNI: " + dni, e);
-            throw new DatabaseDeleteException("Failed to delete patient.");
+            throw new DatabaseDeleteException("Failed to delete patient");
         }
     }
 
@@ -97,7 +99,7 @@ public class PatientDAO extends BaseDAO<Patient, String> {
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error fetching patient with DNI: " + dni, e);
-            throw new DatabaseQueryException("Failed to execute SELECT query.");
+            throw new DatabaseQueryException("Failed to execute SELECT query");
         }
         return Optional.empty();
     }
@@ -114,7 +116,7 @@ public class PatientDAO extends BaseDAO<Patient, String> {
             LOGGER.info("Fetched all patients successfully.");
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error fetching patients.", e);
-            throw new DatabaseQueryException("Failed to execute SELECT query.");
+            throw new DatabaseQueryException("Failed to execute SELECT query");
         }
         return patients;
     }

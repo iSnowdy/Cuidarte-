@@ -13,15 +13,36 @@ public class Appointment {
     private String description;
     private String doctorObservations;
 
-    public Appointment(String doctorDNI, String patientDNI, int clinicID, Date appointmentDate, String description) {
-        this.doctorDNI = doctorDNI;
+    public Appointment(String patientDNI, String doctorDNI, int clinicID, Date appointmentDate, String description) {
         this.patientDNI = patientDNI;
+        this.doctorDNI = doctorDNI;
         this.clinicID = clinicID;
         this.appointmentDate = appointmentDate;
         this.description = description;
         this.appointmentState = AppointmentState.PENDING;
     }
 
+    // Constructors needed to map a ResultSet -> Appointment
+    public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Date appointmentDate, AppointmentState appointmentState, String description) {
+        this.id = id;
+        this.patientDNI = patientDNI;
+        this.doctorDNI = doctorDNI;
+        this.clinicID = clinicID;
+        this.appointmentDate = appointmentDate;
+        this.appointmentState = appointmentState;
+        this.description = description;
+    }
+
+    public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Date appointmentDate, AppointmentState appointmentState, String description, String doctorObservations) {
+        this.id = id;
+        this.patientDNI = patientDNI;
+        this.doctorDNI = doctorDNI;
+        this.clinicID = clinicID;
+        this.appointmentDate = appointmentDate;
+        this.appointmentState = appointmentState;
+        this.description = description;
+        this.doctorObservations = doctorObservations;
+    }
 
 
     // Getters and Setters

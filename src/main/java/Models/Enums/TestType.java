@@ -6,7 +6,7 @@ public enum TestType {
     IMMUNOLOGY_LAB("Inmunologia"),
     MICROBIOLOGY_LAB("Microbiología");
 
-    private String value;
+    private final String value;
 
     TestType(String value) {
         this.value = value;
@@ -14,5 +14,14 @@ public enum TestType {
 
     public String getValue() {
         return value;
+    }
+
+    public static TestType fromString(String text) {
+        for (TestType testType : TestType.values()) {
+            if (testType.value.equalsIgnoreCase(text)) {
+                return testType;
+            }
+        }
+        throw new IllegalArgumentException("No matching constant for [" + text + "]");
     }
 }

@@ -20,7 +20,6 @@ public class PatientPortalPanel extends JPanel {
 
     public PatientPortalPanel(JFrame parentFrame) {
         this.parentFrame = parentFrame;
-
         this.iconRedrawer = new ImageIconRedrawer();
         initPanel();
         addHeader();
@@ -28,25 +27,27 @@ public class PatientPortalPanel extends JPanel {
         addDetailsPanel();
     }
 
+    // Initialize the main panel with BorderLayout and white background
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
     }
 
-    // Different approach of adding the header panel to it (as compared to Main in LandingPage)
+    // Add header component at the top of the panel
     private void addHeader() {
         HeaderPanel headerPanel = new HeaderPanel();
         add(headerPanel, BorderLayout.NORTH);
     }
 
+    // Build the content panel and add it to the main panel
     private void addContent() {
         this.contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
 
         JLabel titleLabel = new JLabel("Portal del Paciente", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 34)); // TODO: Stylize
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 34)); // Stylized title
         titleLabel.setForeground(MAIN_APP_COLOUR);
-        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0)); // More space maybe?
+        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0)); // Extra space
 
         contentPanel.add(titleLabel, BorderLayout.NORTH);
         addGridPanel();
@@ -54,14 +55,15 @@ public class PatientPortalPanel extends JPanel {
         add(contentPanel, BorderLayout.CENTER);
     }
 
+    // Build the grid panel containing all the action cards
     private void addGridPanel() {
         this.gridPanel = new JPanel(new GridBagLayout());
         gridPanel.setBackground(Color.WHITE);
         gridPanel.setBorder(new EmptyBorder(20, 40, 40, 40));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(20, 20, 20, 20); // Space in-between cards
-        gbc.fill = GridBagConstraints.NONE; // Avoids resizing so I can do it manually
+        gbc.insets = new Insets(20, 20, 20, 20); // Space between cards
+        gbc.fill = GridBagConstraints.NONE; // No automatic resizing
 
         gbc.gridx = 0; gbc.gridy = 0;
         gridPanel.add(createCard("Historia Clínica", "/PortalPacienteImgs/healthcare-hospital-medical-43-svgrepo-com.png", "HC"), gbc);
@@ -78,26 +80,40 @@ public class PatientPortalPanel extends JPanel {
         contentPanel.add(gridPanel, BorderLayout.CENTER);
     }
 
+    // Create an individual card with fixed dimensions
     private JPanel createCard(String title, String iconPath, String identifier) {
+        // Create card panel with fixed size
         JPanel cardPanel = new JPanel(new BorderLayout());
-        cardPanel.setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1, true)); // Good thickness?
+        cardPanel.setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1, true));
         cardPanel.setBackground(Color.WHITE);
-        cardPanel.setPreferredSize(new Dimension(250, 100)); // Play with dimensions
+        Dimension cardSize = new Dimension(250, 100);
+        cardPanel.setPreferredSize(cardSize);
+        cardPanel.setMaximumSize(cardSize);
+        cardPanel.setMinimumSize(cardSize);
 
+        // Create an icon panel with fixed size to ensure uniformity
+        JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
+        iconPanel.setBackground(Color.WHITE);
+        iconPanel.setPreferredSize(new Dimension(250, 80));
 
         iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource(iconPath)));
         ImageIcon icon = iconRedrawer.redrawImageIcon(50, 50);
         JLabel iconLabel = new JLabel(icon, JLabel.CENTER);
+        iconLabel.setPreferredSize(new Dimension(50, 50));
+        iconPanel.add(iconLabel);
 
+        // Create a text label with fixed height
         JLabel titleLabel = new JLabel(title, JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setPreferredSize(new Dimension(250, 20));
 
-        cardPanel.add(iconLabel, BorderLayout.CENTER);
+        cardPanel.add(iconPanel, BorderLayout.CENTER);
         cardPanel.add(titleLabel, BorderLayout.SOUTH);
 
+        // Add hover effect to the card
         addHoverEffect(cardPanel);
 
-        // Updates the details panel using the identifier to know what to show
+        // Add mouse listener to update details panel based on identifier
         cardPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
@@ -108,6 +124,7 @@ public class PatientPortalPanel extends JPanel {
         return cardPanel;
     }
 
+    // Add hover effect: change background color on mouse enter/exit
     private void addHoverEffect(JPanel cardPanel) {
         cardPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -124,14 +141,15 @@ public class PatientPortalPanel extends JPanel {
         });
     }
 
+    // Build and add the details panel at the bottom
     private void addDetailsPanel() {
         this.detailsPanel = new JPanel(new BorderLayout());
         detailsPanel.setBackground(Color.WHITE);
         detailsPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
-
         add(detailsPanel, BorderLayout.SOUTH);
     }
 
+    // Update the details panel based on the card identifier
     private void updateDetailsPanel(String identifier) {
         detailsPanel.removeAll();
 
@@ -146,9 +164,7 @@ public class PatientPortalPanel extends JPanel {
         detailsPanel.repaint();
     }
 
-    // TODO: Think about how to do these panels properly
-    // TODO: Stylize it, etc
-
+    // Create a medical report panel (example data)
     private JPanel createMedicalReportPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Historial Clínico", JLabel.CENTER);
@@ -165,6 +181,7 @@ public class PatientPortalPanel extends JPanel {
         return panel;
     }
 
+    // Create a patient data panel (example data)
     private JPanel createPatientDataPanel() {
         JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
         panel.add(new JLabel("Nombre: Juan Pérez"));
@@ -176,12 +193,14 @@ public class PatientPortalPanel extends JPanel {
         return panel;
     }
 
+    // Create a hospitalization reports panel (example data)
     private JPanel createHospitalizationReportsPanel() {
         JPanel panel = new JPanel();
         panel.add(new JLabel("Informes de hospitalización aún no disponibles."));
         return panel;
     }
 
+    // Create an analytics panel for diagnostic tests (example data)
     private JPanel createAnalyticsPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Pruebas Diagnósticas", JLabel.CENTER);

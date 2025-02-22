@@ -1,12 +1,11 @@
 package AboutUs.Swing;
 
+import AboutUs.Components.CustomScrollBar;
 import LandingPage.Swing.HeaderPanel;
 import Utils.Utility.ImageIconRedrawer;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 
 public class AboutUsPanel extends JPanel {
@@ -15,12 +14,19 @@ public class AboutUsPanel extends JPanel {
     private JScrollPane scrollPane;
     private ImageIconRedrawer iconRedrawer;
 
+    private final int IMAGE_WIDTH = 300;
+    private final int IMAGE_HEIGHT = 240;
+
     public AboutUsPanel(JFrame parentFrame) {
         this.parentFrame = parentFrame;
         this.iconRedrawer = new ImageIconRedrawer();
         initPanel();
         addHeader();
         addContent();
+        // Limit the size of the component to 70% of the parent frame
+        Dimension parentSize = parentFrame.getSize();
+        int newWidth = (int) (parentSize.width * 0.7);
+        setPreferredSize(new Dimension(newWidth, parentSize.height));
     }
 
     private void initPanel() {
@@ -34,15 +40,13 @@ public class AboutUsPanel extends JPanel {
     }
 
     private void addContent() {
-        this.contentPanel = new JPanel(new GridBagLayout());
+        contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(Color.WHITE);
         contentPanel.setBorder(new EmptyBorder(20, 40, 40, 40));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
-        // How the element will expand inside the cell. Like this, it will expand horizontally
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        // If the element does not fully fill the cell, this defines how it will behave. Here to the top left corner
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.weightx = 1;
         gbc.gridx = 0;
@@ -54,9 +58,8 @@ public class AboutUsPanel extends JPanel {
         contentPanel.add(titleLabel, gbc);
 
         gbc.gridy++;
-        JLabel subTitleLabel = new JLabel("Lore ipssum Lore ipssum Lore ipssum Lore ipssum Lore ipssum Lore ipssum");
+        JLabel subTitleLabel = new JLabel("Lore ipssum Lore ipssum Lore ipssum Lore ipssum Lore ipssum Lore ipssum", JLabel.CENTER);
         subTitleLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        subTitleLabel.setHorizontalAlignment(JLabel.CENTER);
         contentPanel.add(subTitleLabel, gbc);
 
         gbc.gridy++;
@@ -75,65 +78,72 @@ public class AboutUsPanel extends JPanel {
         contentPanel.add(createProfilePanel("Dra. Laura Fernández", "Jefa de Cirugía",
                 "/AboutUs/laura_fernandez_jefa_cirugia.jpeg", fourthDescription), gbc);
 
-        // TODO: Reaaally ugly Scroll. Stylize it somehow?
         scrollPane = new JScrollPane(contentPanel);
+        // Custom ScrollBar
+        scrollPane.getVerticalScrollBar().setUI(new CustomScrollBar());
+        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
+        // Increase the speed of scrolling
+        scrollPane.getVerticalScrollBar().setUnitIncrement(30);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setBorder(null); // Removes that ugly af border around the scroll panel
+        scrollPane.setBorder(null);
         add(scrollPane, BorderLayout.CENTER);
     }
 
     private JPanel createProfilePanel(String doctorName, String doctorTitle, String doctorImagePath, String description) {
-        JPanel profilePanel = new JPanel(new GridBagLayout());
+        // Main Panel
+        JPanel profilePanel = new JPanel(new BorderLayout());
         profilePanel.setBackground(Color.WHITE);
-        //profilePanel.setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1));
+        profilePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.anchor = GridBagConstraints.WEST;
+        // Image Panel with a fixed size to ensure the correct width of the image, so it does
+        // not move the text besides it
+        JPanel imagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        imagePanel.setBackground(Color.WHITE);
+        imagePanel.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
 
-        // Doctor image
         iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource(doctorImagePath)));
-        ImageIcon doctorProfilePicture = iconRedrawer.redrawImageIcon(300, 240);
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridheight = 3;
+        ImageIcon doctorProfilePicture = iconRedrawer.redrawImageIcon(IMAGE_WIDTH, IMAGE_HEIGHT);
         JLabel profileImage = new JLabel(doctorProfilePicture);
-        profilePanel.add(profileImage, gbc);
+        profileImage.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
+        imagePanel.add(profileImage);
 
-        // Element containing the text so it displays to the right of the image
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridheight = 1;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        JPanel textPanel = new JPanel(new BorderLayout());
+        // Text Panel
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         textPanel.setBackground(Color.WHITE);
 
-        // Name
+        // A border to the left to separate the image from text
+        textPanel.setBorder(new EmptyBorder(0, 20, 0, 0));
+
         JLabel nameLabel = new JLabel(doctorName);
         nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        textPanel.add(nameLabel, BorderLayout.NORTH);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Title
         JLabel titleLabel = new JLabel(doctorTitle);
         titleLabel.setFont(new Font("Arial", Font.ITALIC, 14));
-        textPanel.add(titleLabel, BorderLayout.CENTER);
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Description
         JTextArea descriptionArea = new JTextArea(description);
         descriptionArea.setFont(new Font("Arial", Font.PLAIN, 14));
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
         descriptionArea.setOpaque(false);
         descriptionArea.setEditable(false);
-        textPanel.add(descriptionArea, BorderLayout.SOUTH);
+        descriptionArea.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        profilePanel.add(textPanel, gbc);
+        textPanel.add(nameLabel);
+        textPanel.add(Box.createVerticalStrut(5));
+        textPanel.add(titleLabel);
+        textPanel.add(Box.createVerticalStrut(10));
+        textPanel.add(descriptionArea);
+
+        profilePanel.add(imagePanel, BorderLayout.WEST);
+        profilePanel.add(textPanel, BorderLayout.CENTER);
 
         return profilePanel;
     }
 
-    // TODO: Extract this information from MySQL
-
+    // TODO: From DB soonTM
     private final String firstDescription = "Médico Cirujano, Especialista en Administración Hospitalaria\n" +
             "El Dr. Ramírez es un líder visionario con más de 20 años de experiencia en gestión hospitalaria. " +
             "Su formación en cirugía y administración le permite dirigir el hospital con un enfoque centrado en " +

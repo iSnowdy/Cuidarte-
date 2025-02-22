@@ -4,14 +4,10 @@ import DAO.PatientDAO;
 import Exceptions.*;
 import Interfaces.IPatientService;
 import Models.Patient;
-import MySQL.DataBase.PatientImplementation;
-import Utils.Utility.CustomLogger;
 import Utils.Utility.PasswordHasher;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PatientServices implements IPatientService {
     private final PatientDAO patientDAO;

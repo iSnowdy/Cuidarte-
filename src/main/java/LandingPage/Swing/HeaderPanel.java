@@ -94,7 +94,7 @@ public class HeaderPanel extends JPanel {
         appointmentButton.addActionListener(e -> {
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window instanceof JFrame) {
-                NotificationPopUp.invokeNotification(
+                NotificationPopUp.showCustomNotification(
                         (JFrame) window, // Casting Window to JFrame
                         "Cita médica", "Tu cita ha sido agendada.", "Aceptar",
                         evt -> System.out.println("Notificación cerrada"));

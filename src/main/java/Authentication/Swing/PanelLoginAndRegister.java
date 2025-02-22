@@ -134,7 +134,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
 
                 // TODO: Do this properly please ty. Validate all data before inserting
                 var formattedDate = AuthenticationValidator.validateAndParseDate(dateOfBirth);
-                patient = new Patient(dni, nameAndSurname[0], nameAndSurname[1], phoneNumber, email, formattedDate, 50, password, 50);
+                //patient = new Patient(dni, nameAndSurname[0], nameAndSurname[1], phoneNumber, email, formattedDate, 50, password, 50);
             }
         });
     }

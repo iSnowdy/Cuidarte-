@@ -28,7 +28,7 @@ public class GoogleMapsRedirect {
     public static void showErrorNotification(Component parentComponent) {
         Window window = SwingUtilities.getWindowAncestor(parentComponent);
         if (window instanceof JFrame) {
-            NotificationPopUp.invokeNotification(
+            NotificationPopUp.showCustomNotification(
                     (JFrame) window,
                     "Error al abrir Google Maps",
                     "No se pudo abrir Google Maps.",

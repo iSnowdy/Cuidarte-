@@ -36,7 +36,7 @@ public class PhoneDialer {
     private static void showErrorNotification(Component parentComponent) {
         Window window = SwingUtilities.getWindowAncestor(parentComponent);
         if (window instanceof JFrame) {
-            NotificationPopUp.invokeNotification(
+            NotificationPopUp.showCustomNotification(
                     (JFrame) window,
                     "Error en la llamada",
                     "No se pudo abrir la aplicación de llamadas.",

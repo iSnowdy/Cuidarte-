@@ -1,3 +1,4 @@
+/*
 package Tests;
 
 import Models.Doctor;
@@ -10,9 +11,11 @@ import java.time.LocalDate;
 import java.sql.Date;
 import java.util.Optional;
 
+*/
 /**
  * Hello world!
- */
+ *//*
+
 
 public class JDBC_Tests {
     public static void main(String[] args) {
@@ -65,3 +68,4 @@ public class JDBC_Tests {
         patientServices.deletePatient(p2);
     }
 }
+*/

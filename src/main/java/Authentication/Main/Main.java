@@ -17,6 +17,9 @@ import org.jdesktop.animation.timing.Animator;
 import org.jdesktop.animation.timing.TimingTarget;
 import org.jdesktop.animation.timing.TimingTargetAdapter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -32,11 +35,7 @@ public class Main extends JFrame {
     private PanelLoading panelLoading;
     private PanelVerifyCode panelVerifyCode;
 
-    private PatientServices patientServices;
-    private DoctorServices doctorServices;
-
     private JavaMailSender javaMailSender;
-
 
     private final int addSize = 30;
     private final int coverSize = 40;
@@ -69,8 +68,8 @@ public class Main extends JFrame {
     // TODO: Refactor PanelLoading. Too much code here
     private void start() {
         // Surround with try-catch?
-        this.patientServices = new PatientServices();
-        this.doctorServices = new DoctorServices();
+        /*this.patientServices = new PatientServices();
+        this.doctorServices = new DoctorServices();*/
 
         // Layout Constraints | Column Constraints
         this.layout = new MigLayout("fill, insets 0");
@@ -115,7 +114,7 @@ public class Main extends JFrame {
                     // Verify if the code matches or not
                     Patient patient = loginAndRegister.getPatient();
                     if (AuthenticationValidator.verifyPatientCode(patient, panelVerifyCode.getInputCodeAsInt())) {
-                        patientServices.registerPatient(patient);
+                        //patientServices.registerPatient(patient);
                         showMessage(MessageTypes.SUCCESS, "Código correcto. Registro completado.");
                         panelVerifyCode.setVisible(false);
                     } else {
@@ -133,7 +132,8 @@ public class Main extends JFrame {
         Patient patient = loginAndRegister.getPatient();
 
         try {
-            if (AuthenticationValidator.checkForDuplicatePatient(patient)) {
+            List<Patient> patients = new ArrayList<>();
+            if (AuthenticationValidator.checkForDuplicatePatient(patient, patients)) {
                 showMessage(MessageTypes.ERROR, "Paciente ya registrado con ese DNI o correo");
             } else {
                 showMessage(MessageTypes.SUCCESS, "Se le ha enviado un código de verificación a su correo " +

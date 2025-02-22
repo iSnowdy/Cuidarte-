@@ -88,6 +88,11 @@ public class CustomizedButton extends JButton {
         });
     }
 
+    /*@Override
+    public Dimension getPreferredSize() {
+        return new Dimension(150, 50);
+    }*/
+
     @Override
     protected void paintComponent(Graphics graphics) {
         Graphics2D graphics2D = (Graphics2D) graphics.create();

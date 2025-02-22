@@ -1,6 +1,7 @@
 package PortalPage.Swing;
 
 import LandingPage.Swing.HeaderPanel;
+import PortalPage.TempModels.TestPatient;
 import Utils.Utility.ImageIconRedrawer;
 
 import javax.swing.*;
@@ -13,18 +14,19 @@ import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 
 public class PatientPortalPanel extends JPanel {
     private JFrame parentFrame;
+    private TestPatient patient; // Test patient passed from main
     private JPanel contentPanel;
     private JPanel gridPanel;
-    private JPanel detailsPanel;
     private ImageIconRedrawer iconRedrawer;
 
-    public PatientPortalPanel(JFrame parentFrame) {
+    // Constructor accepting a TestPatient instance
+    public PatientPortalPanel(JFrame parentFrame, TestPatient patient) {
         this.parentFrame = parentFrame;
+        this.patient = patient;
         this.iconRedrawer = new ImageIconRedrawer();
         initPanel();
         addHeader();
         addContent();
-        addDetailsPanel();
     }
 
     // Initialize the main panel with BorderLayout and white background
@@ -39,15 +41,15 @@ public class PatientPortalPanel extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
     }
 
-    // Build the content panel and add it to the main panel
+    // Build the content panel (title and grid of cards) and add it to the main panel
     private void addContent() {
         this.contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
 
         JLabel titleLabel = new JLabel("Portal del Paciente", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 34)); // Stylized title
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 34));
         titleLabel.setForeground(MAIN_APP_COLOUR);
-        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0)); // Extra space
+        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0));
 
         contentPanel.add(titleLabel, BorderLayout.NORTH);
         addGridPanel();
@@ -63,7 +65,7 @@ public class PatientPortalPanel extends JPanel {
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(20, 20, 20, 20); // Space between cards
-        gbc.fill = GridBagConstraints.NONE; // No automatic resizing
+        gbc.fill = GridBagConstraints.NONE;
 
         gbc.gridx = 0; gbc.gridy = 0;
         gridPanel.add(createCard("Historia Clínica", "/PortalPacienteImgs/healthcare-hospital-medical-43-svgrepo-com.png", "HC"), gbc);
@@ -82,7 +84,7 @@ public class PatientPortalPanel extends JPanel {
 
     // Create an individual card with fixed dimensions
     private JPanel createCard(String title, String iconPath, String identifier) {
-        // Create card panel with fixed size
+        // Create card panel with fixed size (250x100)
         JPanel cardPanel = new JPanel(new BorderLayout());
         cardPanel.setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1, true));
         cardPanel.setBackground(Color.WHITE);
@@ -113,11 +115,11 @@ public class PatientPortalPanel extends JPanel {
         // Add hover effect to the card
         addHoverEffect(cardPanel);
 
-        // Add mouse listener to update details panel based on identifier
+        // On click, open a new frame dedicated to this action
         cardPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                updateDetailsPanel(identifier);
+                openFrameForIdentifier(identifier);
             }
         });
 
@@ -141,78 +143,31 @@ public class PatientPortalPanel extends JPanel {
         });
     }
 
-    // Build and add the details panel at the bottom
-    private void addDetailsPanel() {
-        this.detailsPanel = new JPanel(new BorderLayout());
-        detailsPanel.setBackground(Color.WHITE);
-        detailsPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
-        add(detailsPanel, BorderLayout.SOUTH);
-    }
-
-    // Update the details panel based on the card identifier
-    private void updateDetailsPanel(String identifier) {
-        detailsPanel.removeAll();
-
+    // Open a new frame based on the card's identifier using a switch that calls dedicated methods
+    private void openFrameForIdentifier(String identifier) {
         switch (identifier) {
-            case "HC" -> detailsPanel.add(createMedicalReportPanel());
-            case "DP" -> detailsPanel.add(createPatientDataPanel());
-            case "IH" -> detailsPanel.add(createHospitalizationReportsPanel());
-            case "PD" -> detailsPanel.add(createAnalyticsPanel());
+            case "DP" -> openPatientDataFrame();
+            case "HC" -> openClinicalHistoryFrame();
+            case "IH" -> openHospitalizationReportsFrame();
+            case "PD" -> openAnalyticsFrame();
         }
-
-        detailsPanel.revalidate();
-        detailsPanel.repaint();
     }
 
-    // Create a medical report panel (example data)
-    private JPanel createMedicalReportPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        JLabel label = new JLabel("Historial Clínico", JLabel.CENTER);
-        panel.add(label, BorderLayout.NORTH);
-
-        DefaultListModel<String> singleReportTitles = new DefaultListModel<>();
-        singleReportTitles.addElement("Consulta 3 - 10/01/2024");
-        singleReportTitles.addElement("Consulta 2 - 05/01/2024");
-        singleReportTitles.addElement("Consulta 1 - 29/10/2023");
-
-        JList<String> list = new JList<>(singleReportTitles);
-        panel.add(new JScrollPane(list), BorderLayout.CENTER);
-
-        return panel;
+    // Open the frame dedicated to patient data
+    private void openPatientDataFrame() {
+        new PatientDataFrame(patient);
     }
 
-    // Create a patient data panel (example data)
-    private JPanel createPatientDataPanel() {
-        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
-        panel.add(new JLabel("Nombre: Juan Pérez"));
-        panel.add(new JLabel("Edad: 45 años"));
-        panel.add(new JLabel("DNI: 12345678A"));
-        panel.add(new JLabel("Teléfono: 600123456"));
-        panel.add(new JLabel("Dirección: Calle Falsa 123"));
-
-        return panel;
+    // Open the frame dedicated to clinical history
+    private void openClinicalHistoryFrame() {
+        new ClinicalHistoryFrame(patient);
     }
 
-    // Create a hospitalization reports panel (example data)
-    private JPanel createHospitalizationReportsPanel() {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("Informes de hospitalización aún no disponibles."));
-        return panel;
+    private void openHospitalizationReportsFrame() {
+        new HospitalizationReportFrame(patient);
     }
 
-    // Create an analytics panel for diagnostic tests (example data)
-    private JPanel createAnalyticsPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        JLabel label = new JLabel("Pruebas Diagnósticas", JLabel.CENTER);
-        panel.add(label, BorderLayout.NORTH);
-
-        DefaultListModel<String> singleReportTitles = new DefaultListModel<>();
-        singleReportTitles.addElement("Hemograma - 10/01/2024");
-        singleReportTitles.addElement("Bioquímica - 05/01/2024");
-
-        JList<String> list = new JList<>(singleReportTitles);
-        panel.add(new JScrollPane(list), BorderLayout.CENTER);
-
-        return panel;
+    private void openAnalyticsFrame() {
+        new DiagnosticTestFrame(patient);
     }
 }

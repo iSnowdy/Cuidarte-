@@ -1,62 +1,70 @@
 package LandingPage.Components;
 
+import MainApplication.NavigationController;
+
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicMenuItemUI;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
+/**
+ * Custom dropdown menu for navigation between different sections.
+ */
 public class DropDownMenu extends JPopupMenu {
-    private final String[] menuItems;
+    private final String[] menuItems = {"Página Principal", "Mi Portal", "Nuestros Centros", "Quiénes Somos"};
+    private final NavigationController navigationController;
+    private JPanel selectedPanel = null;
 
-    public DropDownMenu() {
-        this.menuItems = new String[]{"Mi Portal", "Contacto", "Nuestros Centros", "Quiénes Somos"};
-
-
+    /**
+     * Constructor that initializes the dropdown menu.
+     *
+     * @param navigationController The controller responsible for switching panels.
+     */
+    public DropDownMenu(NavigationController navigationController) {
+        this.navigationController = navigationController;
         initDropDownMenu();
     }
 
+    /**
+     * Initializes the dropdown menu UI.
+     */
     private void initDropDownMenu() {
-        setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
-
-        setOpaque(true);
+        setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1));
         setBackground(Color.WHITE);
-
         addMenuItems();
     }
 
+    /**
+     * Adds items to the dropdown menu.
+     */
     private void addMenuItems() {
         for (String menuItem : menuItems) {
-            JPanel item = createMenuItem(menuItem);
-            add(item);
+            JPanel itemPanel = createMenuItem(menuItem);
+            add(itemPanel);
         }
     }
 
-    // Style each item of the menu
+    /**
+     * Creates a styled menu item with hover and click effects.
+     *
+     * @param menuItemText The text displayed in the menu item.
+     * @return A JPanel representing the menu item.
+     */
     private JPanel createMenuItem(String menuItemText) {
         JPanel itemPanel = new JPanel(new BorderLayout());
-
         itemPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         itemPanel.setBackground(Color.WHITE);
-        itemPanel.setOpaque(true);
         itemPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         JLabel itemLabel = new JLabel(menuItemText);
         itemLabel.setFont(MAIN_FONT);
         itemLabel.setForeground(Color.BLACK);
-        itemLabel.setOpaque(false);
 
         itemPanel.add(itemLabel, BorderLayout.CENTER);
 
-        // Hover effect
         itemPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -66,21 +74,40 @@ public class DropDownMenu extends JPopupMenu {
 
             @Override
             public void mouseExited(MouseEvent e) {
-                itemPanel.setBackground(Color.WHITE);
-                itemLabel.setForeground(Color.BLACK);
+                if (itemPanel != selectedPanel) {
+                    itemPanel.setBackground(Color.WHITE);
+                    itemLabel.setForeground(Color.BLACK);
+                }
             }
 
-            // Future implementation
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println("Seleccionaste: " + menuItemText);
+                navigationController.switchPanel(menuItemText);
+                highlightSelectedItem(itemPanel);
             }
         });
 
         return itemPanel;
     }
 
-    // Summons the dropdown menu on that component in those coordinates. Makes it a bit more flexible
+    /**
+     * Highlights the selected menu item by changing its background color.
+     *
+     * @param selected The menu item panel that was clicked.
+     */
+    private void highlightSelectedItem(JPanel selected) {
+        if (selectedPanel != null) {
+            selectedPanel.setBackground(Color.WHITE);
+        }
+        selected.setBackground(new Color(230, 230, 230)); // Light gray highlight
+        selectedPanel = selected;
+    }
+
+    /**
+     * Displays the dropdown menu under the specified component.
+     *
+     * @param component The component that triggers the dropdown menu.
+     */
     public void showMenu(Component component) {
         show(component, 0, component.getHeight());
     }

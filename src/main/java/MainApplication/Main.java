@@ -1,15 +1,13 @@
-package PortalPage.Main;
+package MainApplication;
 
 import DatabaseConfig.ConnectionManager;
 import LandingPage.Main.LandingPage;
+import MainApplication.NavigationController;
+
 import javax.swing.*;
 
-/**
- * Entry point for the application.
- */
 public class Main {
     public static void main(String[] args) {
-        // Establish the database connection at startup
         try {
             ConnectionManager.getInstance().connectToDatabase();
         } catch (Exception e) {
@@ -17,7 +15,6 @@ public class Main {
             System.exit(-1);
         }
 
-        // Set Nimbus Look and Feel
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -29,14 +26,18 @@ public class Main {
             e.printStackTrace();
         }
 
-        // Initialize and display the LandingPage UI on the Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
-            JFrame mainFrame = new JFrame();
+            JFrame mainFrame = new JFrame("Patient Portal");
+            mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            mainFrame.setSize(1000, 800);
+            mainFrame.setLocationRelativeTo(null);
+
             LandingPage landingPage = new LandingPage(mainFrame);
             landingPage.show();
+
+            mainFrame.setVisible(true);
         });
 
-        // Add shutdown hook to close the database connection when the application exits
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 ConnectionManager.getInstance().disconnectFromDatabase();

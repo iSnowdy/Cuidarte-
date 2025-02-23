@@ -3,17 +3,21 @@ package LandingPage.Swing;
 import Authentication.Components.CustomizedButton;
 import LandingPage.Components.DropDownMenu;
 import LandingPage.Components.NotificationPopUp;
+import MainApplication.NavigationController;
 import Utils.Utility.ImageIconRedrawer;
 import Utils.Utility.PhoneDialer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 
 import static Utils.Swing.Colors.*;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
 public class HeaderPanel extends JPanel {
+    private final NavigationController navigationController;
+    private DropDownMenu dropDownMenu;
+
     private JLabel appLogo;
     private CustomizedButton registerButton;
     private CustomizedButton loginButton;
@@ -24,159 +28,168 @@ public class HeaderPanel extends JPanel {
     private CustomizedButton callButton;
     private JSeparator separator;
 
-    private ImageIconRedrawer iconRedrawer;
-
     private final String mainPhoneNumber = "+34 800 500 220";
 
-    public HeaderPanel() {
-        setBackground(Color.WHITE);
+    public HeaderPanel(JFrame mainFrame, NavigationController navigationController) {
+        this.navigationController = navigationController;
+        this.dropDownMenu = new DropDownMenu(navigationController);
+
+        setBackground(Color.WHITE); // Background for the entire header
         setOpaque(true);
+        setLayout(new BorderLayout());
         initComponents();
-        addComponentsToLayout();
+        layoutComponents();
     }
 
+    // Initialize all UI components
     private void initComponents() {
-        iconRedrawer = new ImageIconRedrawer();
-        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/General/Logo-Temp.png")));
-        ImageIcon logoIcon = iconRedrawer.redrawImageIcon(50, 50);
-        appLogo = new JLabel(logoIcon);
+        initLogo();
+        initButtons();
+        initMenuIcon();
+        initSeparator();
+        initTitles();
+    }
 
-        registerButton = new CustomizedButton();
-        registerButton.setBackground(MAIN_APP_COLOUR);
-        registerButton.setFont(MAIN_FONT);
-        registerButton.setForeground(Color.WHITE);
-        registerButton.addHoverEffectToButton(MAIN_APP_COLOUR);
-        registerButton.setText("Registrarse");
+    // Initializes the application logo
+    private void initLogo() {
+        appLogo = new JLabel(createIcon("/General/app-logo.png", 70, 70)); // Adjusted size
+    }
 
-        loginButton = new CustomizedButton();
-        loginButton.setBackground(SECONDARY_APP_COLOUR);
-        loginButton.setFont(MAIN_FONT);
-        loginButton.setForeground(Color.WHITE);
-        loginButton.addHoverEffectToButton(SECONDARY_APP_COLOUR);
-        loginButton.setText("Iniciar Sesión");
+    // Initializes all buttons
+    private void initButtons() {
+        int buttonWidth = 120; // TODO: Sizes?
+        int buttonHeight = 40;
 
-        // Dropdown Menu (future implementation)
-        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/dropdown-menu.png")));
-        ImageIcon dropDownIcon = iconRedrawer.redrawImageIcon(20, 20);
-        menuIcon = new JLabel(dropDownIcon);
+        registerButton = createButton("Registrarse", MAIN_APP_COLOUR, MAIN_FONT, Color.WHITE, MAIN_APP_COLOUR);
+        registerButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+
+        loginButton = createButton("Iniciar Sesión", SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR);
+        loginButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+
+        appointmentButton = createButton("Pedir Cita", MY_RED, MAIN_FONT, Color.WHITE, MY_RED.darker());
+        appointmentButton.setIcon(createIcon("/LandingPage/calendar-appointment.png", 35, 35));
+        appointmentButton.setPreferredSize(new Dimension(160, 50));
+        appointmentButton.addActionListener(e -> showNotification());
+
+        callButton = createButton(mainPhoneNumber, SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR.darker());
+        callButton.setIcon(createIcon("/LandingPage/phone-call.png", 35, 35));
+        callButton.setPreferredSize(new Dimension(160, 50));
+        callButton.addActionListener(e -> initiateCall());
+    }
+
+    // Initializes the dropdown menu icon with an appropriate size
+    private void initMenuIcon() {
+        int iconSize = 30; // Slightly reduced size
+        menuIcon = new JLabel(createIcon("/LandingPage/dropdown-menu.png", iconSize, iconSize));
         menuIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        menuIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+        menuIcon.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                // TODO: Future implementation
-                System.out.println("Menú desplegable clicado");
-                DropDownMenu dropDownMenu = new DropDownMenu();
                 dropDownMenu.showMenu(menuIcon);
             }
         });
+    }
 
-        // Separator line
+    // Initializes the separator below the title
+    private void initSeparator() {
         separator = new JSeparator();
-        separator.setForeground(Color.GRAY);
-        separator.setPreferredSize(new Dimension(500, 2));
+        separator.setForeground(Color.BLACK);
+        separator.setPreferredSize(new Dimension(350, 2)); // Separator width
+    }
 
+    // Initializes the title and subtitle labels with proper styling
+    private void initTitles() {
         titleLabel = new JLabel("Cuidarte+");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24)); // TODO: Font
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 26)); // Size
 
         subtitleLabel = new JLabel("Tu salud, nuestra prioridad");
         subtitleLabel.setForeground(SUBTITLE_COLOUR);
-
-        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/calendar-appointment.png")));
-        ImageIcon appointmentIcon = iconRedrawer.redrawImageIcon(50, 50);
-        appointmentButton = new CustomizedButton();
-        appointmentButton.setBackground(MY_RED);
-        appointmentButton.setFont(MAIN_FONT);
-        appointmentButton.setForeground(Color.WHITE);
-        appointmentButton.addHoverEffectToButton(MY_RED.darker());
-        appointmentButton.setIcon(appointmentIcon);
-        appointmentButton.setText("Pedir Cita");
-
-        // Example on how to use the Notification Pop Up class
-        appointmentButton.addActionListener(e -> {
-            Window window = SwingUtilities.getWindowAncestor(this);
-            if (window instanceof JFrame) {
-                NotificationPopUp.showCustomNotification(
-                        (JFrame) window, // Casting Window to JFrame
-                        "Cita médica", "Tu cita ha sido agendada.", "Aceptar",
-                        evt -> System.out.println("Notificación cerrada"));
-            } else {
-                System.err.println("Error: No se pudo obtener el JFrame principal.");
-            }
-        });
-
-
-        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LandingPage/phone-call.png")));
-        ImageIcon callIcon = iconRedrawer.redrawImageIcon(50, 50);
-        callButton = new CustomizedButton();
-        callButton.setBackground(SECONDARY_APP_COLOUR);
-        callButton.setFont(MAIN_FONT);
-        callButton.setForeground(Color.WHITE);
-        callButton.addHoverEffectToButton(SECONDARY_APP_COLOUR.darker());
-        callButton.setIcon(callIcon);
-        // TODO: Needs testing
-        callButton.addActionListener(e -> {
-            String formattedPhoneNUmber = PhoneDialer.obtainFormattedPhoneNumber(mainPhoneNumber);
-            PhoneDialer.makeCall(formattedPhoneNUmber, this);
-        });
-        callButton.setText(mainPhoneNumber);
+        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 15));
     }
 
-    private void addComponentsToLayout() {
-        setLayout(new BorderLayout(0, 0));
+    // Helper method to create an icon with a specific size
+    private ImageIcon createIcon(String resourcePath, int width, int height) {
+        ImageIconRedrawer redrawer = new ImageIconRedrawer();
+        redrawer.setImageIcon(new ImageIcon(getClass().getResource(resourcePath)));
+        return redrawer.redrawImageIcon(width, height);
+    }
 
-        // Top panel with centered layout
-        JPanel topPanel = new JPanel(new GridBagLayout());
-        topPanel.setOpaque(false);
+    // Helper method to create a customized button with hover effect
+    private CustomizedButton createButton(String text, Color background, Font font, Color textColor, Color hoverColor) {
+        CustomizedButton button = new CustomizedButton();
+        button.setText(text);
+        button.setBackground(background);
+        button.setFont(font);
+        button.setForeground(textColor);
+        button.addHoverEffectToButton(hoverColor);
+        return button;
+    }
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 10, 0, 10); // Horizontal spacing between components
-        gbc.anchor = GridBagConstraints.CENTER; // Center components vertically and horizontally
+    // Notifications
+    private void showNotification() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (window instanceof JFrame) {
+            NotificationPopUp.showCustomNotification(
+                    (JFrame) window,
+                    "Cita médica",
+                    "Tu cita ha sido agendada.",
+                    "Aceptar",
+                    evt -> System.out.println("Notification closed")
+            );
+        } else {
+            System.err.println("Error: Could not obtain main JFrame.");
+        }
+    }
 
-        // Add logo to the left
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0.5; // Push logo to the left
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        topPanel.add(appLogo, gbc);
+    // Call
+    private void initiateCall() {
+        String formattedPhoneNumber = PhoneDialer.obtainFormattedPhoneNumber(mainPhoneNumber);
+        PhoneDialer.makeCall(formattedPhoneNumber, this);
+    }
 
-        // Add buttons and dropdown menu to the right
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0)); // Horizontal spacing
+    // Arranges all components in the appropriate layout
+    private void layoutComponents() {
+        setLayout(new BorderLayout());
+
+        // Top panel with a different background color
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setOpaque(true);
+        topPanel.setBackground(new Color(230, 240, 255)); // TODO: Contrast?
+        topPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20)); // Paddings
+
+        // Panel for buttons and menu icon, aligned to the right
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0)); // Spacing
         rightPanel.setOpaque(false);
         rightPanel.add(loginButton);
         rightPanel.add(registerButton);
         rightPanel.add(menuIcon);
 
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weightx = 0.5; // Push buttons to the right
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        topPanel.add(rightPanel, gbc);
-
+        topPanel.add(appLogo, BorderLayout.WEST);
+        topPanel.add(rightPanel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
 
-        // Separator
-        JPanel separatorPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        separatorPanel.setOpaque(false);
-        separatorPanel.add(separator);
-        add(separatorPanel, BorderLayout.CENTER);
-
-        // Center panel containing the text
-        JPanel centerPanel = new JPanel(new GridBagLayout());
+        // Center panel containing title and subtitle
+        JPanel centerPanel = new JPanel();
         centerPanel.setOpaque(false);
-        gbc = new GridBagConstraints();
+        centerPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 0, 5, 0); // Spacing
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(20, 0, 20, 0); // Vertical spacing between components
         centerPanel.add(titleLabel, gbc);
-
         gbc.gridy = 1;
         centerPanel.add(subtitleLabel, gbc);
+        gbc.gridy = 2;
+        centerPanel.add(separator, gbc);
+
         add(centerPanel, BorderLayout.CENTER);
 
-        // Bottom panel containing the other two buttons
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 50)); // Horizontal spacing
+        // Bottom panel with the appointment and call buttons
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
         bottomPanel.setOpaque(false);
         bottomPanel.add(appointmentButton);
         bottomPanel.add(callButton);
+
         add(bottomPanel, BorderLayout.SOUTH);
     }
 }

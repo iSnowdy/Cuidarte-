@@ -12,8 +12,8 @@ public class Main {
             frame.setSize(800, 600);
             frame.setLocationRelativeTo(null);
 
-            CentresPanel centersPanel = new CentresPanel(frame);
-            frame.add(centersPanel);
+            //CentresPanel centersPanel = new CentresPanel(frame);
+            //frame.add(centersPanel);
 
             frame.setVisible(true);
         });

@@ -3,6 +3,7 @@ package Centres.Swing;
 import AboutUs.Components.CustomScrollBar;
 import Authentication.Components.CustomizedButton;
 import LandingPage.Swing.HeaderPanel;
+import MainApplication.NavigationController;
 import Utils.Utility.GoogleMapsRedirect;
 import Utils.Utility.ImageIconRedrawer;
 
@@ -14,39 +15,56 @@ import java.awt.event.ActionListener;
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 
 public class CentresPanel extends JPanel {
-    private JFrame parentFrame;
+    private final JFrame parentFrame;
+    private final NavigationController navigationController;
     private JPanel contentPanel;
     private JScrollPane scrollPane;
-    private ImageIconRedrawer iconRedrawer;
+    private final ImageIconRedrawer iconRedrawer;
 
-    public CentresPanel(JFrame parentFrame) {
+    /**
+     * Constructor for CentresPanel.
+     *
+     * @param parentFrame          The main application frame.
+     * @param navigationController The navigation controller instance.
+     */
+    public CentresPanel(JFrame parentFrame, NavigationController navigationController) {
         this.parentFrame = parentFrame;
+        this.navigationController = navigationController;
         this.iconRedrawer = new ImageIconRedrawer();
+
         initPanel();
-        addHeaderComponent();
+        //addHeaderComponent();
         addContentComponent();
     }
 
-    // Initialize the main panel's layout and background color
+    /**
+     * Initializes the main panel layout and background color.
+     */
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
     }
 
-    // Add the header component at the top
+    /**
+     * Adds the header panel at the top.
+     */
     private void addHeaderComponent() {
-        HeaderPanel headerPanel = new HeaderPanel();
+        HeaderPanel headerPanel = new HeaderPanel(parentFrame, navigationController);
         add(headerPanel, BorderLayout.NORTH);
     }
 
-    // Build the content component and add it with a custom scroll pane
+    /**
+     * Builds and adds the content section with a scroll pane.
+     */
     private void addContentComponent() {
         contentPanel = buildContentPanel();
         scrollPane = buildScrollPane(contentPanel);
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    // Create the content panel with title and centre entries
+    /**
+     * Creates the content panel with titles and centre entries.
+     */
     private JPanel buildContentPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
@@ -61,7 +79,7 @@ public class CentresPanel extends JPanel {
         gbc.gridy = 0;
 
         // Add the main title
-        JLabel titleLabel = new JLabel("Nuestros centros", JLabel.CENTER);
+        JLabel titleLabel = new JLabel("Nuestros Centros", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 34));
         titleLabel.setForeground(MAIN_APP_COLOUR);
         panel.add(titleLabel, gbc);
@@ -83,7 +101,9 @@ public class CentresPanel extends JPanel {
         return panel;
     }
 
-    // Build a scroll pane with a custom scrollbar for the provided panel
+    /**
+     * Builds a scroll pane with a custom scrollbar.
+     */
     private JScrollPane buildScrollPane(JPanel panel) {
         JScrollPane sp = new JScrollPane(panel);
         sp.getVerticalScrollBar().setUI(new CustomScrollBar());
@@ -94,7 +114,9 @@ public class CentresPanel extends JPanel {
         return sp;
     }
 
-    // Create a centre panel that contains an image and text information
+    /**
+     * Creates a centre panel that contains an image and text information.
+     */
     private JPanel createCenterPanel(String centerName, String description, String imagePath, String address) {
         JPanel roundPanel = createRoundedPanel();
         JPanel imagePanel = buildImagePanel(imagePath);
@@ -106,7 +128,9 @@ public class CentresPanel extends JPanel {
         return roundPanel;
     }
 
-    // Create a panel with a custom rounded border background
+    /**
+     * Creates a rounded panel with a border.
+     */
     private JPanel createRoundedPanel() {
         JPanel panel = new JPanel(new BorderLayout()) {
             @Override
@@ -127,7 +151,9 @@ public class CentresPanel extends JPanel {
         return panel;
     }
 
-    // Build the image panel with a fixed size and a redrawn image
+    /**
+     * Builds the image panel for a centre.
+     */
     private JPanel buildImagePanel(String imagePath) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panel.setBackground(Color.WHITE);
@@ -141,7 +167,9 @@ public class CentresPanel extends JPanel {
         return panel;
     }
 
-    // Build the text panel containing centre name, description, and the navigate button
+    /**
+     * Builds the text panel containing centre name, description, and the navigate button.
+     */
     private JPanel buildTextPanel(String centerName, String description, String address) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -172,7 +200,9 @@ public class CentresPanel extends JPanel {
         return panel;
     }
 
-    // Build the "Cómo llegar" button with custom styling and its action listener
+    /**
+     * Creates a navigation button that opens Google Maps.
+     */
     private CustomizedButton buildNavigateButton(String address) {
         CustomizedButton button = new CustomizedButton();
         button.setText("Cómo llegar");
@@ -180,11 +210,10 @@ public class CentresPanel extends JPanel {
         button.setBackground(MAIN_APP_COLOUR);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setMargin(new Insets(3, 10, 3, 10)); // Compact button margins
+        button.setMargin(new Insets(3, 10, 3, 10));
 
-        // Action listener to open Google Maps with the given address
-        ActionListener action = e -> GoogleMapsRedirect.openGoogleMaps(address, this);
-        button.addActionListener(action);
+        // Action listener to open Google Maps
+        button.addActionListener(e -> GoogleMapsRedirect.openGoogleMaps(address, this));
         return button;
     }
 

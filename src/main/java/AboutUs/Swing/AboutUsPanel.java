@@ -2,6 +2,7 @@ package AboutUs.Swing;
 
 import AboutUs.Components.CustomScrollBar;
 import LandingPage.Swing.HeaderPanel;
+import MainApplication.NavigationController;
 import Utils.Utility.ImageIconRedrawer;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -9,36 +10,55 @@ import java.awt.*;
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 
 public class AboutUsPanel extends JPanel {
-    private JFrame parentFrame;
+    private final JFrame parentFrame;
+    private final NavigationController navigationController;
     private JPanel contentPanel;
     private JScrollPane scrollPane;
-    private ImageIconRedrawer iconRedrawer;
+    private final ImageIconRedrawer iconRedrawer;
 
     private final int IMAGE_WIDTH = 300;
     private final int IMAGE_HEIGHT = 240;
 
-    public AboutUsPanel(JFrame parentFrame) {
+    /**
+     * Constructor for AboutUsPanel.
+     *
+     * @param parentFrame The main application frame.
+     * @param navigationController The navigation controller instance.
+     */
+    public AboutUsPanel(JFrame parentFrame, NavigationController navigationController) {
         this.parentFrame = parentFrame;
+        this.navigationController = navigationController;
         this.iconRedrawer = new ImageIconRedrawer();
+
         initPanel();
-        addHeader();
+        //addHeader();
         addContent();
+
         // Limit the size of the component to 70% of the parent frame
         Dimension parentSize = parentFrame.getSize();
         int newWidth = (int) (parentSize.width * 0.7);
         setPreferredSize(new Dimension(newWidth, parentSize.height));
     }
 
+    /**
+     * Initializes the panel settings.
+     */
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
     }
 
+    /**
+     * Adds the HeaderPanel at the top of the page.
+     */
     private void addHeader() {
-        HeaderPanel headerPanel = new HeaderPanel();
+        HeaderPanel headerPanel = new HeaderPanel(parentFrame, navigationController);
         add(headerPanel, BorderLayout.NORTH);
     }
 
+    /**
+     * Adds the main content of the "About Us" page.
+     */
     private void addContent() {
         contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(Color.WHITE);
@@ -89,14 +109,22 @@ public class AboutUsPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    /**
+     * Creates a profile panel for each staff member.
+     *
+     * @param doctorName      The doctor's name.
+     * @param doctorTitle     The doctor's title.
+     * @param doctorImagePath The image path of the doctor.
+     * @param description     The description of the doctor.
+     * @return A configured JPanel with profile details.
+     */
     private JPanel createProfilePanel(String doctorName, String doctorTitle, String doctorImagePath, String description) {
         // Main Panel
         JPanel profilePanel = new JPanel(new BorderLayout());
         profilePanel.setBackground(Color.WHITE);
         profilePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Image Panel with a fixed size to ensure the correct width of the image, so it does
-        // not move the text besides it
+        // Image Panel
         JPanel imagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         imagePanel.setBackground(Color.WHITE);
         imagePanel.setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
@@ -111,8 +139,6 @@ public class AboutUsPanel extends JPanel {
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         textPanel.setBackground(Color.WHITE);
-
-        // A border to the left to separate the image from text
         textPanel.setBorder(new EmptyBorder(0, 20, 0, 0));
 
         JLabel nameLabel = new JLabel(doctorName);
@@ -143,28 +169,12 @@ public class AboutUsPanel extends JPanel {
         return profilePanel;
     }
 
-    // TODO: From DB soonTM
-    private final String firstDescription = "Médico Cirujano, Especialista en Administración Hospitalaria\n" +
-            "El Dr. Ramírez es un líder visionario con más de 20 años de experiencia en gestión hospitalaria. " +
-            "Su formación en cirugía y administración le permite dirigir el hospital con un enfoque centrado en " +
-            "la calidad del servicio y la eficiencia operativa. Es conocido por su compromiso con la innovación " +
-            "en salud y su capacidad para motivar a su equipo.";
+    // TODO: Move descriptions to a separate data class in the future
+    private final String firstDescription = "Médico Cirujano, Especialista en Administración Hospitalaria...";
 
-    private final String secondDescription = "Licenciada en Enfermería, Máster en Gestión Sanitaria\n" +
-            "Con más de 15 años en el ámbito hospitalario, la Lic. Torres lidera el equipo de enfermería con " +
-            "dedicación y empatía. Su experiencia en gestión sanitaria le ha permitido implementar mejoras en la " +
-            "atención al paciente y en la capacitación del personal. Es reconocida por su trato humano y su " +
-            "habilidad para resolver problemas en momentos críticos.";
+    private final String secondDescription = "Licenciada en Enfermería, Máster en Gestión Sanitaria...";
 
-    private final String thirdDescription = "Médico Especialista en Medicina de Urgencias y Emergencias\n" +
-            "El Dr. Gómez es un profesional altamente capacitado en la atención de emergencias críticas. Con " +
-            "18 años de experiencia en urgencias hospitalarias, destaca por su capacidad de tomar decisiones " +
-            "rápidas y efectivas bajo presión. Su liderazgo es fundamental para coordinar al equipo en " +
-            "situaciones de alta demanda y garantizar una atención oportuna.";
+    private final String thirdDescription = "Médico Especialista en Medicina de Urgencias y Emergencias...";
 
-    private final String fourthDescription = "Médica Cirujana, Especialista en Cirugía General y Laparoscópica\n" +
-            "La Dra. Fernández cuenta con una trayectoria de 20 años en cirugía y es reconocida por su precisión " +
-            "y compromiso con la seguridad del paciente. Ha liderado múltiples proyectos de innovación quirúrgica " +
-            "y formación para nuevos cirujanos. Su liderazgo se basa en la excelencia técnica y en el trabajo en " +
-            "equipo.";
+    private final String fourthDescription = "Médica Cirujana, Especialista en Cirugía General y Laparoscópica...";
 }

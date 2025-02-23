@@ -32,10 +32,9 @@ public class Patient extends User {
         this.verificationCode = verificationCode;
     }
 
-    // 6 digit verification code to be sent to the user's email upon registration
+    // 6 digit verification code to be sent to the user's email upon registration and for the salting
     private int generateRandomNumber() {
-        this.verificationCode = (int) (Math.random() * 999999);
-        return this.verificationCode;
+        return (int) (Math.random() * 900000) + 100000;
     }
 
     @Override

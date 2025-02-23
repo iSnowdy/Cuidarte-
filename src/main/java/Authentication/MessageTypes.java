@@ -2,5 +2,6 @@ package Authentication;
 
 public enum MessageTypes {
     SUCCESS,
-    ERROR;
+    ERROR,
+    WARNING;
 }

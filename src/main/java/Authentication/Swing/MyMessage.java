@@ -12,13 +12,13 @@ import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 import static Utils.Swing.Colors.MY_RED;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
-public class Message extends JPanel {
+public class MyMessage extends JPanel {
 
     private MessageTypes messageType = MessageTypes.SUCCESS;
     private boolean show;
     private JLabel messageLabel;
 
-    public Message() {
+    public MyMessage() {
         setOpaque(false);
         setVisible(false);
         initMessageComponents();

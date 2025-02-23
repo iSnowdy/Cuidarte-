@@ -11,11 +11,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 
 import static Utils.Swing.Colors.SUBTITLE_COLOUR;
 
-public class CustomizedButton extends JButton {
+public class CustomizedButton extends BaseButton {
     private Animator buttonAnimator;
     private Point pressedPoint;
     private int targetSize;
@@ -63,35 +62,6 @@ public class CustomizedButton extends JButton {
         this.buttonAnimator.setDeceleration(0.5f);
         this.buttonAnimator.setResolution(0);
     }
-
-    public void addHoverEffectToButton(Color colorBase) {
-        Evaluator<Color> colorEvaluator = new Evaluator<Color>() {
-            @Override
-            public Color evaluate(Color v0, Color v1, float fraction) {
-                int r = (int) (v0.getRed() + fraction * (v1.getRed() - v0.getRed()));
-                int g = (int) (v0.getGreen() + fraction * (v1.getGreen() - v0.getGreen()));
-                int b = (int) (v0.getBlue() + fraction * (v1.getBlue() - v0.getBlue()));
-                return new Color(r, g, b);
-            }
-        };
-
-        Animator animator = PropertySetter.createAnimator(200, this, "background", colorEvaluator, colorBase, colorBase.darker());
-
-        this.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                animator.start();
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                animator.stop();
-                setBackground(colorBase);
-            }
-        });
-    }
-
-    /*@Override
-    public Dimension getPreferredSize() {
-        return new Dimension(150, 50);
-    }*/
 
     @Override
     protected void paintComponent(Graphics graphics) {

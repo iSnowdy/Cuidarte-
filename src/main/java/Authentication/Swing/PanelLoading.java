@@ -5,35 +5,50 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 
 public class PanelLoading extends JPanel {
-    private JLabel loadingLabel;
+    private final JLabel loadingLabel;
+    private final Color DEFAULT_BACKGROUND = new Color(200, 200, 200, 128); // Greyish with opacity
 
     public PanelLoading() {
         setOpaque(false);
-        setFocusCycleRoot(true); // What is this exactly?
-        setVisible(false);
-        setFocusable(true);
-        initComponents();
-        // Empty on purpose. It prevents the user from clicking anywhere else while this is visible
+        setLayout(new BorderLayout());
+
+        // Prevents user interactions while the panel is active
         addMouseListener(new MouseAdapter() {});
+
+        loadingLabel = new JLabel("", SwingConstants.CENTER);
+        setLoadingIcon("/LoginRegisterImgs/loading-bar.gif");
+
+        add(loadingLabel, BorderLayout.CENTER);
     }
 
-    // Add loading Icon as a Gif
-    private void initComponents() {
-        loadingLabel = new JLabel();
-        loadingLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        loadingLabel.setIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/loading-bar.gif")));
+    /**
+     * Sets a new GIF loading icon.
+     * @param path Resource path of the GIF.
+     */
+    public void setLoadingIcon(String path) {
+        ImageIcon icon = new ImageIcon(getClass().getResource(path));
+        loadingLabel.setIcon(icon);
+    }
 
-        setLayout(new BorderLayout());
-        add(loadingLabel, BorderLayout.CENTER);
+    /**
+     * Displays the loading panel.
+     */
+    public void showLoading() {
+        setVisible(true);
+    }
+
+    /**
+     * Hides the loading panel.
+     */
+    public void hideLoading() {
+        setVisible(false);
     }
 
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
-
         Graphics2D graphics2D = (Graphics2D) graphics;
-        graphics2D.setColor(new Color(255, 255, 255)); // Background colour while the Panel is visible TODO: Change it to a grey?
-        graphics2D.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)); // 50% opacity
+        graphics2D.setColor(DEFAULT_BACKGROUND);
         graphics2D.fillRect(0, 0, getWidth(), getHeight());
     }
 }

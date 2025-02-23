@@ -2,209 +2,224 @@ package Authentication.Swing;
 
 import Authentication.Components.CustomTextField;
 import Authentication.Components.CustomizedButton;
-import Models.Doctor;
+import Authentication.MessageTypes;
 import Models.Patient;
 import Utils.Utility.ImageIconRedrawer;
-import Utils.Validation.AuthenticationValidator;
+import Utils.Validation.MyValidator;
 import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
+
 public class PanelLoginAndRegister extends JLayeredPane {
-    private JPanel login, register;
+    private final JPanel loginPanel;
+    private final JPanel registerPanel;
+    private final ImageIconRedrawer imageIconRedrawer;
+    private final BiConsumer<MessageTypes, String> showMessageCallBack; // Function obtained from Authenticator
 
-    private ImageIconRedrawer imageIconRedrawer;
-    private Patient patient;
-    private Doctor doctor;
+    // Register fields
+    private CustomTextField dniTextField;
+    private CustomTextField fullNameTextField;
+    private CustomTextField emailTextField;
+    private CustomTextField phoneTextField;
+    private CustomTextField birthDateTextField;
+    private CustomTextField passwordTextField;
 
-    public PanelLoginAndRegister(ActionListener eventRegister) {
+    // Login fields
+    private CustomTextField emailLoginTextField;
+    private CustomTextField passwordLoginTextField;
+
+    private final int ICON_WIDTH = 20;
+    private final int ICON_HEIGHT = 20;
+
+    public PanelLoginAndRegister(ActionListener registerAction, ActionListener loginAction, BiConsumer<MessageTypes, String> messageAction) {
+        this.showMessageCallBack = messageAction;
+
         setOpaque(false);
         setLayout(new CardLayout());
-        initComponents();
-        initRegister(eventRegister);
-        initLogin();
 
-        // Register by default
-        this.login.setVisible(false);
-        this.register.setVisible(true);
+        imageIconRedrawer = new ImageIconRedrawer();
+
+        loginPanel = createPanel();
+        registerPanel = createPanel();
+
+        initRegister(registerAction);
+        initLogin(loginAction);
+
+        add(loginPanel, "login");
+        add(registerPanel, "register");
+
+        showRegisterForm(true);
     }
 
-    private void initComponents() {
-        this.imageIconRedrawer = new ImageIconRedrawer();
 
-        this.login = new JPanel();
-        this.register = new JPanel();
-
-        this.login.setBackground(Color.WHITE);
-        this.register.setBackground(Color.WHITE);
-
-        add(login, "login");
-        add(register, "register");
+    private JPanel createPanel() {
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.WHITE);
+        return panel;
     }
 
-    // TODO: Add the logo at the top
-    private void initRegister(ActionListener eventRegister) {
-        // Adjust space between elements
-        this.register.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]10[]10[]10[]40[]push"));
-        JLabel registerLabel = new JLabel("Registrarse");
-        registerLabel.setFont(MAIN_FONT); // TODO: Font
-        registerLabel.setForeground(MAIN_APP_COLOUR);
-        this.register.add(registerLabel);
+    private void initRegister(ActionListener registerAction) {
+        registerPanel.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]10[]10[]10[]40[]push"));
 
-        // TODO: Data Validation. Data Input to DB. Hash password. Use another thing for password and email?
-        // TODO: Refactor this? Too many blocks of code very similar to each other
-        // TODO: Use ImageIconRedrawer to redraw images
-        CustomTextField dniTextField = generateCustomTextField(
-                "C:\\DAM\\identification-card-fill-svgrepo-com(1).png",
-                20,
-                20,
-                "DNI: "
-        );
-        this.register.add(dniTextField, "w 60%");  // TODO: Consider editing the width
-        
-        CustomTextField usernameTextField = generateCustomTextField(
-                "/LoginRegisterImgs/usuario.png",
-                20,
-                20,
-                "Nombre completo: "
-        );
-        this.register.add(usernameTextField, "w 60");
+        registerPanel.add(createTitleLabel("Registrarse"));
 
-        CustomTextField userEmail = new CustomTextField();
-        userEmail.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/correo.png")));
-        userEmail.setHintText("Email");
-        this.register.add(userEmail, "w 60%");
-        
-        CustomTextField emailTextField = generateCustomTextField(
-                "/LoginRegisterImgs/correo.png",
-                20,
-                20,
-                "Email: "
-        );
-        this.register.add(emailTextField, "w 60%");
+        dniTextField = createTextField("/LoginRegisterImgs/dni.png", "DNI: ");
+        fullNameTextField = createTextField("/LoginRegisterImgs/usuario.png", "Nombre completo: ");
+        emailTextField = createTextField("/LoginRegisterImgs/correo.png", "Email: ");
+        phoneTextField = createTextField("/LoginRegisterImgs/telefono.png", "Número de teléfono: ");
+        birthDateTextField = createTextField("/LoginRegisterImgs/calendario.png", "Fecha de nacimiento: ");
+        passwordTextField = createTextField("/LoginRegisterImgs/contraseña.png", "Contraseña: ");
 
-        CustomTextField phoneNumberTExtField = generateCustomTextField(
-                "/LoginRegisterImgs/telefono.png",
-                20,
-                20,
-                "Número de teléfono: "
-        );
-        this.register.add(phoneNumberTExtField, "w 60%");
-        
-        CustomTextField dateOfBirthTextField = generateCustomTextField(
-                "/LoginRegisterImgs/calendario.png",
-                20,
-                20,
-                "Fecha de nacimiento: "
-        );
-        this.register.add(dateOfBirthTextField, "w 60%");
+        registerPanel.add(dniTextField, "w 60%");
+        registerPanel.add(fullNameTextField, "w 60%");
+        registerPanel.add(emailTextField, "w 60%");
+        registerPanel.add(phoneTextField, "w 60%");
+        registerPanel.add(birthDateTextField, "w 60%");
+        registerPanel.add(passwordTextField, "w 60%");
 
-        CustomTextField passwordTextField = generateCustomTextField(
-                "/LoginRegisterImgs/contraseña.png",
-                20,
-                20,
-                "Contraseña: "
-        );
-        this.register.add(passwordTextField, "w 60%");
-
-        CustomizedButton registerButton = new CustomizedButton();
-        registerButton.setBackground(MAIN_APP_COLOUR); // TODO: Colours?
-        registerButton.setForeground(Color.red); // TODO: Font?
-        registerButton.setFont(MAIN_FONT);
-        registerButton.addActionListener(eventRegister);
-        // TODO: setText vs setLabel?
-        registerButton.setLabel("Registrarse");
-        this.register.add(registerButton, "w 40%, h 40");
-        // TODO: Refactor this
-        registerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                String dni = dniTextField.getText().trim();
-                String username = usernameTextField.getText().trim();
-                String email = userEmail.getText().trim();
-                String phoneNumber = phoneNumberTExtField.getText().trim();
-                String dateOfBirth = dateOfBirthTextField.getText().trim();
-                String password = passwordTextField.getText().trim();
-
-                String[] nameAndSurname = nameAndSurnamesSplitted(username);
-
-                // TODO: Do this properly please ty. Validate all data before inserting
-                var formattedDate = AuthenticationValidator.validateAndParseDate(dateOfBirth);
-                //patient = new Patient(dni, nameAndSurname[0], nameAndSurname[1], phoneNumber, email, formattedDate, 50, password, 50);
-            }
-        });
+        CustomizedButton registerButton = createButton("Registrarse", registerAction);
+        registerPanel.add(registerButton, "w 40%, h 40");
     }
 
-    private void initLogin() {
-        // Adjust space between elements
-        // TODO: Check the amount of elements present. Login Button or Forgot Password first? Separation between them?
-        this.login.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]40[]push"));
-        JLabel loginLabel = new JLabel("Iniciar Sesión");
-        loginLabel.setFont(MAIN_FONT); // TODO: Font
-        loginLabel.setForeground(MAIN_APP_COLOUR);
-        this.login.add(loginLabel);
+    private void initLogin(ActionListener loginAction) {
+        loginPanel.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]40[]push"));
 
-        CustomTextField userEmail = new CustomTextField();
-        userEmail.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/correo.png")));
-        userEmail.setHintText("Email");
-        this.login.add(userEmail, "w 60%");
+        loginPanel.add(createTitleLabel("Iniciar Sesión"));
 
-        CustomTextField userPassword = new CustomTextField();
-        userPassword.setPrefixIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/contraseña.png")));
-        userPassword.setHintText("Contraseña");
-        this.login.add(userPassword, "w 60%");
+        emailLoginTextField = createTextField("/LoginRegisterImgs/correo.png", "Email: ");
+        passwordLoginTextField = createTextField("/LoginRegisterImgs/contraseña.png", "Contraseña: ");
 
-        CustomizedButton loginButton = new CustomizedButton();
-        loginButton.setBackground(MAIN_APP_COLOUR);
-        loginButton.setForeground(Color.red);
-        loginButton.setFont(MAIN_FONT);
-        loginButton.setLabel("Login");
-        this.login.add(loginButton, "w 40%, h 40");
+        loginPanel.add(emailLoginTextField, "w 60%");
+        loginPanel.add(passwordLoginTextField, "w 60%");
 
-        JButton forgotPasswordButton = new JButton("¿Olvidó su contraseña?"); // TODO: JMail?
-        forgotPasswordButton.setFont(MAIN_FONT);
-        forgotPasswordButton.setForeground(Color.YELLOW); // TODO: Stylize it
-        forgotPasswordButton.setBackground(MAIN_APP_COLOUR);
-        forgotPasswordButton.setContentAreaFilled(false); // ?
-        forgotPasswordButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        this.login.add(forgotPasswordButton);
+        CustomizedButton loginButton = createButton("Login", loginAction);
+        loginPanel.add(loginButton, "w 40%, h 40");
+
+        JButton forgotPasswordButton = createForgotPasswordButton();
+        loginPanel.add(forgotPasswordButton);
     }
 
+    private JLabel createTitleLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(MAIN_FONT);
+        label.setForeground(MAIN_APP_COLOUR);
+        return label;
+    }
+
+    private CustomTextField createTextField(String iconPath, String hintText) {
+        CustomTextField textField = new CustomTextField();
+
+        imageIconRedrawer.setImageIcon(new ImageIcon(getClass().getResource(iconPath)));
+        ImageIcon imageIcon = imageIconRedrawer.redrawImageIcon(ICON_WIDTH, ICON_HEIGHT);
+
+        textField.setPrefixIcon(imageIcon);
+        textField.setHintText(hintText);
+        return textField;
+    }
+
+    private CustomizedButton createButton(String text, ActionListener action) {
+        CustomizedButton button = new CustomizedButton();
+        button.setBackground(MAIN_APP_COLOUR);
+        button.setForeground(Color.RED);
+        button.setFont(MAIN_FONT);
+        button.setText(text);
+        button.addActionListener(action);
+        return button;
+    }
+
+    private JButton createForgotPasswordButton() {
+        JButton button = new JButton("¿Olvidó su contraseña?");
+        button.setFont(MAIN_FONT);
+        button.setForeground(Color.YELLOW);
+        button.setBackground(MAIN_APP_COLOUR);
+        button.setContentAreaFilled(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return button;
+    }
+
+    // Switch between login and register forms
     public void showRegisterForm(boolean show) {
-        if (show) {
-            this.register.setVisible(true);
-            this.login.setVisible(false);
-        } else {
-            this.register.setVisible(false);
-            this.login.setVisible(true);
+        registerPanel.setVisible(show);
+        loginPanel.setVisible(!show);
+    }
+
+    // Retrieves a Patient object based on the input fields
+    public Optional<Patient> getPatientData() {
+        String dni = dniTextField.getText().trim();
+        String fullName = fullNameTextField.getText().trim();
+        String email = emailTextField.getText().trim();
+        String phone = phoneTextField.getText().trim();
+        String birthDate = birthDateTextField.getText().trim();
+        String password = passwordTextField.getText().trim();
+
+        if (!MyValidator.isValidDNIFormat(dni)) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "DNI inválido. Verifique el formato.");
+            return Optional.empty();
         }
+        if (!MyValidator.isValidTextLength(fullName, 3)) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "El nombre debe tener al menos 3 caracteres.");
+            return Optional.empty();
+        }
+        if (!MyValidator.isValidEmailAddress(email)) {
+            System.out.println("Email is: " + email);
+            showMessageCallBack.accept(MessageTypes.ERROR, "Formato del correo electrónico inválido.");
+            return Optional.empty();
+        }
+        if (!MyValidator.isValidPhoneNumber(phone)) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "Formato del número de teléfono inválido.");
+            return Optional.empty();
+        }
+        if (!MyValidator.isValidPassword(password)) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "La contraseña debe tener al menos 6 caracteres y un número.");
+            return Optional.empty();
+        }
+
+        String[] nameSplit = nameAndSurnamesSplit(fullName);
+
+        Optional<java.sql.Date> parsedDate = MyValidator.validateAndParseDate(birthDate);
+        if (parsedDate.isEmpty()) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "Fecha de nacimiento inválida. Use el formato YYYY-MM-DD.");
+            return Optional.empty();
+        }
+
+        int age = calculateAge(parsedDate.get());
+
+        return Optional.of(new Patient(dni, nameSplit[0], nameSplit[1], phone, email, Optional.of(parsedDate.get()), age, password));
     }
 
-    public Patient getPatient() {
-        return patient;
-    }
-    
-    private CustomTextField generateCustomTextField(String imagePath, int width, int height, String textHint) {
-        CustomTextField generatedTextField = new CustomTextField();
-        imageIconRedrawer.setImageIcon(new ImageIcon(imagePath));
-        ImageIcon imageIcon = imageIconRedrawer.redrawImageIcon(width, height);
-        generatedTextField.setPrefixIcon(imageIcon);
-        
-        generatedTextField.setHintText(textHint);
-        
-        return generatedTextField;
-    }
-
-    private String[] nameAndSurnamesSplitted(String fullname) {
-        String [] parts = fullname.split(" ", 2); // Max split it twice
+    private String[] nameAndSurnamesSplit(String fullname) {
+        String[] parts = fullname.split(" ", 2); // Max split it twice
 
         String name = parts[0].trim();
         String surnames = parts.length > 1 ? parts[1].trim() : "";
 
         return new String[]{name, surnames};
+    }
+
+    private int calculateAge(Date birthDate) {
+        LocalDate birthLocalDate = birthDate.toLocalDate();
+        return Period.between(birthLocalDate, LocalDate.now()).getYears();
+    }
+
+
+    // Retrieves the email input from the login form
+    public String getEmailInputFromLogin() {
+        return emailLoginTextField.getText().trim();
+    }
+
+    // Retrieves the password input from the login form
+    public String getPasswordInputFromLogin() {
+        return passwordLoginTextField.getText().trim();
     }
 }

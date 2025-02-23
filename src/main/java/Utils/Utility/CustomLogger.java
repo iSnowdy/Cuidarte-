@@ -23,10 +23,11 @@ public class CustomLogger {
             fileHandler.setFormatter(new SimpleFormatter() {
                 @Override
                 public String format(LogRecord record) {
-                    return String.format("[%s] [%s]: %s%n",
+                    return String.format("[%s] [%s]: %s%n%s",
                             record.getLevel(),
                             record.getSourceClassName(),
-                            record.getMessage());
+                            record.getMessage(),
+                            getStackTrace(record.getThrown())); // printStackStrace basically
                 }
             });
 
@@ -37,5 +38,15 @@ public class CustomLogger {
             e.printStackTrace();
         }
         return logger;
+    }
+
+    private static String getStackTrace(Throwable throwable) {
+        if (throwable == null) return "";
+
+        StringBuilder builder = new StringBuilder();
+        for (StackTraceElement stackTraceElement : throwable.getStackTrace()) {
+            builder.append("\tat ").append(stackTraceElement.toString()).append("\n"); // tat = TAB
+        }
+        return builder.toString();
     }
 }

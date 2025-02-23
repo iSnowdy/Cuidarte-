@@ -1,10 +1,9 @@
 package Authentication.Components;
 
-import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class CustomizedButtonOutline extends JButton {
+public class CustomizedButtonOutline extends BaseButton {
 
     public CustomizedButtonOutline() {
         setContentAreaFilled(false);

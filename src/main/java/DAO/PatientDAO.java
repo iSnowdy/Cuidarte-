@@ -104,6 +104,21 @@ public class PatientDAO extends BaseDAO<Patient, String> {
         return Optional.empty();
     }
 
+    public Optional<Patient> findByEmail(String email) throws DatabaseQueryException {
+        String query = "SELECT * FROM pacientes WHERE Email = ?";
+
+        try (ResultSet resultSet = executeQuery(query, email)) {
+            if (resultSet.next()) {
+                LOGGER.info("Fetched patient with email: " + email);
+                return Optional.of(mapResultSetToPatient(resultSet));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching patient with email: " + email, e);
+            throw new DatabaseQueryException("Failed to execute SELECT by email");
+        }
+        return Optional.empty();
+    }
+
     @Override
     public List<Patient> findAll() throws DatabaseQueryException {
         List<Patient> patients = new ArrayList<>();

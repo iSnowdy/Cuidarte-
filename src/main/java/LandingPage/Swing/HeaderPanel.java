@@ -1,8 +1,9 @@
 package LandingPage.Swing;
 
 import Authentication.Components.CustomizedButton;
+import Authentication.Main.Authenticator;
 import LandingPage.Components.DropDownMenu;
-import LandingPage.Components.NotificationPopUp;
+import LandingPage.Components.GradientTextLabel;
 import MainApplication.NavigationController;
 import Utils.Utility.ImageIconRedrawer;
 import Utils.Utility.PhoneDialer;
@@ -22,7 +23,8 @@ public class HeaderPanel extends JPanel {
     private CustomizedButton registerButton;
     private CustomizedButton loginButton;
     private JLabel menuIcon;
-    private JLabel titleLabel;
+    private GradientTextLabel titleLabel;
+    private JLabel plusLabel;
     private JLabel subtitleLabel;
     private CustomizedButton appointmentButton;
     private CustomizedButton callButton;
@@ -65,11 +67,12 @@ public class HeaderPanel extends JPanel {
 
         loginButton = createButton("Iniciar Sesión", SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR);
         loginButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        loginButton.addActionListener(e -> initiateLogin());
 
         appointmentButton = createButton("Pedir Cita", MY_RED, MAIN_FONT, Color.WHITE, MY_RED.darker());
         appointmentButton.setIcon(createIcon("/LandingPage/calendar-appointment.png", 35, 35));
         appointmentButton.setPreferredSize(new Dimension(160, 50));
-        appointmentButton.addActionListener(e -> showNotification());
+        appointmentButton.addActionListener(e -> appointmentRedirect());
 
         callButton = createButton(mainPhoneNumber, SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR.darker());
         callButton.setIcon(createIcon("/LandingPage/phone-call.png", 35, 35));
@@ -99,12 +102,15 @@ public class HeaderPanel extends JPanel {
 
     // Initializes the title and subtitle labels with proper styling
     private void initTitles() {
-        titleLabel = new JLabel("Cuidarte+");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 26)); // Size
+        titleLabel = new GradientTextLabel("Cuidarte", SECONDARY_APP_COLOUR, MAIN_APP_COLOUR);
+        //titleLabel.setFont(new Font("Arial", Font.BOLD, 26)); // Size
+        plusLabel = new JLabel("+");
+        plusLabel.setFont(new Font("Arial", Font.BOLD, 46));
+        plusLabel.setForeground(Color.RED);
 
         subtitleLabel = new JLabel("Tu salud, nuestra prioridad");
         subtitleLabel.setForeground(SUBTITLE_COLOUR);
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 15));
+        subtitleLabel.setFont(new Font("Arial", Font.BOLD + Font.ITALIC, 17));
     }
 
     // Helper method to create an icon with a specific size
@@ -126,19 +132,39 @@ public class HeaderPanel extends JPanel {
     }
 
     // Notifications
-    private void showNotification() {
-        Window window = SwingUtilities.getWindowAncestor(this);
-        if (window instanceof JFrame) {
-            NotificationPopUp.showCustomNotification(
-                    (JFrame) window,
-                    "Cita médica",
-                    "Tu cita ha sido agendada.",
-                    "Aceptar",
-                    evt -> System.out.println("Notification closed")
-            );
+    private void appointmentRedirect() {
+        if (!navigationController.isUserLoggedIn()) {
+            navigationController.showLoginRequiredMessage();
         } else {
-            System.err.println("Error: Could not obtain main JFrame.");
+            System.out.println("Clicked on Agenda");
         }
+    }
+
+    // Login and Register onClicks
+    private void initiateLogin() {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Inicio de Sesión");
+            frame.setSize(1000, 800);
+            frame.setLocationRelativeTo(this);
+
+            Authenticator authenticator = new Authenticator(patient -> {
+                navigationController.loginUser(patient);
+
+                frame.dispose();
+            });
+
+            frame.add(authenticator);
+
+            frame.setVisible(true);
+
+            System.out.println("HERE");
+
+        });
+        System.out.println("AFTER");
+    }
+
+    private void initiateRegister() {
+
     }
 
     // Call
@@ -177,6 +203,9 @@ public class HeaderPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         centerPanel.add(titleLabel, gbc);
+        gbc.gridx = 1;
+        centerPanel.add(plusLabel, gbc);
+        gbc.gridx = 0;
         gbc.gridy = 1;
         centerPanel.add(subtitleLabel, gbc);
         gbc.gridy = 2;

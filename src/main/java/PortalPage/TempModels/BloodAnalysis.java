@@ -4,21 +4,21 @@ import java.util.Date;
 
 public class BloodAnalysis {
     private int id;
-    private TestPatient testPatient;
+    private Patient patient;
     private String testResults;
     private String testType;
     private Date testDate;
 
-    public BloodAnalysis(int id, TestPatient testPatient, String testResults, String testType, Date testDate) {
+    public BloodAnalysis(int id, Patient patient, String testResults, String testType, Date testDate) {
         this.id = id;
-        this.testPatient = testPatient;
+        this.patient = patient;
         this.testResults = testResults;
         this.testType = testType;
         this.testDate = testDate;
     }
 
     public int getId() { return id; }
-    public TestPatient getTestPatient() { return testPatient; }
+    public Patient getTestPatient() { return patient; }
     public String getTestResults() { return testResults; }
     public String getTestType() { return testType; }
     public Date getTestDate() { return testDate; }

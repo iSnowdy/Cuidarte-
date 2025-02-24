@@ -1,7 +1,7 @@
 package PortalPage.Swing;
 
+import Models.Patient;
 import PortalPage.TempModels.DiagnosticTest;
-import PortalPage.TempModels.TestPatient;
 import Models.Enums.TestType;
 import Utils.FilterComponent;
 import Utils.Swing.Colors;
@@ -15,7 +15,7 @@ import java.util.List;
 
 public class DiagnosticTestFrame extends JFrame {
     // Test patient for which diagnostic tests are shown
-    private TestPatient patient;
+    private Patient patient;
     // List of all diagnostic tests (dummy data)
     private List<DiagnosticTest> allTests;
     private DefaultListModel<DiagnosticTest> testListModel;
@@ -28,9 +28,9 @@ public class DiagnosticTestFrame extends JFrame {
     private static final String FILTER_BY_DATE = "Fecha";
     private static final String FILTER_BY_TESTTYPE = "Tipo de prueba";
 
-    public DiagnosticTestFrame(TestPatient patient) {
+    public DiagnosticTestFrame(Patient patient) {
         this.patient = patient;
-        setTitle("Pruebas Diagnósticas de " + patient.getName());
+        setTitle("Pruebas Diagnósticas de " + patient.getSurname());
         setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -64,7 +64,7 @@ public class DiagnosticTestFrame extends JFrame {
         container.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         // Title label
-        JLabel titleLabel = new JLabel("Pruebas Diagnósticas de " + patient.getName(), JLabel.CENTER);
+        JLabel titleLabel = new JLabel("Pruebas Diagnósticas de " + patient.getSurname(), JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         titleLabel.setForeground(Colors.MAIN_APP_COLOUR);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

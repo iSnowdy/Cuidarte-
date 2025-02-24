@@ -17,11 +17,8 @@ public class ImageCarousel extends JPanel {
 
     private JPanel imageContainer;
     private JPanel indicatorPanel;
-    private JPanel navigationPanel;
 
     private JLabel imageLabel;
-    private JLabel previousImageLabel;
-    private JLabel nextImageLabel;
 
     private int currentIndex = 0;
 
@@ -46,7 +43,6 @@ public class ImageCarousel extends JPanel {
         setLayout(new BorderLayout());
         initImageContainer();
         initIndicatorPanel();
-        initNavigationLabels();
         layoutComponents();
         updateImage();
     }
@@ -59,6 +55,12 @@ public class ImageCarousel extends JPanel {
         imageContainer.setOpaque(false);
         imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(JLabel.CENTER);
+        imageLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showNextImage();
+            }
+        });
         imageContainer.add(imageLabel, BorderLayout.CENTER);
     }
 
@@ -71,57 +73,17 @@ public class ImageCarousel extends JPanel {
     }
 
     /**
-     * Creates and initializes the navigation labels (previous and next).
-     */
-    private void initNavigationLabels() {
-        // Create previous and next buttons using helper method
-        previousImageLabel = createNavigationLabel("/LandingPage/previous.png", 10, 10, this::showPreviousImage);
-        nextImageLabel = createNavigationLabel("/LandingPage/next.png", 10, 10, this::showNextImage);
-    }
-
-    /**
      * Lays out all components in the main panel.
      */
     private void layoutComponents() {
-        // Create navigation panel with previous button, indicator panel, and next button
-        navigationPanel = new JPanel(new BorderLayout());
-        navigationPanel.setOpaque(false);
-
         // Container for the indicator dots to center them properly
         JPanel indicatorContainer = new JPanel(new FlowLayout(FlowLayout.CENTER));
         indicatorContainer.setOpaque(false);
         indicatorContainer.add(indicatorPanel);
 
-        navigationPanel.add(previousImageLabel, BorderLayout.WEST);
-        navigationPanel.add(indicatorContainer, BorderLayout.CENTER);
-        navigationPanel.add(nextImageLabel, BorderLayout.EAST);
-
         // Add image container to center and navigation panel to the bottom
         add(imageContainer, BorderLayout.CENTER);
-        add(navigationPanel, BorderLayout.SOUTH);
-    }
-
-    /**
-     * Helper method to create a navigation label with an icon and click action.
-     *
-     * @param resourcePath The path to the icon resource.
-     * @param width        Desired width of the icon.
-     * @param height       Desired height of the icon.
-     * @param onClickAction The action to execute on click.
-     * @return Configured JLabel acting as a navigation button.
-     */
-    private JLabel createNavigationLabel(String resourcePath, int width, int height, Runnable onClickAction) {
-        ImageIconRedrawer iconRedrawer = new ImageIconRedrawer();
-        iconRedrawer.setImageIcon(new ImageIcon(getClass().getResource(resourcePath)));
-        JLabel label = new JLabel(iconRedrawer.redrawImageIcon(width, height));
-        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        label.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                onClickAction.run();
-            }
-        });
-        return label;
+        add(indicatorContainer, BorderLayout.SOUTH);
     }
 
     /**

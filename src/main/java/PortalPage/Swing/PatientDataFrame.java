@@ -1,6 +1,7 @@
 package PortalPage.Swing;
 
-import PortalPage.TempModels.TestPatient;
+
+import Models.Patient;
 import Utils.Swing.Colors;
 
 import javax.swing.*;
@@ -9,7 +10,7 @@ import java.awt.*;
 
 public class PatientDataFrame extends JFrame {
     // Model for patient data (using temporary hardcoded data for now)
-    private TestPatient testPatient;
+    private Patient patient;
 
     // UI Components for patient data
     private JTextField txtName;
@@ -25,8 +26,8 @@ public class PatientDataFrame extends JFrame {
     private boolean isEditing = false;
 
     // Constructor accepting a TestPatient object
-    public PatientDataFrame(TestPatient testPatient) {
-        this.testPatient = testPatient;
+    public PatientDataFrame(Patient patient) {
+        this.patient = patient;
         initializeFrame();
         addComponents();
         loadPatientData();
@@ -154,10 +155,10 @@ public class PatientDataFrame extends JFrame {
 
     // Load the patient data from the model into the text fields
     private void loadPatientData() {
-        txtName.setText(testPatient.getName());
-        txtAge.setText(String.valueOf(testPatient.getAge()));
-        txtAddress.setText(testPatient.getAddress());
-        txtPhone.setText(testPatient.getPhone());
+        txtName.setText(patient.getFirstName());
+        txtAge.setText(String.valueOf(patient.getAge()));
+        txtAddress.setText(patient.getSurname());
+        txtPhone.setText(patient.getPhoneNumber());
     }
 
     // Toggle between view mode and edit mode
@@ -182,8 +183,7 @@ public class PatientDataFrame extends JFrame {
         try {
             int age = Integer.parseInt(txtAge.getText().trim());
             // In an MVC structure, here we would notify the controller of the changes.
-            testPatient = new TestPatient(testPatient.getId(), txtName.getText().trim(), age,
-                    txtAddress.getText().trim(), txtPhone.getText().trim());
+            //patient = new Patient(patient.getId(), txtName.getText().trim(), age, txtAddress.getText().trim(), txtPhone.getText().trim());
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "La edad debe ser un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
             return;

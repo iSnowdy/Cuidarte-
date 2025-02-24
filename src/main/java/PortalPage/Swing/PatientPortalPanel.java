@@ -2,7 +2,7 @@ package PortalPage.Swing;
 
 import LandingPage.Swing.HeaderPanel;
 import MainApplication.NavigationController;
-import PortalPage.TempModels.TestPatient;
+import Models.Patient;
 import Utils.Utility.ImageIconRedrawer;
 
 import javax.swing.*;
@@ -16,7 +16,7 @@ import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 public class PatientPortalPanel extends JPanel {
     private final JFrame parentFrame;
     private final NavigationController navigationController;
-    private final TestPatient patient;
+    private final Patient patient;
     private JPanel contentPanel;
     private JPanel gridPanel;
     private final ImageIconRedrawer iconRedrawer;
@@ -28,7 +28,7 @@ public class PatientPortalPanel extends JPanel {
      * @param navigationController The navigation controller instance.
      * @param patient              The test patient instance.
      */
-    public PatientPortalPanel(JFrame parentFrame, NavigationController navigationController, TestPatient patient) {
+    public PatientPortalPanel(JFrame parentFrame, NavigationController navigationController, Patient patient) {
         this.parentFrame = parentFrame;
         this.navigationController = navigationController;
         this.patient = patient;

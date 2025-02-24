@@ -1,7 +1,7 @@
 package PortalPage.Swing;
 
+import Models.Patient;
 import PortalPage.TempModels.HospitalizationReport;
-import PortalPage.TempModels.TestPatient;
 import Utils.FilterComponent;
 import Utils.Swing.Colors;
 
@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.List;
 
 public class HospitalizationReportFrame extends JFrame {
-    private TestPatient patient;
+    private Patient patient;
     private List<HospitalizationReport> allReports;
     private DefaultListModel<HospitalizationReport> reportListModel;
     private JList<HospitalizationReport> reportJList;
@@ -25,9 +25,9 @@ public class HospitalizationReportFrame extends JFrame {
     private static final String FILTER_BY_DATE = "Fecha";
     private static final String FILTER_BY_DIAGNOSIS = "Diagnóstico";
 
-    public HospitalizationReportFrame(TestPatient patient) {
+    public HospitalizationReportFrame(Patient patient) {
         this.patient = patient;
-        setTitle("Informes de Hospitalización de " + patient.getName());
+        setTitle("Informes de Hospitalización de " + patient.getSurname());
         setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -68,7 +68,7 @@ public class HospitalizationReportFrame extends JFrame {
         container.setBorder(new EmptyBorder(20,20,20,20));
 
         // Title label
-        JLabel titleLabel = new JLabel("Informes de Hospitalización de " + patient.getName(), JLabel.CENTER);
+        JLabel titleLabel = new JLabel("Informes de Hospitalización de " + patient.getSurname(), JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         titleLabel.setForeground(Colors.MAIN_APP_COLOUR);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

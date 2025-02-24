@@ -34,8 +34,8 @@ public class Main {
             frame.setSize(1000, 800);
             frame.setLocationRelativeTo(null);
 
-            Authenticator authenticator = new Authenticator();
-            frame.add(authenticator);
+            //Authenticator authenticator = new Authenticator();
+            //frame.add(authenticator);
 
             frame.setVisible(true);
         });

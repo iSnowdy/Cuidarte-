@@ -132,7 +132,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
         CustomizedButton button = new CustomizedButton();
         button.setBackground(MAIN_APP_COLOUR);
         button.setForeground(Color.RED);
-        button.setFont(MAIN_FONT);
+        button.setFont(new Font("Times New Roman", Font.PLAIN, 16));;
         button.setText(text);
         button.addActionListener(action);
         return button;

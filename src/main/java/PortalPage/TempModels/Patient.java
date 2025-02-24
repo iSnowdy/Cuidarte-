@@ -1,7 +1,7 @@
 package PortalPage.TempModels;
 
 // Simple class to represent a patient
-public class TestPatient {
+public class Patient {
     private int id;
     private String name;
     private int age;
@@ -9,7 +9,7 @@ public class TestPatient {
     private String phone;
 
     // Constructor with sample parameters
-    public TestPatient(int id, String name, int age, String address, String phone) {
+    public Patient(int id, String name, int age, String address, String phone) {
         this.id = id;
         this.name = name;
         this.age = age;

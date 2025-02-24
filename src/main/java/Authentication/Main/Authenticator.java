@@ -19,6 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,6 +35,7 @@ public class Authenticator extends JPanel {
     private final PanelVerifyCode panelVerifyCode;
 
     private Patient tempPatient;
+    private Consumer<Patient> loginCallBack;
 
     private PatientServices patientServices;
     private JavaMailSender javaMailSender;
@@ -44,7 +46,11 @@ public class Authenticator extends JPanel {
     private boolean isLogin;
     private final DecimalFormat decimalFormat = new DecimalFormat("##0.###");
 
-    public Authenticator() {
+    private boolean isUserLoggedIn = false;
+
+    public Authenticator(Consumer<Patient> loginCallBack) {
+        this.loginCallBack = loginCallBack;
+
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         this.backGround = new JLayeredPane();
@@ -166,12 +172,15 @@ public class Authenticator extends JPanel {
             if (MyValidator.verifyPatientCode(patientCode, inputCode)) {
                 patientServices.registerPatient(patient);
                 showMessage(MessageTypes.SUCCESS, "Código correcto. Registro completado.");
+                this.userLoggedIn(true);
+                if (loginCallBack != null) loginCallBack.accept(patient);
 
                 // Clear cache just in case
                 patient = null;
                 panelVerifyCode.hidePanel();
             } else {
                 showMessage(MessageTypes.ERROR, "Código incorrecto. Inténtelo nuevamente.");
+                this.userLoggedIn(false);
             }
         } catch (Exception e) {
             showMessage(MessageTypes.ERROR, "Error en la verificación.");
@@ -212,6 +221,8 @@ public class Authenticator extends JPanel {
             // Successful login
             showMessage(MessageTypes.SUCCESS, "Inicio de sesión exitoso.");
             LOGGER.info("Patient " + patient.getEmail() + " logged in successfully.");
+            this.userLoggedIn(true);
+            if (loginCallBack != null) loginCallBack.accept(patient);
 
             // TODO: Integrate with the main dashboard or transition to the next screen
         } catch (Exception e) {
@@ -275,5 +286,17 @@ public class Authenticator extends JPanel {
         animator.setDeceleration(0.5f);
         animator.setResolution(0);
         return animator;
+    }
+
+    public void userLoggedIn(boolean isLoggedIn) {
+        this.isUserLoggedIn = isLoggedIn;
+    }
+
+    public Patient getPatientFromAuthenticator() {
+        return tempPatient;
+    }
+
+    public boolean isUserLoggedIn() {
+        return isUserLoggedIn;
     }
 }

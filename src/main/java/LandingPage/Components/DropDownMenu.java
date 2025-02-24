@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
+import static Utils.Swing.Colors.SECONDARY_APP_COLOUR;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
 /**
@@ -97,11 +98,22 @@ public class DropDownMenu extends JPopupMenu {
      */
     private void highlightSelectedItem(JPanel selected) {
         if (selectedPanel != null) {
+            // Reset previous panel color
             selectedPanel.setBackground(Color.WHITE);
+
+            // Reset previous text color
+            JLabel previousLabel = (JLabel) selectedPanel.getComponent(0);
+            previousLabel.setForeground(Color.BLACK);
         }
-        selected.setBackground(new Color(230, 230, 230)); // Light gray highlight
+
+        // Apply highlight effect to new selection
+        selected.setBackground(MAIN_APP_COLOUR);
+        JLabel newLabel = (JLabel) selected.getComponent(0);
+        newLabel.setForeground(Color.WHITE); // Ensure text color changes
+
         selectedPanel = selected;
     }
+
 
     /**
      * Displays the dropdown menu under the specified component.

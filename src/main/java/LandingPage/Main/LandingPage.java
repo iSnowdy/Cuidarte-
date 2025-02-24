@@ -19,6 +19,7 @@ public class LandingPage extends JPanel {
 
     public LandingPage(JFrame frame) {
         this.frame = frame;
+        this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Full Screen
         this.navigationController = new NavigationController(frame, this);
         initializeUI();
     }

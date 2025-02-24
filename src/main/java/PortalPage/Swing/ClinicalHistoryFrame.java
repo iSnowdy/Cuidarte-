@@ -1,7 +1,7 @@
 package PortalPage.Swing;
 
+import Models.Patient;
 import PortalPage.TempModels.ClinicalHistory;
-import PortalPage.TempModels.TestPatient;
 import Utils.FilterComponent;
 import Utils.Swing.Colors;
 
@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.List;
 
 public class ClinicalHistoryFrame extends JFrame {
-    private TestPatient patient;
+    private Patient patient;
     private List<ClinicalHistory> allHistories;
     private DefaultListModel<ClinicalHistory> historyListModel;
     private JList<ClinicalHistory> historyJList;
@@ -27,7 +27,7 @@ public class ClinicalHistoryFrame extends JFrame {
     private static final String FILTER_BY_SPECIALTY = "Especialidad";
     private static final String FILTER_BY_DOCTOR = "Doctor";
 
-    public ClinicalHistoryFrame(TestPatient patient) {
+    public ClinicalHistoryFrame(Patient patient) {
         this.patient = patient;
         setTitle("Historial Clínico");
         setSize(700, 500);
@@ -63,7 +63,7 @@ public class ClinicalHistoryFrame extends JFrame {
         container.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         // Title label: "Historia Clínica de [patient name]"
-        JLabel titleLabel = new JLabel("Historia Clínica de " + patient.getName(), JLabel.CENTER);
+        JLabel titleLabel = new JLabel("Historia Clínica de " + patient.getSurname(), JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         titleLabel.setForeground(Colors.MAIN_APP_COLOUR);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

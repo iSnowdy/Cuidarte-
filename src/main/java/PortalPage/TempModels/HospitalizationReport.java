@@ -1,19 +1,21 @@
 package PortalPage.TempModels;
 
+import Models.Patient;
+
 import java.util.Date;
 
 public class HospitalizationReport {
     private int id;
-    private TestPatient testPatient;
+    private Models.Patient patient;
     private Date admissionDate;
     private Date dischargeDate;
     private String diagnosis;
     private String procedures;
     private String notes;
 
-    public HospitalizationReport(int id, TestPatient testPatient, Date admissionDate, Date dischargeDate, String diagnosis, String procedures, String notes) {
+    public HospitalizationReport(int id, Models.Patient patient, Date admissionDate, Date dischargeDate, String diagnosis, String procedures, String notes) {
         this.id = id;
-        this.testPatient = testPatient;
+        this.patient = patient;
         this.admissionDate = admissionDate;
         this.dischargeDate = dischargeDate;
         this.diagnosis = diagnosis;
@@ -22,7 +24,7 @@ public class HospitalizationReport {
     }
 
     public int getId() { return id; }
-    public TestPatient getTestPatient() { return testPatient; }
+    public Patient getTestPatient() { return patient; }
     public Date getAdmissionDate() { return admissionDate; }
     public Date getDischargeDate() { return dischargeDate; }
     public String getDiagnosis() { return diagnosis; }

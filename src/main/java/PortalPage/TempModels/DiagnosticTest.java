@@ -1,25 +1,27 @@
 package PortalPage.TempModels;
 
 import Models.Enums.TestType;
+import Models.Patient;
+
 import java.util.Date;
 
 public class DiagnosticTest {
     private int id;
-    private TestPatient testPatient;
+    private Models.Patient patient;
     private String testResults;
     private TestType testType;
     private Date testDate;
 
-    public DiagnosticTest(int id, TestPatient testPatient, String testResults, TestType testType, Date testDate) {
+    public DiagnosticTest(int id, Models.Patient patient, String testResults, TestType testType, Date testDate) {
         this.id = id;
-        this.testPatient = testPatient;
+        this.patient = patient;
         this.testResults = testResults;
         this.testType = testType;
         this.testDate = testDate;
     }
 
     public int getId() { return id; }
-    public TestPatient getTestPatient() { return testPatient; }
+    public Patient getTestPatient() { return patient; }
     public String getTestResults() { return testResults; }
     public TestType getTestType() { return testType; }
     public Date getTestDate() { return testDate; }

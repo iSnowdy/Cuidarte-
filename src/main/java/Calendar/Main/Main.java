@@ -33,7 +33,7 @@ public class Main extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.WHITE);
 
-        calendarPanel = new CalendarCustom();
+        //calendarPanel = new CalendarCustom();
 
         mainPanel.add(calendarPanel, BorderLayout.CENTER);
 
@@ -47,12 +47,12 @@ public class Main extends JFrame {
         clinicData.put("Clinic B", List.of("Dermatology", "Pediatrics", "Ophthalmology"));
         clinicData.put("Clinic C", List.of("Radiology", "Orthopedics", "Surgery"));
 
-        ClinicSpecialitySelectionDialog selectionDialog = new ClinicSpecialitySelectionDialog(this, clinicData);
-        selectionDialog.setVisible(true);
+        //ClinicSpecialitySelectionDialog selectionDialog = new ClinicSpecialitySelectionDialog(this, clinicData);
+        //selectionDialog.setVisible(true);
 
         // Retrieve selected values
-        selectedClinic = selectionDialog.getSelectedClinic();
-        selectedSpecialty = selectionDialog.getSelectedSpecialty();
+        //selectedClinic = selectionDialog.getSelectedClinic();
+        //selectedSpecialty = selectionDialog.getSelectedSpecialty();
 
         return selectedClinic != null && selectedSpecialty != null;
     }

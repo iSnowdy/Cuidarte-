@@ -2,28 +2,28 @@ package Models;
 
 import Models.Enums.AppointmentState;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Appointment {
     private int id;
     private String doctorDNI, patientDNI;
     private int clinicID;
-    private Date appointmentDate;
+    private Timestamp appointmentDate;
     private AppointmentState appointmentState;
     private String description;
     private String doctorObservations;
 
-    public Appointment(String patientDNI, String doctorDNI, int clinicID, Date appointmentDate, String description) {
+    public Appointment(String patientDNI, String doctorDNI, int clinicID, Timestamp appointmentDateTime, String description) {
         this.patientDNI = patientDNI;
         this.doctorDNI = doctorDNI;
         this.clinicID = clinicID;
-        this.appointmentDate = appointmentDate;
+        this.appointmentDate = appointmentDateTime;
         this.description = description;
         this.appointmentState = AppointmentState.PENDING;
     }
 
     // Constructors needed to map a ResultSet -> Appointment
-    public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Date appointmentDate, AppointmentState appointmentState, String description) {
+    public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Timestamp appointmentDate, AppointmentState appointmentState, String description) {
         this.id = id;
         this.patientDNI = patientDNI;
         this.doctorDNI = doctorDNI;
@@ -33,7 +33,7 @@ public class Appointment {
         this.description = description;
     }
 
-    public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Date appointmentDate, AppointmentState appointmentState, String description, String doctorObservations) {
+    public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Timestamp appointmentDate, AppointmentState appointmentState, String description, String doctorObservations) {
         this.id = id;
         this.patientDNI = patientDNI;
         this.doctorDNI = doctorDNI;
@@ -42,6 +42,11 @@ public class Appointment {
         this.appointmentState = appointmentState;
         this.description = description;
         this.doctorObservations = doctorObservations;
+    }
+
+    public String formatedAppointment() {
+        return
+                "Su cita es el día: " + appointmentDate;
     }
 
 
@@ -74,10 +79,10 @@ public class Appointment {
         this.clinicID = clinicID;
     }
 
-    public Date getAppointmentDate() {
+    public Timestamp getAppointmentDateTime() {
         return appointmentDate;
     }
-    public void setAppointmentDate(Date appointmentDate) {
+    public void setAppointmentDateTime(Timestamp appointmentDate) {
         this.appointmentDate = appointmentDate;
     }
 

@@ -6,6 +6,7 @@ import Models.Enums.AppointmentState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +32,8 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
                     entity.getPatientDNI(),
                     entity.getDoctorDNI(),
                     entity.getClinicID(),
-                    entity.getAppointmentDate(),
-                    entity.getAppointmentState().name(),  // Convert ENUM to String
+                    entity.getAppointmentDateTime(),
+                    entity.getAppointmentState().getValue(),  // Convert ENUM to String
                     entity.getDescription(),
                     entity.getDoctorObservations()
             );
@@ -57,8 +58,8 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
                     entity.getPatientDNI(),
                     entity.getDoctorDNI(),
                     entity.getClinicID(),
-                    entity.getAppointmentDate(),
-                    entity.getAppointmentState().name(),
+                    entity.getAppointmentDateTime(),
+                    entity.getAppointmentState().getValue(),
                     entity.getDescription(),
                     entity.getDoctorObservations(),
                     entity.getId()
@@ -124,10 +125,35 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
                 rs.getString("DNI_Paciente"),
                 rs.getString("DNI_Medico"),
                 rs.getInt("ID_Clinica"),
-                rs.getDate("Fecha_Hora"),
+                rs.getTimestamp("Fecha_Hora"),
                 AppointmentState.fromString(rs.getString("Estado_Cita")),  // Convert String to ENUM
                 rs.getString("Motivo_Consulta"),
                 rs.getString("Observaciones_Medicas")
         );
+    }
+
+    // Retrieves the appointments for a specific doctor on a given date
+    public List<String> getBookedAppointments(String doctorDNI, java.sql.Date date) throws DatabaseQueryException {
+        List<String> bookedAppointments = new ArrayList<>();
+
+        String query =
+                "SELECT TIME(Fecha_Hora) AS Hora " +
+                "FROM citas_medicas " +
+                "WHERE " +
+                    "DNI_Medico = ? AND " +
+                    "DATE(Fecha_Hora) = ? AND " +
+                    "Estado_Cita != 'Cancelada'";
+
+        try (ResultSet resultSet = executeQuery(query, doctorDNI, date)) {
+            while (resultSet.next()) {
+                bookedAppointments.add(resultSet.getString("Hora")); // AS Fecha_Hora -> Hora
+            }
+            LOGGER.info("Loaded " + bookedAppointments.size() +
+                    " appointments for doctor with DNI " + doctorDNI + " on " + date);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching appointments for Doctor DNI: " + doctorDNI + " at: " + date, e);
+            throw new DatabaseQueryException("Error fetching appointments for doctor");
+        }
+        return bookedAppointments;
     }
 }

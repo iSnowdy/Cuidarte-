@@ -1,15 +1,26 @@
 package AboutUs.Swing;
 
 import AboutUs.Components.CustomScrollBar;
-import LandingPage.Swing.HeaderPanel;
+import DAO.DoctorDAO;
+import Exceptions.DatabaseOpeningException;
+import Exceptions.DatabaseQueryException;
+import LandingPage.Components.NotificationPopUp;
 import MainApplication.NavigationController;
+import Models.Doctor;
+import Utils.Utility.CustomLogger;
 import Utils.Utility.ImageIconRedrawer;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 
 public class AboutUsPanel extends JPanel {
+    private final Logger LOGGER = CustomLogger.getLogger(AboutUsPanel.class);
+
     private final JFrame parentFrame;
     private final NavigationController navigationController;
     private JPanel contentPanel;
@@ -31,7 +42,6 @@ public class AboutUsPanel extends JPanel {
         this.iconRedrawer = new ImageIconRedrawer();
 
         initPanel();
-        //addHeader();
         addContent();
 
         // Limit the size of the component to 70% of the parent frame
@@ -46,14 +56,6 @@ public class AboutUsPanel extends JPanel {
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
-    }
-
-    /**
-     * Adds the HeaderPanel at the top of the page.
-     */
-    private void addHeader() {
-        HeaderPanel headerPanel = new HeaderPanel(parentFrame, navigationController);
-        add(headerPanel, BorderLayout.NORTH);
     }
 
     /**
@@ -77,26 +79,24 @@ public class AboutUsPanel extends JPanel {
         titleLabel.setForeground(MAIN_APP_COLOUR);
         contentPanel.add(titleLabel, gbc);
 
-        gbc.gridy++;
-        JLabel subTitleLabel = new JLabel("Lore ipssum Lore ipssum Lore ipssum Lore ipssum Lore ipssum Lore ipssum", JLabel.CENTER);
-        subTitleLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        contentPanel.add(subTitleLabel, gbc);
+        String[] imagePaths = {
+                "/AboutUs/alejandro_ramirez_director_hospital.jpeg", "/AboutUs/mariana_torres_jefa_enfermeria.jpeg",
+                "/AboutUs/ricardo_gomez_jefe_urgencias.jpeg", "/AboutUs/laura_fernandez_jefa_cirugia.jpeg",
+                "/AboutUs/doctor_random1.jpg", "/AboutUs/doctor_random2.jpg", "/AboutUs/doctor_random3.jpg"
+        };
 
-        gbc.gridy++;
-        contentPanel.add(createProfilePanel("Dr. Alejandro Ramírez", "Director Médico",
-                "/AboutUs/alejandro_ramirez_director_hospital.jpeg", firstDescription), gbc);
-
-        gbc.gridy++;
-        contentPanel.add(createProfilePanel("Lic. Mariana Torres", "Jefa de Enfermería",
-                "/AboutUs/mariana_torres_jefa_enfermeria.jpeg", secondDescription), gbc);
-
-        gbc.gridy++;
-        contentPanel.add(createProfilePanel("Dr. Ricardo Gómez", "Jefe de Urgencias",
-                "/AboutUs/ricardo_gomez_jefe_urgencias.jpeg", thirdDescription), gbc);
-
-        gbc.gridy++;
-        contentPanel.add(createProfilePanel("Dra. Laura Fernández", "Jefa de Cirugía",
-                "/AboutUs/laura_fernandez_jefa_cirugia.jpeg", fourthDescription), gbc);
+        List<Doctor> headDoctors = loadHeadDoctorsFromDB();
+        if (headDoctors.isEmpty()) {
+            gbc.gridy++;
+            JLabel noDataLabel = new JLabel("No se han encontrado doctores en este momento.", JLabel.CENTER);
+            noDataLabel.setFont(new Font("Arial", Font.ITALIC, 16));
+            contentPanel.add(noDataLabel, gbc);
+        } else {
+            for (int i = 0; i < headDoctors.size(); i++) {
+                gbc.gridy++;
+                contentPanel.add(createProfilePanel(headDoctors.get(i), imagePaths[i]), gbc);
+            }
+        }
 
         scrollPane = new JScrollPane(contentPanel);
         // Custom ScrollBar
@@ -109,16 +109,23 @@ public class AboutUsPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    /**
-     * Creates a profile panel for each staff member.
-     *
-     * @param doctorName      The doctor's name.
-     * @param doctorTitle     The doctor's title.
-     * @param doctorImagePath The image path of the doctor.
-     * @param description     The description of the doctor.
-     * @return A configured JPanel with profile details.
-     */
-    private JPanel createProfilePanel(String doctorName, String doctorTitle, String doctorImagePath, String description) {
+    private List<Doctor> loadHeadDoctorsFromDB() {
+        try {
+            DoctorDAO doctorDAO = new DoctorDAO();
+            return doctorDAO.findAllBosses();
+        } catch (DatabaseOpeningException | DatabaseQueryException e) {
+            LOGGER.log(Level.SEVERE, "Error loading all head doctors from DB for AboutUsPanel", e);
+            NotificationPopUp.showErrorMessage(
+                    this,
+                    "Error",
+                    "No se han podido cargar correctamente los jefes de departamento"
+            );
+            return List.of();
+        }
+    }
+
+    // Creates a profile panel for each staff member
+    private JPanel createProfilePanel(Doctor doctor, String doctorImagePath) {
         // Main Panel
         JPanel profilePanel = new JPanel(new BorderLayout());
         profilePanel.setBackground(Color.WHITE);
@@ -141,15 +148,15 @@ public class AboutUsPanel extends JPanel {
         textPanel.setBackground(Color.WHITE);
         textPanel.setBorder(new EmptyBorder(0, 20, 0, 0));
 
-        JLabel nameLabel = new JLabel(doctorName);
+        JLabel nameLabel = new JLabel(doctor.getFirstName() + " " + doctor.getSurname());
         nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel titleLabel = new JLabel(doctorTitle);
+        JLabel titleLabel = new JLabel(doctor.getSpecialty());
         titleLabel.setFont(new Font("Arial", Font.ITALIC, 14));
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JTextArea descriptionArea = new JTextArea(description);
+        JTextArea descriptionArea = new JTextArea(doctor.getDescription());
         descriptionArea.setFont(new Font("Arial", Font.PLAIN, 14));
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
@@ -168,13 +175,4 @@ public class AboutUsPanel extends JPanel {
 
         return profilePanel;
     }
-
-    // TODO: Move descriptions to a separate data class in the future
-    private final String firstDescription = "Médico Cirujano, Especialista en Administración Hospitalaria...";
-
-    private final String secondDescription = "Licenciada en Enfermería, Máster en Gestión Sanitaria...";
-
-    private final String thirdDescription = "Médico Especialista en Medicina de Urgencias y Emergencias...";
-
-    private final String fourthDescription = "Médica Cirujana, Especialista en Cirugía General y Laparoscópica...";
 }

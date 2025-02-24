@@ -1,8 +1,17 @@
 package Calendar.Component;
 
-import Calendar.Main.TemporaryAppointment;
 import Calendar.Swing.PanelSlide;
+import DAO.AppointmentDAO;
+import DAO.ClinicDAO;
+import DAO.DoctorDAO;
+import DAO.PatientDAO;
+import Exceptions.DatabaseOpeningException;
+import Exceptions.DatabaseQueryException;
 import LandingPage.Components.NotificationPopUp;
+import Models.Appointment;
+import Models.Doctor;
+import Models.Patient;
+import Utils.Utility.CustomLogger;
 import Utils.Utility.ImageIconRedrawer;
 
 import javax.swing.*;
@@ -10,13 +19,27 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static Utils.Swing.Colors.SECONDARY_APP_COLOUR;
 
 public class CalendarCustom extends JPanel {
+    private final Logger LOGGER = CustomLogger.getLogger(CalendarCustom.class);
+
+    private Patient patient;
+
+    private DoctorDAO doctorDAO;
+    private ClinicDAO clinicDAO;
+    private AppointmentDAO appointmentDAO;
+    private PatientDAO patientDAO;
+
     private final ImageIconRedrawer iconRedrawer;
     private int month;
     private int year;
@@ -26,6 +49,10 @@ public class CalendarCustom extends JPanel {
     private JButton backButton;
     private JButton nextButton;
     private JButton changeDoctorButton;
+
+    private String selectedClinic;
+    private String selectedSpeciality;
+    private int clinicID;
 
     private JComboBox<String> doctorComboBox;
     private Map<String, List<Integer>> doctorScheduleMap;
@@ -38,30 +65,105 @@ public class CalendarCustom extends JPanel {
     private JPanel appointmentHistoryPanel;
     private PanelDate currentPanelDate;
 
+    private Doctor selectedDoctorEntity;
     private String selectedDoctor;
 
-    // TODO: For testing purposes only!
-    private final List<TemporaryAppointment> confirmedAppointments = new ArrayList<>();
+    private final List<Appointment> confirmedAppointments = new ArrayList<>();
     private DefaultListModel<String> historyModel = new DefaultListModel<>();
     private JList<String> historyList;
 
     private boolean isSyncingAppointments = false;
 
 
-    public CalendarCustom() {
+    public CalendarCustom(Patient patient, String selectedClinic, String selectedSpeciality) {
         this.iconRedrawer = new ImageIconRedrawer();
+        this.patient = patient;
+        this.selectedClinic = selectedClinic;
+        this.selectedSpeciality = selectedSpeciality;
+
+        initDAOs();
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
         thisMonth(); // Initialize current month and year
 
-        initDoctorSelection(); // Dropdown for selecting a doctor
+        loadDoctorDataFromDB();
+
+        //initDoctorSelection(); // Dropdown for selecting a doctor
         initLeftPanel(); // Left panel for specific time scheduling
         initRightPanel(); // Right panel containing the calendar
 
         setupMainLayout();
     }
+
+    private void initDAOs() {
+        try {
+            this.doctorDAO = new DoctorDAO();
+            this.clinicDAO = new ClinicDAO();
+            this.appointmentDAO = new AppointmentDAO();
+            this.patientDAO = new PatientDAO();
+        } catch (DatabaseOpeningException e) {
+            LOGGER.log(Level.SEVERE, "Error opening DAOs for Calendar", e);
+            NotificationPopUp.showErrorMessage(
+                    this,
+                    "Error",
+                    "No se ha podido inicializar el calendario correctamente"
+            );
+            // TODO: How to dispose of the frame?
+        }
+    }
+
+    // DB stuff
+
+    private void loadDoctorDataFromDB() {
+        try {
+            Optional<Integer> optionalClinicID = clinicDAO.getClinicIDByName(selectedClinic);
+            if (optionalClinicID.isEmpty()) {
+                NotificationPopUp.showErrorMessage(
+                        this,
+                        "Error",
+                        "No se ha encontrado la clínica seleccionada."
+                );
+                return;
+            }
+            this.clinicID = optionalClinicID.get();
+
+            // Load doctors from the clinic selected and of that specific speciality
+            List<Doctor> doctors = doctorDAO.findDoctorsByClinicAndSpeciality(clinicID, selectedSpeciality);
+            if (doctors.isEmpty()) {
+                NotificationPopUp.showErrorMessage(
+                        this,
+                        "Error",
+                        "No hay doctores disponibles para la clínica y especialidad seleccionadas."
+                );
+                return;
+            }
+
+            // Now populate the ComboBox
+            doctorScheduleMap = new HashMap<>();
+            doctorTimeSlots = new HashMap<>();
+
+            // Adds an ArrayList as a placeholder for the time slots later
+            for (Doctor doctor : doctors) {
+                doctorScheduleMap.put(doctor.getFirstName() + " " + doctor.getSurname(), new ArrayList<>());
+            }
+
+            doctorTimeSlots = doctorDAO.getDoctorAvailableTimeSlots(clinicID, java.sql.Date.valueOf(LocalDate.now()));
+
+            SwingUtilities.invokeLater(() -> {
+                doctorComboBox.setModel(new DefaultComboBoxModel<>(doctorScheduleMap.keySet().toArray(new String[0])));
+                doctorComboBox.setSelectedIndex(-1);
+            });
+
+        } catch (DatabaseQueryException e) {
+            LOGGER.log(Level.SEVERE, "Could not load all doctors from DB in Calendar");
+            NotificationPopUp.showErrorMessage(
+                    this, "Error", "No se pudieron cargar los médicos."
+            );
+        }
+    }
+
 
     // Updates the displayed calendar based on the selected doctor's available days
     private void updateDoctorSchedule(boolean toRight) {
@@ -96,21 +198,30 @@ public class CalendarCustom extends JPanel {
         isSyncingAppointments = false;
     }
 
-    // TODO: Temporary
     // Extracts the date from an appointment
     private LocalDate extractDateFromAppointment(String appointmentText) {
         return confirmedAppointments.stream()
                 .filter(a -> a.toString().equals(appointmentText))
-                .map(TemporaryAppointment::getDate)
+                .map(a -> a.getAppointmentDateTime().toLocalDateTime().toLocalDate())
                 .findFirst()
                 .orElse(null);
     }
+
+    // Extracts the time from an appointment
+    private LocalTime extractTimeFromAppointment(String appointmentText) {
+        return confirmedAppointments.stream()
+                .filter(a -> a.toString().equals(appointmentText))
+                .map(a -> a.getAppointmentDateTime().toLocalDateTime().toLocalTime())
+                .findFirst()
+                .orElse(null);
+    }
+
 
     // Updates the left panel to display available time slots for a selected day
     private void updateTimeSlots(LocalDate selectedDate) {
         leftPanel.removeAll();
 
-        JLabel dateLabel = new JLabel("Available slots for: " + selectedDate, SwingConstants.CENTER);
+        JLabel dateLabel = new JLabel("Horarios disponibles para: " + selectedDate, SwingConstants.CENTER);
         dateLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         dateLabel.setForeground(Color.WHITE);
         leftPanel.add(dateLabel, BorderLayout.NORTH);
@@ -125,7 +236,7 @@ public class CalendarCustom extends JPanel {
                 timeSlotPanel.add(slotButton);
             }
         } else {
-            JLabel noSlotsLabel = new JLabel("No slots available", SwingConstants.CENTER);
+            JLabel noSlotsLabel = new JLabel("No hay horarios disponibles", SwingConstants.CENTER);
             noSlotsLabel.setForeground(Color.WHITE);
             timeSlotPanel.add(noSlotsLabel);
         }
@@ -157,24 +268,63 @@ public class CalendarCustom extends JPanel {
 
     // Helps updating the historic of appointments
     private void registerAppointment(LocalDate date, String time) {
-        TemporaryAppointment appointment = new TemporaryAppointment(selectedDoctor, date, time);
-        confirmedAppointments.add(appointment);
-        historyModel.addElement(appointment.toString()); // Adds this specific appointment to the historic
-        appointmentDays.add(date); // Adds it to the list of appointments injected to PanelDate
+        try {
+            // Ask for the patient motive of appointment
+            String appointmentReason = JOptionPane.showInputDialog(
+                    this,
+                    "Ingrese el motivo de la consulta: ",
+                    "Motivo de la cita",
+                    JOptionPane.QUESTION_MESSAGE
+            );
 
-        NotificationPopUp.showInfoMessage(this, "Cita confirmada con éxito.", "Éxito");
+            if (appointmentReason == null || appointmentReason.trim().isEmpty()) {
+                NotificationPopUp.showErrorMessage(
+                        this,
+                        "Error",
+                        "Debe ingresar un motivo para la consulta"
+                );
+                return;
+            }
 
-        if (appointmentHistoryPanel.getParent() == null) {
-            leftPanel.add(appointmentHistoryPanel, BorderLayout.SOUTH);
-            leftPanel.revalidate();
-            leftPanel.repaint();
+            String dateTimeString = date + " " + time; // Result: YYYY-MM-DD HH:MM
+            Timestamp appointmentTimestamp = Timestamp.valueOf(dateTimeString + ":00"); // :00 seconds
+
+            Appointment newAppointment = new Appointment(
+                    patient.getDNI(), selectedDoctorEntity.getDNI(), clinicID,
+                    appointmentTimestamp, appointmentReason
+            );
+
+            appointmentDAO.save(newAppointment);
+
+            confirmedAppointments.add(newAppointment);
+            // Adds this specific appointment to the historic
+            historyModel.addElement("Cita con " + selectedDoctor + " el " + date + " a las " + time);
+            appointmentDays.add(date); // Adds it to the list of appointments injected to PanelDate
+
+            NotificationPopUp.showInfoMessage(this, "Cita confirmada con éxito.", "Éxito");
+
+            // Removes booked slot
+            doctorTimeSlots.get(selectedDoctor).remove(time);
+
+            if (appointmentHistoryPanel.getParent() == null) {
+                leftPanel.add(appointmentHistoryPanel, BorderLayout.SOUTH);
+                leftPanel.revalidate();
+                leftPanel.repaint();
+            }
+            updateDoctorSchedule(true);
+        } catch (DatabaseQueryException e) {
+            LOGGER.log(Level.SEVERE, "Error saving appointment", e);
+            NotificationPopUp.showErrorMessage(
+                    this,
+                    "Error",
+                    "No se pudo guardar la cita."
+            );
         }
-        updateDoctorSchedule(true);
     }
 
     public void showAppointmentDetails(LocalDate date) {
-        TemporaryAppointment appointment = confirmedAppointments.stream()
-                .filter(a -> a.getDate().equals(date))
+        Appointment appointment = confirmedAppointments.stream()
+                .filter(a -> a.getAppointmentDateTime().toLocalDateTime().toLocalDate().equals(date))
                 .findFirst()
                 .orElse(null);
 
@@ -191,7 +341,7 @@ public class CalendarCustom extends JPanel {
 
         int selection = JOptionPane.showOptionDialog(
                 this,
-                "Detalles de la Cita:\n" + appointment.toString(),
+                "Detalles de la Cita:\n" + appointment.formatedAppointment(),
                 "Información de Cita",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.INFORMATION_MESSAGE,
@@ -201,22 +351,28 @@ public class CalendarCustom extends JPanel {
         );
 
         if (isFuture && selection == 0) {
-            cancelAppointment(date);
+            cancelAppointment(appointment);
 
             // Force UI update to remove the appointment marker from the calendar
             historyList.updateUI();
         }
     }
 
-    private void cancelAppointment(LocalDate date) {
+    private void cancelAppointment(Appointment appointmentToCancel) {
+        LocalDate date = appointmentToCancel.getAppointmentDateTime().toLocalDateTime().toLocalDate();
+        String time = appointmentToCancel.getAppointmentDateTime().toLocalDateTime().toLocalTime().toString();
+
         // Remove from confirmed appointments
-        confirmedAppointments.removeIf(a -> a.getDate().equals(date));
+        confirmedAppointments.removeIf(a -> a.getAppointmentDateTime().equals(appointmentToCancel.getAppointmentDateTime()));
         appointmentDays.remove(date);
+
+        doctorTimeSlots.get(selectedDoctor).add(time); // Frees the slot
 
         // Remove from history model
         for (int i = 0; i < historyModel.getSize(); i++) {
             LocalDate appointmentDate = extractDateFromAppointment(historyModel.getElementAt(i));
-            if (appointmentDate != null && appointmentDate.equals(date)) {
+            LocalTime appointmentTime = extractTimeFromAppointment(historyModel.getElementAt(i));
+            if (appointmentDate != null && appointmentDate.equals(date) && appointmentTime.equals(time)) {
                 historyModel.remove(i);
                 break;
             }
@@ -253,19 +409,6 @@ public class CalendarCustom extends JPanel {
 
     // Initializes the dropdown for doctor selection and loads mock data
     private void initDoctorSelection() {
-        // TODO: Test data. Should be loaded from DB
-        doctorScheduleMap = new HashMap<>();
-        doctorScheduleMap.put("Dr. Smith", List.of(2, 4, 6, 8, 10, 12, 14)); // Even days
-        doctorScheduleMap.put("Dr. Johnson", List.of(1, 3, 5, 7, 9, 11, 13)); // Odd days
-        doctorScheduleMap.put("Dr. Adams", List.of(5, 10, 15, 20, 25)); // Random
-
-        // Define specific time slots for each doctor
-        doctorTimeSlots = new HashMap<>();
-        doctorTimeSlots.put("Dr. Smith", List.of("09:00 AM", "10:30 AM", "12:00 PM"));
-        doctorTimeSlots.put("Dr. Johnson", List.of("02:00 PM", "03:30 PM", "05:00 PM"));
-        doctorTimeSlots.put("Dr. Adams", List.of("08:00 AM", "09:45 AM", "11:30 AM", "01:00 PM"));
-
-        doctorComboBox = new JComboBox<>(doctorScheduleMap.keySet().toArray(new String[0]));
         doctorComboBox.setPreferredSize(new Dimension(200, 30));
         doctorComboBox.addActionListener(e -> handleDoctorSelection());
 
@@ -276,8 +419,40 @@ public class CalendarCustom extends JPanel {
     private void handleDoctorSelection() {
         selectedDoctor = (String) doctorComboBox.getSelectedItem();
         if (selectedDoctor != null) {
+            loadDoctorEntityFromDB(selectedDoctor);
             updateDoctorSchedule(true);
             changeDoctorButton.setVisible(true); // Now show the button to go back
+        }
+    }
+
+    private void loadDoctorEntityFromDB(String doctorName) {
+        try {
+            // Extract the name from the ComboBox selectedDoctor String
+            String[] nameParts = doctorName.split(" ");
+            if (nameParts.length < 1) {
+                LOGGER.log(Level.SEVERE, "Invalid doctor name format: " + doctorName);
+                return;
+            }
+            String firstName = nameParts[0];
+            String lastName = String.join(" ", Arrays.copyOfRange(nameParts, 1, nameParts.length));
+
+            Optional<Doctor> doctorOptional = doctorDAO.findByName(firstName, lastName);
+            if (doctorOptional.isEmpty()) {
+                NotificationPopUp.showErrorMessage(
+                        this,
+                        "Error",
+                        "Doctor " + doctorName + " no encontrado"
+                );
+            }
+            this.selectedDoctorEntity = doctorOptional.get();
+
+        } catch (DatabaseQueryException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching doctors with name " + doctorName, e);
+            NotificationPopUp.showErrorMessage(
+                    this,
+                    "Error",
+                    "No se ha podido cargar la información del doctor."
+            );
         }
     }
 
@@ -357,7 +532,9 @@ public class CalendarCustom extends JPanel {
         if (confirmed) {
             historyModel.remove(index);
             LocalDate date = extractDateFromAppointment(selectedAppointment);
+            LocalTime time = extractTimeFromAppointment(selectedAppointment);
             appointmentDays.remove(date);
+            doctorTimeSlots.get(selectedDoctor).add(time.toString());
 
             NotificationPopUp.showInfoMessage(this, "Cita cancelada con éxito", "Cita cancelada");
 

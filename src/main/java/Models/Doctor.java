@@ -2,11 +2,13 @@ package Models;
 
 public class Doctor extends User {
     private String specialty;
+    private String description;
 
     public Doctor(String DNI, String firstName, String surname, String phoneNumber, String email,
-                  String specialty) {
+                  String specialty, String description) {
         super(DNI, firstName, surname, phoneNumber, email);
         this.specialty = specialty;
+        this.description = description;
     }
 
     @Override
@@ -27,5 +29,12 @@ public class Doctor extends User {
     }
     public void setSpecialty(String specialty) {
         this.specialty = specialty;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -115,8 +115,4 @@ public class PanelDate extends JPanel {
             cell.removeActionListener(al);
         }
     }
-
-    public void refreshDate() {
-        setDate();
-    }
 }

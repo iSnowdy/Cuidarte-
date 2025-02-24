@@ -80,7 +80,7 @@ public class ClinicDAO extends BaseDAO<Clinic, Integer> {
 
     @Override
     public Optional<Clinic> findById(Integer clinicID) throws DatabaseQueryException {
-        String query = "SELECT * FROM clinics WHERE ID_Clinica = " + clinicID;
+        String query = "SELECT * FROM clinicas WHERE ID_Clinica = ?";
 
         try (ResultSet resultSet = executeQuery(query, clinicID)) {
             if (resultSet.next()) {
@@ -89,6 +89,21 @@ public class ClinicDAO extends BaseDAO<Clinic, Integer> {
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error trying to find the clinic with ID " + clinicID, e);
+            throw new DatabaseQueryException("Error trying to select a clinic");
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Integer> getClinicIDByName(String clinicName) throws DatabaseQueryException {
+        String query = "SELECT ID_Clinica FROM clinicas WHERE Nombre = ?";
+
+        try (ResultSet resultSet = executeQuery(query, clinicName)) {
+            if (resultSet.next()) {
+                LOGGER.info("Successfully retrieved clinic " + clinicName + " from database");
+                return Optional.of(resultSet.getInt("ID_Clinica"));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error trying to find the clinic with name " + clinicName, e);
             throw new DatabaseQueryException("Error trying to select a clinic");
         }
         return Optional.empty();
@@ -106,7 +121,7 @@ public class ClinicDAO extends BaseDAO<Clinic, Integer> {
             LOGGER.info("Successfully retrieved clinics (" + clinics.size() + ") from database");
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error selecting all clinics", e);
-            throw new DatabaseQueryException("Error selecting all clinics", e);
+            throw new DatabaseQueryException("Error selecting all clinics");
         }
         return clinics;
     }
@@ -119,5 +134,28 @@ public class ClinicDAO extends BaseDAO<Clinic, Integer> {
                 rs.getString("Email"),
                 rs.getString("Telefono")
         );
+    }
+
+    public List<String> getSpecialitiesByClinic(Integer clinicID) throws DatabaseQueryException {
+        List<String> specialities = new ArrayList<>();
+
+        String query =
+                "SELECT DISTINCT m.Especialidad " +
+                "FROM medicos m" +
+                "JOIN disponibilidad_medico dm " +
+                    "ON m.DNI_Medico = dm.DNI_Medico " +
+                "WHERE m.ID_Clinica = ?";
+
+        try (ResultSet resultSet = executeQuery(query, clinicID)) {
+            while (resultSet.next()) {
+                specialities.add(resultSet.getString("Especialidad"));
+            }
+            LOGGER.info("Successfully retrieved a total of: " + specialities.size() + " specialities from" +
+                    " clinic ID: " + clinicID);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error trying to find the specialities from clinic with ID " + clinicID, e);
+            throw new DatabaseQueryException("Failed to retrieve all specialities for clinic");
+        }
+        return specialities;
     }
 }

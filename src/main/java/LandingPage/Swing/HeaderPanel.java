@@ -16,6 +16,8 @@ import static Utils.Swing.Colors.*;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
 public class HeaderPanel extends JPanel {
+    private JFrame mainFrame;
+
     private final NavigationController navigationController;
     private DropDownMenu dropDownMenu;
 
@@ -33,6 +35,7 @@ public class HeaderPanel extends JPanel {
     private final String mainPhoneNumber = "+34 800 500 220";
 
     public HeaderPanel(JFrame mainFrame, NavigationController navigationController) {
+        this.mainFrame = mainFrame;
         this.navigationController = navigationController;
         this.dropDownMenu = new DropDownMenu(navigationController);
 
@@ -72,7 +75,7 @@ public class HeaderPanel extends JPanel {
         appointmentButton = createButton("Pedir Cita", MY_RED, MAIN_FONT, Color.WHITE, MY_RED.darker());
         appointmentButton.setIcon(createIcon("/LandingPage/calendar-appointment.png", 35, 35));
         appointmentButton.setPreferredSize(new Dimension(160, 50));
-        appointmentButton.addActionListener(e -> appointmentRedirect());
+        appointmentButton.addActionListener(e -> navigationController.appointmentRedirect());
 
         callButton = createButton(mainPhoneNumber, SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR.darker());
         callButton.setIcon(createIcon("/LandingPage/phone-call.png", 35, 35));
@@ -131,16 +134,10 @@ public class HeaderPanel extends JPanel {
         return button;
     }
 
-    // Notifications
-    private void appointmentRedirect() {
-        if (!navigationController.isUserLoggedIn()) {
-            navigationController.showLoginRequiredMessage();
-        } else {
-            System.out.println("Clicked on Agenda");
-        }
-    }
-
     // Login and Register onClicks
+    // The CallBack on Authenticator will notify us when the Patient has successfully logged in
+    // Upon the notification, the patient data will be passed down to the NavigationController
+    // and the frame will be closed
     private void initiateLogin() {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Inicio de Sesión");
@@ -154,13 +151,8 @@ public class HeaderPanel extends JPanel {
             });
 
             frame.add(authenticator);
-
             frame.setVisible(true);
-
-            System.out.println("HERE");
-
         });
-        System.out.println("AFTER");
     }
 
     private void initiateRegister() {
@@ -202,10 +194,16 @@ public class HeaderPanel extends JPanel {
         gbc.insets = new Insets(5, 0, 5, 0); // Spacing
         gbc.gridx = 0;
         gbc.gridy = 0;
-        centerPanel.add(titleLabel, gbc);
-        gbc.gridx = 1;
-        centerPanel.add(plusLabel, gbc);
-        gbc.gridx = 0;
+
+        // Panel to hold "Cuidarte" and "+"
+        JPanel titlePanel = new JPanel();
+        titlePanel.setOpaque(false);
+        titlePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0)); // Ensures small gap between text and "+"
+        titlePanel.add(titleLabel);
+        titlePanel.add(plusLabel);
+
+        centerPanel.add(titlePanel, gbc);
+
         gbc.gridy = 1;
         centerPanel.add(subtitleLabel, gbc);
         gbc.gridy = 2;

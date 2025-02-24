@@ -1,6 +1,8 @@
 package MainApplication;
 
 import AboutUs.Swing.AboutUsPanel;
+import Calendar.Component.CalendarCustom;
+import Calendar.Component.ClinicSpecialitySelectionDialog;
 import Centres.Swing.CentresPanel;
 import LandingPage.Components.NotificationPopUp;
 import LandingPage.Main.LandingPage;
@@ -63,9 +65,7 @@ public class NavigationController {
         }
 
         // Ensure the content updates only if different
-        if (landingPage.getMainPanel() != newPanel) {
-            landingPage.setMainContent(newPanel);
-        }
+        switchToPanel(newPanel);
     }
 
 
@@ -74,6 +74,42 @@ public class NavigationController {
                 mainFrame,
                 "Acceso restringido",
                 "Debe iniciar sesión o registrarse antes de acceder.");
+    }
+
+    public void switchToPanel(JPanel panel) {
+        if (landingPage.getMainPanel() != panel) {
+            landingPage.setMainContent(panel);
+        }
+    }
+
+    public void appointmentRedirect() {
+        if (!isUserLoggedIn()) {
+            showLoginRequiredMessage();
+            return;
+        }
+
+        // Open clinic-speciality selection dialog
+        ClinicSpecialitySelectionDialog selectionDialog = new ClinicSpecialitySelectionDialog(mainFrame);
+        selectionDialog.setVisible(true);
+
+        // Retrieve the selection
+        String selectedClinic = selectionDialog.getSelectedClinic();
+        String selectedSpeciality = selectionDialog.getSelectedSpeciality();
+
+        if (selectedClinic != null && selectedSpeciality != null) {
+            proceedToCalendar(selectedClinic, selectedSpeciality);
+        } else {
+            NotificationPopUp.showErrorMessage(
+                    mainFrame,
+                    "Error",
+                    "Hubo un error durante la selección de clínica y especialidad."
+            );
+        }
+    }
+
+    private void proceedToCalendar(String selectedClinic, String selectedSpeciality) {
+        CalendarCustom calendar = new CalendarCustom(loggedInPatient, selectedClinic, selectedSpeciality);
+        switchToPanel(calendar);
     }
 
     /**
@@ -98,5 +134,9 @@ public class NavigationController {
 
     public boolean isUserLoggedIn() {
         return isLoggedIn;
+    }
+
+    public Patient getLoggedInPatient() {
+        return loggedInPatient;
     }
 }

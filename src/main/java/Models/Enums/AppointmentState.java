@@ -1,8 +1,8 @@
 package Models.Enums;
 
-public enum  AppointmentState {
+public enum AppointmentState {
     PENDING("Pendiente"),
-    CONFIRMED("Confirmed"),
+    CONFIRMED("Confirmada"),
     CANCELLED("Cancelada"),
     ATTENDED("Atendida");
 

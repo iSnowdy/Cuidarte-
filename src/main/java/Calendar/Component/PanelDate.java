@@ -10,22 +10,21 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public class PanelDate extends JPanel {
-    private int month;
-    private int year;
-    private List<Integer> availableDays; // Available days for the selected doctor
+    private final int month, year;
+    private final List<LocalDate> availableDays; // Available days for the selected doctor
+    private final Set<LocalDate> appointmentDates;
+    private final Consumer<LocalDate> onDateSelected; // Callback for notifying selection
+    private final Consumer<LocalDate> onAppointmentSelected; // To manage clicks on Cells
     private final List<Cell> cellsList;
-    private Consumer<LocalDate> onDateSelected; // Callback for notifying selection
-    private Consumer<LocalDate> onAppointmentSelected; // To manage clicks on Cells
-    private Set<LocalDate> appointmentDates;
 
-    public PanelDate(int month, int year, List<Integer> availableDays, Consumer<LocalDate> onDateSelected, Set<LocalDate> appointmentDates, Consumer<LocalDate> onAppointmentClick) {
+    public PanelDate(int month, int year, List<LocalDate> availableDays, Consumer<LocalDate> onDateSelected, Set<LocalDate> appointmentDates, Consumer<LocalDate> onAppointmentClick) {
         this.month = month;
         this.year = year;
         this.availableDays = availableDays;
         this.onDateSelected = onDateSelected;
         this.appointmentDates = appointmentDates;
         this.onAppointmentSelected = onAppointmentClick;
-        this.cellsList = new ArrayList<>();
+        this.cellsList = new java.util.ArrayList<>();
 
         setLayout(new GridLayout(7, 7, 5, 5));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -68,19 +67,23 @@ public class PanelDate extends JPanel {
         LocalDate today = LocalDate.now();
 
         for (Cell cell : cellsList) {
-            LocalDate finalDate = startDate;
-            cell.setText(String.valueOf(finalDate.getDayOfMonth()));
-            cell.setDate(finalDate);
-            cell.currentMonth(finalDate.getMonthValue() == month);
+            cell.resetCell();
+            LocalDate cellDate = startDate;
 
-            if (appointmentDates.contains(finalDate)) {
-                handleAppointmentCell(cell, finalDate, today);
+            cell.setText(String.valueOf(cellDate.getDayOfMonth()));
+            cell.setDate(cellDate);
+            cell.currentMonth(cellDate.getMonthValue() == month);
+
+            if (appointmentDates.contains(cellDate)) {
+                markAppointmentCell(cell, cellDate, today);
+            } else if (availableDays.contains(cellDate)) {
+                markAvailableCell(cell, cellDate);
             } else {
-                handleAvailableCell(cell, finalDate);
+                cell.setEnabled(false);
             }
 
-            if (finalDate.equals(today)) {
-                cell.setAsToday();
+            if (cellDate.equals(today)) {
+                cell.markAsToday();
             }
 
             startDate = startDate.plusDays(1);
@@ -88,6 +91,17 @@ public class PanelDate extends JPanel {
 
         revalidate();
         repaint();
+    }
+
+
+    private void markAppointmentCell(Cell cell, LocalDate date, LocalDate today) {
+        cell.markAsAppointmentDay(date.isAfter(today));
+        cell.addActionListener(e -> onAppointmentSelected.accept(date));
+    }
+
+    private void markAvailableCell(Cell cell, LocalDate date) {
+        cell.markAsAvailableDay();
+        cell.addActionListener(e -> onDateSelected.accept(date));
     }
 
     // Handles UI behavior for appointment days

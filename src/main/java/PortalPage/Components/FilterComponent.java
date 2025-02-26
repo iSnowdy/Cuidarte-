@@ -1,4 +1,4 @@
-package Utils;
+package PortalPage.Components;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

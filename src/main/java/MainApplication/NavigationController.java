@@ -108,9 +108,17 @@ public class NavigationController {
     }
 
     private void proceedToCalendar(String selectedClinic, String selectedSpeciality) {
+        JFrame calendarFrame = new JFrame("Agenda de Citas - " + selectedClinic);
+        calendarFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        calendarFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        calendarFrame.setLocationRelativeTo(mainFrame);
+
         CalendarCustom calendar = new CalendarCustom(loggedInPatient, selectedClinic, selectedSpeciality);
-        switchToPanel(calendar);
+        calendarFrame.add(calendar);
+
+        calendarFrame.setVisible(true);
     }
+
 
     /**
      * Sets the login state and user session.

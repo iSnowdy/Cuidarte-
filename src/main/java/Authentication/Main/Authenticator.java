@@ -274,7 +274,10 @@ public class Authenticator extends JPanel {
         fractionCover = Double.parseDouble(decimalFormat.format(fractionCover));
         fractionLogin = Double.parseDouble(decimalFormat.format(fractionLogin));
 
-        if (fraction >= 0.5f) loginAndRegister.showRegisterForm(isLogin);
+        if (fraction >= 0.5f) {
+            loginAndRegister.showRegisterForm(isLogin);
+            cover.animateText(!isLogin);
+        }
         layout.setComponentConstraints(cover, "width " + size + "%, pos " + fractionCover + "al 0 n 100%");
         layout.setComponentConstraints(loginAndRegister, "width " + loginSize + "%, pos " + fractionLogin + "al 0 n 100%");
         backGround.revalidate();

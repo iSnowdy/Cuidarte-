@@ -35,7 +35,6 @@ public class PatientPortalPanel extends JPanel {
         this.iconRedrawer = new ImageIconRedrawer();
 
         initPanel();
-        //addHeader();
         addContent();
     }
 
@@ -45,14 +44,6 @@ public class PatientPortalPanel extends JPanel {
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
-    }
-
-    /**
-     * Adds the header panel at the top.
-     */
-    private void addHeader() {
-        HeaderPanel headerPanel = new HeaderPanel(parentFrame, navigationController);
-        add(headerPanel, BorderLayout.NORTH);
     }
 
     /**

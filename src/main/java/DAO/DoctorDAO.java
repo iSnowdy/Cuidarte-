@@ -30,7 +30,7 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
                     entity.getSurname(),
                     entity.getPhoneNumber(),
                     entity.getEmail(),
-                    entity.getSpecialty(),
+                    entity.getSpeciality(),
                     entity.getDescription()
             );
             if (result) LOGGER.info("Inserted doctor: " + entity.getDNI());
@@ -55,7 +55,7 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
                     entity.getSurname(),
                     entity.getPhoneNumber(),
                     entity.getEmail(),
-                    entity.getSpecialty(),
+                    entity.getSpeciality(),
                     entity.getDescription(),
                     entity.getDNI()
             );
@@ -179,11 +179,11 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
         List<Doctor> doctors = new ArrayList<>();
 
         String query =
-                "SELECT d.DNI_Medico, d.Nombre, d.Apellidos, d.Numero_Telefono, d.Email, d.Especialidad " +
-                "FROM medicos d " +
+                "SELECT * " +
+                "FROM medicos m " +
                 "JOIN disponibilidad_medico dm " +
-                        "ON d.DNI_Medico = dm.DNI_Medico " +
-                "WHERE dm.ID_Clinica = ? AND d.Especialidad = ?";
+                        "ON m.DNI_Medico = dm.DNI_Medico " +
+                "WHERE dm.ID_Clinica = ? AND m.Especialidad = ?";
 
         try (ResultSet resultSet = executeQuery(query, clinicID, speciality)) {
             while (resultSet.next()) {
@@ -202,22 +202,28 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
         Map<String, List<String>> doctorAvailableTimeSlots = new HashMap<>();
 
         String query =
-                "SELECT dm.DNI_Medico, dm.Hora_Inicio, dm_Hora_Fin, dm_Duracion_Cita " +
-                "FROM disponibilidad_medico dm" +
+                "SELECT * " +
+                "FROM disponibilidad_medico dm " +
                 "WHERE dm.ID_Clinica = ?";
 
         try (ResultSet resultSet = executeQuery(query, clinicID)) {
             while (resultSet.next()) {
                 String doctorDNI = resultSet.getString("DNI_Medico");
+                // Generates available time slots
                 List<String> timeSlots = generateTimeSlots(
                         resultSet.getString("Hora_Inicio"),
                         resultSet.getString("Hora_Fin"),
                         resultSet.getInt("Duracion_Cita")
                 );
 
-                // Now we remove the booked slots from the slots we give back
-                List<String> bookedSlots = new AppointmentDAO().getBookedAppointments(doctorDNI, selectedDate);
-                timeSlots.removeAll(bookedSlots);
+                try {
+                    // Now we remove the booked slots from the slots we give back
+                    List<String> bookedSlots = new AppointmentDAO().getBookedAppointments(doctorDNI, selectedDate);
+                    timeSlots.removeAll(bookedSlots);
+                } catch (DatabaseOpeningException | DatabaseQueryException e) {
+                    LOGGER.log(Level.SEVERE, "Error fetching booked slots from AppointmentDAO", e);
+                    throw new DatabaseQueryException("Error fetching booked slots");
+                }
 
                 doctorAvailableTimeSlots.put(doctorDNI, timeSlots);
             }

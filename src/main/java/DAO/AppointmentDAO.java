@@ -7,6 +7,7 @@ import Models.Enums.AppointmentState;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -119,17 +120,20 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
         return appointments;
     }
 
-    private Appointment mapResultSetToAppointment(ResultSet rs) throws SQLException {
-        return new Appointment(
-                rs.getInt("ID_Cita"),
-                rs.getString("DNI_Paciente"),
-                rs.getString("DNI_Medico"),
-                rs.getInt("ID_Clinica"),
-                rs.getTimestamp("Fecha_Hora"),
-                AppointmentState.fromString(rs.getString("Estado_Cita")),  // Convert String to ENUM
-                rs.getString("Motivo_Consulta"),
-                rs.getString("Observaciones_Medicas")
-        );
+    public List<Appointment> findAppointmentsByPatient(String patientDNI) throws DatabaseQueryException {
+        List<Appointment> appointments = new ArrayList<>();
+        String query = "SELECT * FROM citas_medicas WHERE DNI_Paciente = ? ORDER BY Fecha_Hora ASC";
+
+        try (ResultSet resultSet = executeQuery(query, patientDNI)) {
+            while (resultSet.next()) {
+                appointments.add(mapResultSetToAppointment(resultSet));
+            }
+            LOGGER.info("Loaded " + appointments.size() + " appointments for patient " + patientDNI);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error loading appointments for patient " + patientDNI, e);
+            throw new DatabaseQueryException("Could not retrieve patient appointments.");
+        }
+        return appointments;
     }
 
     // Retrieves the appointments for a specific doctor on a given date
@@ -156,4 +160,58 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
         }
         return bookedAppointments;
     }
+
+    public List<Appointment> getAppointmentsByPatientAndDate(String patientDNI, LocalDate date) throws DatabaseQueryException {
+        List<Appointment> appointments = new ArrayList<>();
+
+        String query =
+                "SELECT * FROM citas_medicas " +
+                        "WHERE DNI_Paciente = ? AND DATE(Fecha_Hora) = ?";
+
+        try (ResultSet resultSet = executeQuery(query, patientDNI, java.sql.Date.valueOf(date))) {
+            while (resultSet.next()) {
+                appointments.add(mapResultSetToAppointment(resultSet));
+            }
+            LOGGER.info("Fetched " + appointments.size() + " appointments for patient " + patientDNI + " on " + date);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching appointments for patient " + patientDNI + " on " + date, e);
+            throw new DatabaseQueryException("Could not fetch appointments for the patient on the specified date.");
+        }
+
+        return appointments;
+    }
+
+    public List<Appointment> getAppointmentsByDoctorAndDate(String doctorDNI, LocalDate date) throws DatabaseQueryException {
+        List<Appointment> appointments = new ArrayList<>();
+
+        String query =
+                "SELECT * FROM citas_medicas " +
+                        "WHERE DNI_Medico = ? AND DATE(Fecha_Hora) = ? AND Estado_Cita != 'Cancelada'";
+
+        try (ResultSet resultSet = executeQuery(query, doctorDNI, java.sql.Date.valueOf(date))) {
+            while (resultSet.next()) {
+                appointments.add(mapResultSetToAppointment(resultSet));
+            }
+            LOGGER.info("Loaded " + appointments.size() +
+                    " appointments for doctor with DNI " + doctorDNI + " on " + date);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching appointments for Doctor DNI: " + doctorDNI + " at: " + date, e);
+            throw new DatabaseQueryException("Error fetching appointments for doctor");
+        }
+        return appointments;
+    }
+
+    private Appointment mapResultSetToAppointment(ResultSet rs) throws SQLException {
+        return new Appointment(
+                rs.getInt("ID_Cita"),
+                rs.getString("DNI_Paciente"),
+                rs.getString("DNI_Medico"),
+                rs.getInt("ID_Clinica"),
+                rs.getTimestamp("Fecha_Hora"),
+                AppointmentState.fromString(rs.getString("Estado_Cita")),  // Convert String to ENUM
+                rs.getString("Motivo_Consulta"),
+                rs.getString("Observaciones_Medicas")
+        );
+    }
+
 }

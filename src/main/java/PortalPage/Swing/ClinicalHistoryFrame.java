@@ -1,8 +1,8 @@
 package PortalPage.Swing;
 
 import Models.Patient;
+import PortalPage.Components.FilterComponent;
 import PortalPage.TempModels.ClinicalHistory;
-import Utils.FilterComponent;
 import Utils.Swing.Colors;
 
 

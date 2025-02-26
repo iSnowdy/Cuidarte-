@@ -141,10 +141,9 @@ public class ClinicDAO extends BaseDAO<Clinic, Integer> {
 
         String query =
                 "SELECT DISTINCT m.Especialidad " +
-                "FROM medicos m" +
-                "JOIN disponibilidad_medico dm " +
-                    "ON m.DNI_Medico = dm.DNI_Medico " +
-                "WHERE m.ID_Clinica = ?";
+                        "FROM medicos m " +
+                        "INNER JOIN disponibilidad_medico dm ON m.DNI_Medico = dm.DNI_Medico " +
+                        "WHERE dm.ID_Clinica = ?";
 
         try (ResultSet resultSet = executeQuery(query, clinicID)) {
             while (resultSet.next()) {

@@ -1,9 +1,9 @@
 package PortalPage.Swing;
 
 import Models.Patient;
+import PortalPage.Components.FilterComponent;
 import PortalPage.TempModels.DiagnosticTest;
 import Models.Enums.TestType;
-import Utils.FilterComponent;
 import Utils.Swing.Colors;
 
 import javax.swing.*;

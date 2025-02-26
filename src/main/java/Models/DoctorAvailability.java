@@ -1,40 +1,38 @@
 package Models;
 
-import Models.Enums.DayOfTheWeek;
-
+import java.sql.Date;
 import java.sql.Time;
-import java.util.List;
 
 public class DoctorAvailability {
     private int doctorAvailabilityID;
     private int clinicID;
     private String doctorDNI;
-    private List<DayOfTheWeek> availableDays;
+    private Date date;
     private Time startTime;
     private Time endTime;
     private int appointmentDuration;
 
-    public DoctorAvailability(String doctorDNI, int clinicID, List<DayOfTheWeek> availableDays, Time startTime, Time endTime, int appointmentDuration) {
+    public DoctorAvailability(String doctorDNI, int clinicID, Date date, Time startTime, Time endTime, int appointmentDuration) {
         this.doctorDNI = doctorDNI;
         this.clinicID = clinicID;
-        this.availableDays = availableDays;
+        this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
         this.appointmentDuration = appointmentDuration;
     }
 
-    // Constructor needed to map a ResultSet -> DoctorAvailability and relationship with days
-    public DoctorAvailability(int doctorAvailabilityID,  String doctorDNI, int clinicID, List<DayOfTheWeek> availableDays, Time startTime, Time endTime, int appointmentDuration) {
+    // Maps data from the DB to the DTO
+    public DoctorAvailability(int doctorAvailabilityID, String doctorDNI, int clinicID, Date date, Time startTime, Time endTime, int appointmentDuration) {
         this.doctorAvailabilityID = doctorAvailabilityID;
         this.clinicID = clinicID;
         this.doctorDNI = doctorDNI;
-        this.availableDays = availableDays;
+        this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
         this.appointmentDuration = appointmentDuration;
     }
 
-    // Getters y Setters
+    // Getters and Setters
     public int getDoctorAvailabilityID() {
         return doctorAvailabilityID;
     }
@@ -56,11 +54,11 @@ public class DoctorAvailability {
         this.doctorDNI = doctorDNI;
     }
 
-    public List<DayOfTheWeek> getAvailableDays() {
-        return availableDays;
+    public Date getDate() {
+        return date;
     }
-    public void setAvailableDays(List<DayOfTheWeek> availableDays) {
-        this.availableDays = availableDays;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public Time getStartTime() {

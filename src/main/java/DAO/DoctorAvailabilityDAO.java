@@ -2,16 +2,18 @@ package DAO;
 
 import Exceptions.*;
 import Models.DoctorAvailability;
-import Models.Enums.DayOfTheWeek;
+import Models.Enums.TimeSlotStatus;
+import Models.TimeSlot;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
-
-// Queries both disponibilidad_medico & dias_disponibles_medico
 
 public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> {
 
@@ -22,30 +24,29 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
     @Override
     public boolean save(DoctorAvailability entity) throws DatabaseInsertException {
         String query =
-                "INSERT INTO " +
-                "doctor_availability (DNI_Medico, Hora_Inicio, Hora_Fin, Duracion_Cita) " +
-                "VALUES (?, ?, ?, ?)";
+                "INSERT INTO disponibilidad_medico " +
+                        "(DNI_Medico, ID_Clinica, Fecha, Hora_Inicio, Hora_Fin, Duracion_Cita) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
             boolean result = executeUpdate(
                     query,
                     entity.getDoctorDNI(),
+                    entity.getClinicID(),
+                    entity.getDate(),
                     entity.getStartTime(),
                     entity.getEndTime(),
                     entity.getAppointmentDuration()
             );
 
             if (result) {
-                LOGGER.info("Inserted doctor availability for doctor: " + entity.getDoctorDNI());
-
-                // Retrieve the last inserted ID
-                int availabilityId = getLastInsertedId();
-                saveAvailableDays(availabilityId, entity.getAvailableDays());
+                LOGGER.info("Inserted doctor availability for doctor: " + entity.getDoctorDNI() +
+                        " in clinic ID: " + entity.getClinicID() + " on " + entity.getDate());
             }
-
             return result;
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error inserting doctor availability for doctor: " + entity.getDoctorDNI(), e);
+            LOGGER.log(Level.SEVERE, "Error inserting doctor availability for doctor: " +
+                    entity.getDoctorDNI(), e);
             throw new DatabaseInsertException("Failed to insert doctor availability");
         }
     }
@@ -54,13 +55,13 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
     public boolean update(DoctorAvailability entity) throws DatabaseQueryException {
         String query =
                 "UPDATE disponibilidad_medico " +
-                "SET DNI_Medico = ?, Hora_Inicio = ?, Hora_Fin = ?, Duracion_Cita = ? " +
-                "WHERE ID_Disponibilidad = ?";
+                        "SET Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Duracion_Cita = ? " +
+                        "WHERE ID_Disponibilidad = ?";
 
         try {
             boolean result = executeUpdate(
                     query,
-                    entity.getDoctorDNI(),
+                    entity.getDate(),
                     entity.getStartTime(),
                     entity.getEndTime(),
                     entity.getAppointmentDuration(),
@@ -69,10 +70,6 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
 
             if (result) {
                 LOGGER.info("Updated doctor availability with ID: " + entity.getDoctorAvailabilityID());
-
-                // Delete old days and insert new ones
-                deleteAvailableDays(entity.getDoctorAvailabilityID());
-                saveAvailableDays(entity.getDoctorAvailabilityID(), entity.getAvailableDays());
             }
 
             return result;
@@ -81,6 +78,7 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
             throw new DatabaseUpdateException("Failed to update doctor availability");
         }
     }
+
 
     @Override
     public boolean delete(Integer doctorAvailabilityID) throws DatabaseDeleteException {
@@ -100,7 +98,7 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
 
     @Override
     public Optional<DoctorAvailability> findById(Integer doctorAvailabilityID) throws DatabaseQueryException {
-        String query = "SELECT * FROM disponibilidad_medico WHERE ID_Disponibilidad = " + doctorAvailabilityID;
+        String query = "SELECT * FROM disponibilidad_medico WHERE ID_Disponibilidad = ?";
 
         try (ResultSet resultSet = executeQuery(query, doctorAvailabilityID)) {
             if (resultSet.next()) {
@@ -113,6 +111,7 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
         }
         return Optional.empty();
     }
+
 
     @Override
     public List<DoctorAvailability> findAll() throws DatabaseQueryException {
@@ -131,66 +130,110 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
         return availabilities;
     }
 
-    private DoctorAvailability mapResultSetToDoctorAvailability(ResultSet resultSet) throws SQLException {
-        int availabilityId = resultSet.getInt("ID_Availability");
-        List<DayOfTheWeek> availableDays = getAvailableDays(availabilityId);
+    public List<DoctorAvailability> getDoctorAvailableDays(String doctorDNI, int clinicID) throws DatabaseQueryException {
+        List<DoctorAvailability> availableDays = new ArrayList<>();
 
+        String query =
+                "SELECT * FROM disponibilidad_medico " +
+                        "WHERE DNI_Medico = ? AND ID_Clinica = ?";
+
+        try (ResultSet resultSet = executeQuery(query, doctorDNI, clinicID)) {
+            while (resultSet.next()) {
+                availableDays.add(mapResultSetToDoctorAvailability(resultSet));
+            }
+            LOGGER.info("Found " + availableDays.size() + " available days for doctor " + doctorDNI + " at clinic ID " + clinicID);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching available days for doctor " + doctorDNI + " at clinic ID: " + clinicID, e);
+            throw new DatabaseQueryException("Could not fetch doctor availability");
+        }
+
+        return availableDays;
+    }
+
+    public List<String> findAvailableHoursByDoctorAndDate(String doctorDNI, int clinicID, LocalDate date) throws DatabaseQueryException {
+        List<String> availableHours = new ArrayList<>();
+
+        String query =
+                "SELECT Hora_Inicio, Hora_Fin, Duracion_Cita " +
+                        "FROM disponibilidad_medico " +
+                        "WHERE DNI_Medico = ? AND ID_Clinica = ? AND Fecha = ?";
+
+        try (ResultSet resultSet = executeQuery(query, doctorDNI, clinicID, java.sql.Date.valueOf(date))) {
+            if (resultSet.next()) {
+                Time startTime = resultSet.getTime("Hora_Inicio");
+                Time endTime = resultSet.getTime("Hora_Fin");
+                int duration = resultSet.getInt("Duracion_Cita");
+
+                LocalTime start = startTime.toLocalTime();
+                LocalTime end = endTime.toLocalTime();
+
+                while (start.plusMinutes(duration).isBefore(end) || start.plusMinutes(duration).equals(end)) {
+                    availableHours.add(start.toString()); // "HH:mm"
+                    start = start.plusMinutes(duration);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching available hours for doctor " + doctorDNI + " at clinic " + clinicID + " on " + date, e);
+            throw new DatabaseQueryException("Could not fetch available hours");
+        }
+        return availableHours;
+    }
+
+    public List<TimeSlot> findAvailableTimeSlotsByDoctorAndDate(String doctorDNI, int clinicID, LocalDate date) throws DatabaseQueryException {
+        List<TimeSlot> availableTimeSlots = new ArrayList<>();
+
+        String query =
+                "SELECT f.ID_Franja, f.ID_Disponibilidad, f.Hora, f.Estado " +
+                        "FROM franjas_horarias f " +
+                        "INNER JOIN disponibilidad_medico d ON f.ID_Disponibilidad = d.ID_Disponibilidad " +
+                        "WHERE d.DNI_Medico = ? AND d.ID_Clinica = ? AND d.Fecha = ? AND f.Estado = ?";
+
+        try (ResultSet resultSet = executeQuery(query, doctorDNI, clinicID, java.sql.Date.valueOf(date), TimeSlotStatus.DISPONIBLE.name())) {
+            while (resultSet.next()) {
+                availableTimeSlots.add(new TimeSlot(
+                        resultSet.getInt("ID_Franja"),
+                        resultSet.getInt("ID_Disponibilidad"),
+                        resultSet.getTime("Hora"),
+                        TimeSlotStatus.fromString(resultSet.getString("Estado"))
+                ));
+            }
+            LOGGER.info("Found " + availableTimeSlots.size() + " available time slots for doctor " + doctorDNI + " at clinic " + clinicID + " on " + date);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching available time slots for doctor " + doctorDNI + " at clinic " + clinicID + " on " + date, e);
+            throw new DatabaseQueryException("Could not fetch available time slots");
+        }
+        return availableTimeSlots;
+    }
+
+
+    public List<DoctorAvailability> findAvailabilityByClinicAndDoctor(int clinicID, String doctorDNI) throws DatabaseQueryException {
+        List<DoctorAvailability> availabilities = new ArrayList<>();
+        String query =
+                "SELECT * FROM disponibilidad_medico " +
+                        "WHERE ID_Clinica = ? AND DNI_Medico = ?";
+
+        try (ResultSet resultSet = executeQuery(query, clinicID, doctorDNI)) {
+            while (resultSet.next()) {
+                availabilities.add(mapResultSetToDoctorAvailability(resultSet));
+            }
+            LOGGER.info("Found " + availabilities.size() + " availability slots for doctor "
+                    + doctorDNI + " in clinic ID " + clinicID);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching availability for doctor " + doctorDNI + " in clinic " + clinicID, e);
+            throw new DatabaseQueryException("Could not fetch doctor availability");
+        }
+        return availabilities;
+    }
+
+    private DoctorAvailability mapResultSetToDoctorAvailability(ResultSet resultSet) throws SQLException {
         return new DoctorAvailability(
-                availabilityId,
+                resultSet.getInt("ID_Disponibilidad"),
                 resultSet.getString("DNI_Medico"),
                 resultSet.getInt("ID_Clinica"),
-                availableDays,
+                resultSet.getDate("Fecha"),
                 resultSet.getTime("Hora_Inicio"),
                 resultSet.getTime("Hora_Fin"),
                 resultSet.getInt("Duracion_Cita")
         );
-    }
-
-    // TODO: I don't think this is right
-
-    private void saveAvailableDays(int availabilityID, List<DayOfTheWeek> availableDays) throws SQLException {
-        String query =
-                "INSERT INTO " +
-                "dias_disponibles_medico (ID_Dias_Disponibles, Dia_Semana) " +
-                "VALUES (?, ?)";
-        for (DayOfTheWeek day : availableDays) {
-            executeUpdate(query, availabilityID, day.getValue());
-        }
-        LOGGER.info("Saved all available days for doctor availability ID: " + availabilityID);
-    }
-
-    private void deleteAvailableDays(int availabilityID) throws SQLException {
-        String query =
-                "DELETE FROM dias_disponibles_medico " +
-                "WHERE ID_Dias_Disponibles = ?";
-
-        boolean result = executeUpdate(query, availabilityID);
-        if (result) LOGGER.info("Deleted available days for doctor availability ID: " + availabilityID);
-        else LOGGER.info("No available days found to delete for doctor availability with ID: " + availabilityID);
-    }
-
-    private List<DayOfTheWeek> getAvailableDays(int availabilityID) throws SQLException {
-        List<DayOfTheWeek> availableDays = new ArrayList<>();
-        String query = "SELECT Dia_Semana FROM dias_disponibles_medico WHERE ID_Dias_Disponibles = ?";
-
-        try (ResultSet resultSet = executeQuery(query, availabilityID)) {
-            while (resultSet.next()) {
-                availableDays.add(DayOfTheWeek.fromString(resultSet.getString("Dia_Semana")));
-            }
-        }
-        return availableDays;
-    }
-
-    // Every connection has their own LAST_INSERT_ID(), and is unique to theirs. So we do not have to worry about
-    // another connection's ID due to it not being concurrent. And since we just inserted that entity, we are sure
-    // to retrieve its auto-generated ID
-    private int getLastInsertedId() throws SQLException {
-        String query = "SELECT LAST_INSERT_ID() as last_id";
-        try (ResultSet resultSet = executeQuery(query)) {
-            if (resultSet.next()) {
-                return resultSet.getInt("last_id");
-            }
-        }
-        throw new SQLException("Could not find last inserted ID");
     }
 }

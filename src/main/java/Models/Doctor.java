@@ -1,13 +1,13 @@
 package Models;
 
 public class Doctor extends User {
-    private String specialty;
+    private String speciality;
     private String description;
 
     public Doctor(String DNI, String firstName, String surname, String phoneNumber, String email,
-                  String specialty, String description) {
+                  String speciality, String description) {
         super(DNI, firstName, surname, phoneNumber, email);
-        this.specialty = specialty;
+        this.speciality = speciality;
         this.description = description;
     }
 
@@ -20,15 +20,15 @@ public class Doctor extends User {
     public String toString() {
         return
                 super.toString() + "\n" +
-                        "Doctor Specialty: " + specialty;
+                        "Doctor Specialty: " + speciality;
     }
 
     // Getters and Setters
-    public String getSpecialty() {
-        return specialty;
+    public String getSpeciality() {
+        return speciality;
     }
-    public void setSpecialty(String specialty) {
-        this.specialty = specialty;
+    public void setSpeciality(String speciality) {
+        this.speciality = speciality;
     }
 
     public String getDescription() {

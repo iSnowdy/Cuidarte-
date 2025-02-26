@@ -2,19 +2,14 @@ package Calendar.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 
-import static Utils.Swing.Colors.*;
-
 public class Cell extends JButton {
     private LocalDate date;
-    private boolean isTitle;
-    private boolean isToday;
-    private boolean isHovered;
-    private boolean hasPastAppointment;
-    private boolean hasFutureAppointment;
+    private boolean isTitle, isToday, isHovered, hasPastAppointment, hasFutureAppointment, isAvailableDay;
 
     public Cell() {
         initializeCell();
@@ -28,6 +23,7 @@ public class Cell extends JButton {
         this.isHovered = false;
         this.hasPastAppointment = false;
         this.hasFutureAppointment = false;
+        this.isAvailableDay = false;
 
         setContentAreaFilled(false);
         setOpaque(false);
@@ -63,22 +59,29 @@ public class Cell extends JButton {
     public void maskAsTitleCell() {
         this.isTitle = true;
         setFont(new Font("Arial", Font.BOLD, 12));
-        setForeground(MAIN_APP_COLOUR);
+        setForeground(Color.DARK_GRAY);
     }
 
-    // 🔹 Marks this cell if it represents a past or future appointment
+    // Marks this cell if it represents a past or future appointment
     public void markAsAppointmentDay(boolean isFuture) {
         if (isFuture) {
             hasFutureAppointment = true;
         } else {
             hasPastAppointment = true;
         }
+        repaint();
+    }
+
+    // Marks this cell if it represents a day where the doctor is available
+    public void markAsAvailableDay() {
+        this.isAvailableDay = true;
+        repaint();
     }
 
     // Marks this cell if it represents today's date
-    public void setAsToday() {
+    public void markAsToday() {
         this.isToday = true;
-        setForeground(Color.WHITE);
+        repaint();
     }
 
     // Sets the date associated with this cell
@@ -96,6 +99,21 @@ public class Cell extends JButton {
         setForeground(isCurrentMonth ? Color.BLACK : new Color(169, 169, 169));
     }
 
+    public void resetCell() {
+        this.isToday = false;
+        this.isHovered = false;
+        this.hasPastAppointment = false;
+        this.hasFutureAppointment = false;
+        this.isAvailableDay = false;
+        removeAllActionListeners();
+    }
+
+    private void removeAllActionListeners() {
+        for (ActionListener al : getActionListeners()) {
+            removeActionListener(al);
+        }
+    }
+
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(50, 50);
@@ -105,6 +123,7 @@ public class Cell extends JButton {
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = prepareGraphics(g);
 
+        drawBackground(g2);
         drawHoverEffect(g2);
         drawTitleUnderline(g2);
         drawHighlight(g2);
@@ -129,7 +148,7 @@ public class Cell extends JButton {
     // Draws an underline if the cell is a title cell (day of the week)
     private void drawTitleUnderline(Graphics2D g2) {
         if (isTitle) {
-            g2.setColor(MAIN_APP_COLOUR);
+            g2.setColor(Color.DARK_GRAY);
             g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
         }
     }
@@ -141,13 +160,16 @@ public class Cell extends JButton {
         int size = 35;
 
         if (isToday) {
-            drawRoundedHighlight(g2, MAIN_APP_COLOUR, x, y, size);
+            drawRoundedHighlight(g2, new Color(0, 100, 255), x, y, size); // 🔵 Blue for today
         }
         if (hasPastAppointment) {
-            drawRoundedHighlight(g2, SECONDARY_APP_COLOUR, x, y, size);
+            drawRoundedHighlight(g2, new Color(178, 34, 34), x, y, size); // 🔴 Dark Red for past appointments
         }
         if (hasFutureAppointment) {
-            drawRoundedHighlight(g2, MAIN_APP_COLOUR, x, y, size);
+            drawRoundedHighlight(g2, new Color(50, 205, 50), x, y, size); // 🟢 Green for future appointments
+        }
+        if (isAvailableDay) {
+            drawRoundedHighlight(g2, new Color(255, 215, 0), x, y, size); // 🟡 Gold for available days
         }
     }
 
@@ -155,5 +177,13 @@ public class Cell extends JButton {
     private void drawRoundedHighlight(Graphics2D g2, Color color, int x, int y, int size) {
         g2.setColor(color);
         g2.fillRoundRect(x, y, size, size, 100, 100);
+    }
+
+    // Draws the background for available days
+    private void drawBackground(Graphics2D g2) {
+        if (isAvailableDay) {
+            g2.setColor(new Color(255, 255, 102, 150)); // 🟡 Soft Yellow for available days
+            g2.fillRect(0, 0, getWidth(), getHeight());
+        }
     }
 }

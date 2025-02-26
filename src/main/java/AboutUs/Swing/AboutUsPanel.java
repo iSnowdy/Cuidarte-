@@ -152,7 +152,7 @@ public class AboutUsPanel extends JPanel {
         nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel titleLabel = new JLabel(doctor.getSpecialty());
+        JLabel titleLabel = new JLabel(doctor.getSpeciality());
         titleLabel.setFont(new Font("Arial", Font.ITALIC, 14));
         titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 

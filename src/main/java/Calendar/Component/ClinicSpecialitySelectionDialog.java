@@ -96,6 +96,9 @@ public class ClinicSpecialitySelectionDialog extends JDialog {
     private void updateSpecialtyList() {
         selectedClinic = (String) clinicComboBox.getSelectedItem();
 
+        // Avoids running the query if no clinic hsa been selected yet
+        if (selectedClinic == null || selectedClinic.isEmpty()) return;
+
         try {
             ClinicDAO clinicDAO = new ClinicDAO();
             Optional<Integer> optionalClinicID = clinicDAO.getClinicIDByName(selectedClinic);

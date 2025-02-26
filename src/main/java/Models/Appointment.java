@@ -19,7 +19,16 @@ public class Appointment {
         this.clinicID = clinicID;
         this.appointmentDate = appointmentDateTime;
         this.description = description;
-        this.appointmentState = AppointmentState.PENDING;
+        this.appointmentState = AppointmentState.CONFIRMED;
+    }
+
+    public Appointment(String patientDNI, String doctorDNI, int clinicID, Timestamp appointmentDateTime, String description, AppointmentState appointmentState) {
+        this.patientDNI = patientDNI;
+        this.doctorDNI = doctorDNI;
+        this.clinicID = clinicID;
+        this.appointmentDate = appointmentDateTime;
+        this.description = description;
+        this.appointmentState = appointmentState;
     }
 
     // Constructors needed to map a ResultSet -> Appointment

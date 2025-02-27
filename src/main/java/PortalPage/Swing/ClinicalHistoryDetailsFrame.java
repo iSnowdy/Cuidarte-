@@ -1,8 +1,8 @@
 package PortalPage.Swing;
 
-import AboutUs.Components.CustomScrollBar;
-import PortalPage.TempModels.ClinicalHistory;
+import Models.MedicalReport;
 import Utils.Swing.Colors;
+import Utils.Utility.PDFReportGenerator;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -10,18 +10,19 @@ import java.awt.*;
 import java.text.SimpleDateFormat;
 
 public class ClinicalHistoryDetailsFrame extends JFrame {
-    private ClinicalHistory clinicalHistory;
+    private final MedicalReport medicalReport;
+    private JButton generateMedicalReportButton;
 
-    public ClinicalHistoryDetailsFrame(ClinicalHistory clinicalHistory) {
-        this.clinicalHistory = clinicalHistory;
+    public ClinicalHistoryDetailsFrame(MedicalReport medicalReport) {
+        this.medicalReport = medicalReport;
         initializeFrame();
         addComponents();
         setVisible(true);
     }
 
     private void initializeFrame() {
-        setTitle("Detalle de Historia Clínica");
-        setSize(600, 400);
+        setTitle("Detalles de la Historia Clínica");
+        setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -31,60 +32,82 @@ public class ClinicalHistoryDetailsFrame extends JFrame {
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        JLabel titleLabel = new JLabel("Detalle de Historia Clínica", JLabel.CENTER);
+        // Panel superior con título y separador
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(Color.WHITE);
+
+        JLabel titleLabel = new JLabel("Detalles de la Historia Clínica", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Colors.MAIN_APP_COLOUR);
-        titleLabel.setBorder(new EmptyBorder(10, 0, 20, 0));
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
 
+        // Separator with explicit height
+        JSeparator separator = new JSeparator();
+        separator.setForeground(Colors.MAIN_APP_COLOUR);
+        separator.setPreferredSize(new Dimension(1, 2)); // Ensure visibility
+
+        headerPanel.add(titleLabel, BorderLayout.NORTH);
+        headerPanel.add(separator, BorderLayout.CENTER);
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // Details panel
         JPanel detailsPanel = new JPanel(new GridBagLayout());
         detailsPanel.setBackground(Color.WHITE);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
 
-        // Doctor Name
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        detailsPanel.add(new JLabel("Doctor:"), gbc);
-        gbc.gridx = 1;
-        detailsPanel.add(new JLabel(clinicalHistory.getDoctorName()), gbc);
+        // Adding details
+        addDetailRow(detailsPanel, gbc, "Fecha:", new SimpleDateFormat("dd/MM/yyyy").format(medicalReport.getVisitDate()));
+        addDetailRow(detailsPanel, gbc, "Doctor:", medicalReport.getDoctorDNI()); // Set as the doctor's name instead
+        addDetailRow(detailsPanel, gbc, "Diagnóstico:", medicalReport.getDiagnosis());
+        addDetailRow(detailsPanel, gbc, "Motivo de Consulta:", medicalReport.getAppointmentMotive());
+        addDetailRow(detailsPanel, gbc, "Exploración Física:", medicalReport.getPhysicalExploration());
+        addDetailRow(detailsPanel, gbc, "Tratamiento:", medicalReport.getTreatment());
+        addDetailRow(detailsPanel, gbc, "Temperatura:", medicalReport.getTemperature() + "°C");
+        addDetailRow(detailsPanel, gbc, "Presión:", medicalReport.getSystolic() + "/" + medicalReport.getDiastolic() + " mmHg");
 
-        // Specialty
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        detailsPanel.add(new JLabel("Especialidad:"), gbc);
-        gbc.gridx = 1;
-        detailsPanel.add(new JLabel(clinicalHistory.getSpecialty()), gbc);
+        // Scroll panel in case content overflows
+        JScrollPane scrollPane = new JScrollPane(detailsPanel);
+        scrollPane.setBorder(null);
+        scrollPane.setBackground(Color.WHITE);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Date
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        detailsPanel.add(new JLabel("Fecha:"), gbc);
-        gbc.gridx = 1;
-        String formattedDate = new SimpleDateFormat("dd/MM/yyyy").format(clinicalHistory.getDate());
-        detailsPanel.add(new JLabel(formattedDate), gbc);
+        generateMedicalReportButton = new JButton("Generar informe en PDF");
+        generateMedicalReportButton.addActionListener(e -> {
+            PDFReportGenerator.generateMedicalReport(medicalReport, "C:\\Users\\andyl\\IdeaProjects\\Cuidarte\\src\\main\\resources\\medicalreport.pdf");
+        });
+        mainPanel.add(generateMedicalReportButton, BorderLayout.SOUTH);
 
-        // Details
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        detailsPanel.add(new JLabel("Detalles:"), gbc);
-        gbc.gridy = 4;
-        JTextArea txtDetails = new JTextArea(clinicalHistory.getDetails());
-        txtDetails.setFont(new Font("Arial", Font.PLAIN, 16));
-        txtDetails.setLineWrap(true);
-        txtDetails.setWrapStyleWord(true);
-        txtDetails.setEditable(false);
-        txtDetails.setBackground(Colors.TEXTFIELD_BACKGROUND_COLOUR);
-        // Increase preferred size for the text area
-        JScrollPane scrollPane = new JScrollPane(txtDetails);
-        scrollPane.setPreferredSize(new Dimension(500, 250));
-        scrollPane.getVerticalScrollBar().setUI(new CustomScrollBar());
-        detailsPanel.add(scrollPane, gbc);
-
-        mainPanel.add(detailsPanel, BorderLayout.CENTER);
         add(mainPanel);
+    }
+
+    // Helper method to add rows with proper wrapping
+    private void addDetailRow(JPanel panel, GridBagConstraints gbc, String label, String value) {
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(createDetailLabel(label), gbc);
+
+        gbc.gridx = 1;
+        panel.add(createDetailValue(value), gbc);
+    }
+
+    private JLabel createDetailLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.BOLD, 16));
+        return label;
+    }
+
+    private JTextArea createDetailValue(String value) {
+        JTextArea textArea = new JTextArea(value);
+        textArea.setFont(new Font("Arial", Font.PLAIN, 16));
+        textArea.setWrapStyleWord(true);
+        textArea.setLineWrap(true);
+        textArea.setEditable(false);
+        textArea.setOpaque(false);
+        return textArea;
     }
 }

@@ -40,7 +40,7 @@ public class PatientDataFrame extends JFrame {
     private void initializeFrame() {
         setTitle("Datos del Paciente");
         setSize(700, 500);
-        setMinimumSize(new Dimension(700, 500));
+        setMinimumSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -50,14 +50,31 @@ public class PatientDataFrame extends JFrame {
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(new EmptyBorder(20, 40, 20, 40));
 
+        // Title Section with Spacing
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
+        titlePanel.setBackground(Color.WHITE);
+
         JLabel titleLabel = new JLabel("Datos del Paciente", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         titleLabel.setForeground(Colors.MAIN_APP_COLOUR);
-        titleLabel.setBorder(new EmptyBorder(10, 0, 20, 0));
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0)); // Add padding around the title
 
-        JPanel formPanel = createFormPanel();
-        mainPanel.add(formPanel, BorderLayout.CENTER);
+        // Separator for better visual organization
+        JSeparator separator = new JSeparator();
+        separator.setForeground(Colors.MAIN_APP_COLOUR);
+        separator.setMaximumSize(new Dimension(Short.MAX_VALUE, 2)); // Full-width
+
+        // Adding spacing using vertical struts
+        titlePanel.add(Box.createVerticalStrut(10)); // Space above title
+        titlePanel.add(titleLabel);
+        titlePanel.add(Box.createVerticalStrut(10)); // Space between title and separator
+        titlePanel.add(separator);
+        titlePanel.add(Box.createVerticalStrut(15)); // Space between separator and form
+
+        mainPanel.add(titlePanel, BorderLayout.NORTH);
+        mainPanel.add(createFormPanel(), BorderLayout.CENTER);
         mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
 
         getContentPane().add(mainPanel);
@@ -77,8 +94,8 @@ public class PatientDataFrame extends JFrame {
         addField(formPanel, "Apellidos:", txtSurname = createTextField(false), gbc, 2);
         addField(formPanel, "Fecha de Nacimiento:", txtBirthdate = createTextField(false), gbc, 3);
         addField(formPanel, "Edad:", txtAge = createTextField(false), gbc, 4);
-        addField(formPanel, "Teléfono:", txtPhone = createTextField(true), gbc, 5);
-        addField(formPanel, "Email:", txtEmail = createTextField(true), gbc, 6);
+        addField(formPanel, "Teléfono:", txtPhone = createTextField(false), gbc, 5);
+        addField(formPanel, "Email:", txtEmail = createTextField(false), gbc, 6);
 
         return formPanel;
     }

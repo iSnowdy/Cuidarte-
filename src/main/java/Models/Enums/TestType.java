@@ -3,7 +3,7 @@ package Models.Enums;
 public enum TestType {
     BLOOD_LAB("Hemograma"),
     BIOCHEMISTRY_LAB("Bioquímica"),
-    IMMUNOLOGY_LAB("Inmunologia"),
+    IMMUNOLOGY_LAB("Inmunología"),
     MICROBIOLOGY_LAB("Microbiología");
 
     private final String value;

@@ -1,13 +1,14 @@
 package Models;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class MedicalReport {
     private int id;
     private String
             patientDNI, doctorDNI,
             medicalHistory, diagnosis, allergies, appointmentMotive, physicalExploration, treatment;
-    private Date visitDate;
+    private Timestamp visitDate;
     private float
             temperature, weight, height;
     private int systolic, diastolic, heartRate, saturation;
@@ -24,7 +25,7 @@ public class MedicalReport {
                          String medicalHistory, String allergies, String appointmentMotive, String physicalExploration, String treatment,
                          int systolic, int diastolic, int heartRate, int saturation,
                          float temperature, float weight, float height,
-                         Date visitDate) {
+                         Timestamp visitDate) {
         this.patientDNI = patientDNI;
         this.doctorDNI = doctorDNI;
         this.medicalHistory = medicalHistory;
@@ -41,8 +42,6 @@ public class MedicalReport {
         this.height = height;
         this.visitDate = visitDate;
     }
-
-
 
 
     // Getters and Setters
@@ -109,10 +108,10 @@ public class MedicalReport {
         this.treatment = treatment;
     }
 
-    public Date getVisitDate() {
+    public Timestamp getVisitDate() {
         return visitDate;
     }
-    public void setVisitDate(Date visitDate) {
+    public void setVisitDate(Timestamp visitDate) {
         this.visitDate = visitDate;
     }
 

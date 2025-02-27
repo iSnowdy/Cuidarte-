@@ -55,8 +55,8 @@ public class PatientDAO extends BaseDAO<Patient, String> {
 
         try {
             boolean result = executeUpdate(query,
-                    entity.getDNI(),
                     entity.getFirstName(),
+                    entity.getSurname(),
                     entity.getPhoneNumber(),
                     entity.getEmail(),
                     entity.getDateOfBirth(),

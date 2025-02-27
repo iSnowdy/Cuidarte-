@@ -1,158 +1,215 @@
 package PortalPage.Swing;
 
+import DAO.DiagnosticTestDAO;
+import Exceptions.DatabaseQueryException;
+import LandingPage.Components.NotificationPopUp;
+import Models.DiagnosticTest;
 import Models.Patient;
-import PortalPage.Components.FilterComponent;
-import PortalPage.TempModels.DiagnosticTest;
-import Models.Enums.TestType;
 import Utils.Swing.Colors;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DiagnosticTestFrame extends JFrame {
-    // Test patient for which diagnostic tests are shown
-    private Patient patient;
-    // List of all diagnostic tests (dummy data)
+    private static final Logger LOGGER = Logger.getLogger(DiagnosticTestFrame.class.getName());
+
+    private final Patient patient;
+    private final DiagnosticTestDAO diagnosticTestDAO;
     private List<DiagnosticTest> allTests;
-    private DefaultListModel<DiagnosticTest> testListModel;
-    private JList<DiagnosticTest> testJList;
-
-    // Reusable FilterPanel for managing filter UI
-    private FilterComponent filterPanel;
-
-    // Filter constants
-    private static final String FILTER_BY_DATE = "Fecha";
-    private static final String FILTER_BY_TESTTYPE = "Tipo de prueba";
+    private JTable diagnosticTestData;
+    private DefaultTableModel tableModel;
+    private JComboBox<String> testTypeCombo, dateOrderCombo;
 
     public DiagnosticTestFrame(Patient patient) {
         this.patient = patient;
-        setTitle("Pruebas Diagnósticas de " + patient.getSurname());
-        setSize(700, 500);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        initializeDummyData();
-        initComponents();
+
+        try {
+            this.diagnosticTestDAO = new DiagnosticTestDAO();
+            this.allTests = diagnosticTestDAO.findByPatientDNI(patient.getDNI());
+        } catch (DatabaseQueryException e) {
+            throw new RuntimeException("Error fetching diagnostic tests", e);
+        }
+
+        initializeFrame();
+        addComponents();
+        updateDiagnosticTestsTable();
         setVisible(true);
     }
 
-    // Create dummy diagnostic tests for testing
-    private void initializeDummyData() {
-        allTests = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
-
-        cal.set(2024, Calendar.JANUARY, 10);
-        allTests.add(new DiagnosticTest(1, patient, "Resultados de hemograma normal.", TestType.BLOOD_LAB, cal.getTime()));
-        cal.set(2024, Calendar.JANUARY, 5);
-        allTests.add(new DiagnosticTest(2, patient, "Valores de bioquímica alterados.", TestType.BIOCHEMISTRY_LAB, cal.getTime()));
-        cal.set(2023, Calendar.OCTOBER, 29);
-        allTests.add(new DiagnosticTest(3, patient, "Resultados inmunológicos normales.", TestType.IMMUNOLOGY_LAB, cal.getTime()));
-        cal.set(2023, Calendar.DECEMBER, 15);
-        allTests.add(new DiagnosticTest(4, patient, "Cultivo de microbiología positivo.", TestType.MICROBIOLOGY_LAB, cal.getTime()));
-        cal.set(2023, Calendar.NOVEMBER, 20);
-        allTests.add(new DiagnosticTest(5, patient, "Hemograma indica anemia leve.", TestType.BLOOD_LAB, cal.getTime()));
+    private void initializeFrame() {
+        setTitle("Pruebas Diagnósticas");
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // Full screen
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    // Initialize UI components using a vertical BoxLayout
-    private void initComponents() {
-        JPanel container = new JPanel();
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-        container.setBackground(Color.WHITE);
-        container.setBorder(new EmptyBorder(20, 20, 20, 20));
+    private void addComponents() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // Title label
+        // Title Label
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
+        titlePanel.setBackground(Color.WHITE);
+
         JLabel titleLabel = new JLabel("Pruebas Diagnósticas de " + patient.getSurname(), JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Colors.MAIN_APP_COLOUR);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(new EmptyBorder(10, 0, 20, 0));
-        container.add(titleLabel);
+        titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
 
-        // Create a map of criteria controls for the FilterPanel
-        Map<String, JComponent> criteriaMap = new HashMap<>();
-        // For "Fecha", a combo box for Ascendente/Descendente order
-        JComboBox<String> dateOrderCombo = new JComboBox<>(new String[]{"Ascendente", "Descendente"});
-        dateOrderCombo.setFont(new Font("Arial", Font.PLAIN, 16));
-        dateOrderCombo.setMaximumSize(new Dimension(150, 25));
-        dateOrderCombo.addActionListener(e -> updateTestList());
-        criteriaMap.put(FILTER_BY_DATE, dateOrderCombo);
-        // For "Tipo de prueba", a combo box with options from TestType enum (plus "Todos")
-        String[] testTypeOptions = new String[TestType.values().length + 1];
-        testTypeOptions[0] = "Todos";
-        for (int i = 0; i < TestType.values().length; i++) {
-            testTypeOptions[i + 1] = TestType.values()[i].getValue();
-        }
-        JComboBox<String> testTypeCombo = new JComboBox<>(testTypeOptions);
-        testTypeCombo.setFont(new Font("Arial", Font.PLAIN, 16));
-        testTypeCombo.setMaximumSize(new Dimension(150, 25));
-        testTypeCombo.addActionListener(e -> updateTestList());
-        criteriaMap.put(FILTER_BY_TESTTYPE, testTypeCombo);
+        // Separator
+        JSeparator separator = new JSeparator();
+        separator.setForeground(Colors.MAIN_APP_COLOUR);
+        separator.setMaximumSize(new Dimension(Short.MAX_VALUE, 2));
 
-        // Instantiate the reusable FilterPanel with filter types and criteria controls
-        String[] filterTypes = {FILTER_BY_DATE, FILTER_BY_TESTTYPE};
-        filterPanel = new FilterComponent(filterTypes, criteriaMap);
-        container.add(filterPanel);
+        titlePanel.add(Box.createVerticalStrut(10));
+        titlePanel.add(titleLabel);
+        titlePanel.add(Box.createVerticalStrut(10));
+        titlePanel.add(separator);
+        titlePanel.add(Box.createVerticalStrut(15));
 
-        container.add(Box.createVerticalStrut(40));
+        mainPanel.add(titlePanel, BorderLayout.NORTH);
 
-        // Add diagnostic test list panel
-        container.add(createTestListPanel());
+        // Filter Panel
+        JPanel filterPanel = createFilterPanel();
+        mainPanel.add(filterPanel, BorderLayout.CENTER);
 
-        add(container);
+        // Test Table
+        JPanel tablePanel = createDiagnosticTestsTablePanel();
+        mainPanel.add(tablePanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
     }
 
-    // Create the panel containing the diagnostic test list with a scroll pane
-    private JPanel createTestListPanel() {
-        testListModel = new DefaultListModel<>();
-        testJList = new JList<>(testListModel);
-        testJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        testJList.setFont(new Font("Arial", Font.PLAIN, 16));
-        updateTestList();
+    private JPanel createFilterPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(new EmptyBorder(10, 0, 10, 0));
 
-        // Double-click to open detail frame
-        testJList.addMouseListener(new MouseAdapter() {
+        panel.add(new JLabel("Ordenar por fecha:"));
+        dateOrderCombo = new JComboBox<>(new String[]{"Ascendente", "Descendente"});
+        dateOrderCombo.addActionListener(e -> updateDiagnosticTestsTable());
+        panel.add(dateOrderCombo);
+
+        panel.add(Box.createHorizontalStrut(20));
+
+        panel.add(new JLabel("Tipo de prueba:"));
+        testTypeCombo = new JComboBox<>(new String[]{"Todos", "Hemograma", "Bioquímica", "Inmunología", "Microbiología"});
+        testTypeCombo.addActionListener(e -> updateDiagnosticTestsTable());
+        panel.add(testTypeCombo);
+
+        return panel;
+    }
+
+    private JPanel createDiagnosticTestsTablePanel() {
+        String[] columnNames = {"Fecha", "Tipo de Prueba", "Resultados"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
-            public void mouseClicked(MouseEvent evt) {
-                if (evt.getClickCount() == 2) {
-                    DiagnosticTest selected = testJList.getSelectedValue();
-                    if (selected != null) {
-                        new DiagnosticTestDetailsFrame(selected);
+            public boolean isCellEditable(int row, int column) {
+                return false; // Prevents editing
+            }
+        };
+
+        diagnosticTestData = new JTable(tableModel);
+        diagnosticTestData.setFont(new Font("Arial", Font.PLAIN, 14)); // Consistent font style
+        diagnosticTestData.setRowHeight(25);
+        diagnosticTestData.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Set table header style
+        JTableHeader header = diagnosticTestData.getTableHeader();
+        header.setFont(new Font("Arial", Font.BOLD, 14)); // Bold header text
+        header.setBackground(new Color(230, 230, 230)); // Light gray background
+        header.setOpaque(true);
+
+        // Apply row striping for better readability
+        diagnosticTestData.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    cell.setBackground(row % 2 == 0 ? Color.WHITE : new Color(240, 240, 240)); // Alternating row colors
+                }
+                ((JLabel) cell).setHorizontalAlignment(SwingConstants.CENTER); // Center align text
+                return cell;
+            }
+        });
+
+        diagnosticTestData.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) { // Double-click to open details
+                    int row = diagnosticTestData.getSelectedRow();
+                    if (row != -1) {
+                        openTestDetails(row);
                     }
                 }
             }
         });
 
+        updateDiagnosticTestsTable(); // Load table data
+
+        JScrollPane scrollPane = new JScrollPane(diagnosticTestData);
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JScrollPane(testJList), BorderLayout.CENTER);
+        panel.add(scrollPane, BorderLayout.CENTER);
         return panel;
     }
 
-    // Filter and update the diagnostic test list based on selected criteria
-    private void updateTestList() {
-        String filterType = filterPanel.getSelectedFilterType();
-        List<DiagnosticTest> filtered = new ArrayList<>(allTests);
+    private void updateDiagnosticTestsTable() {
+        tableModel.setRowCount(0); // Clears table
 
-        if (FILTER_BY_DATE.equals(filterType)) {
-            JComboBox<String> combo = (JComboBox<String>) filterPanel.getCurrentCriteriaComponent();
-            String order = (String) combo.getSelectedItem();
-            filtered.sort(Comparator.comparing(DiagnosticTest::getTestDate));
-            if ("Descendente".equals(order)) {
-                Collections.reverse(filtered);
-            }
-        } else if (FILTER_BY_TESTTYPE.equals(filterType)) {
-            JComboBox<String> combo = (JComboBox<String>) filterPanel.getCurrentCriteriaComponent();
-            String selectedType = (String) combo.getSelectedItem();
-            if (selectedType != null && !selectedType.equalsIgnoreCase("Todos")) {
-                filtered.removeIf(dt -> !dt.getTestType().getValue().equalsIgnoreCase(selectedType));
-            }
+        try {
+            allTests = diagnosticTestDAO.findByPatientDNI(patient.getDNI()); // Fetches from DB
+        } catch (DatabaseQueryException e) {
+            LOGGER.log(Level.SEVERE, "Error loading diagnostic tests from DB", e);
+            NotificationPopUp.showErrorMessage(this, "Error", "No se pudieron cargar las pruebas diagnósticas.");
+            return;
         }
 
-        testListModel.clear();
-        for (DiagnosticTest dt : filtered) {
-            testListModel.addElement(dt);
+        boolean ascending = dateOrderCombo.getSelectedItem().equals("Ascendente");
+        allTests.sort((t1, t2) -> ascending ? t1.getTestDate().compareTo(t2.getTestDate())
+                : t2.getTestDate().compareTo(t1.getTestDate()));
+
+        for (DiagnosticTest test : allTests) {
+            if (shouldIncludeTest(test)) {
+                tableModel.addRow(new Object[]{
+                        test.getTestDate(), test.getTestType().getValue(), test.getResults()
+                });
+            }
+        }
+    }
+
+    private boolean shouldIncludeTest(DiagnosticTest test) {
+        String selectedType = (String) testTypeCombo.getSelectedItem();
+        return selectedType.equals("Todos") || test.getTestType().getValue().equalsIgnoreCase(selectedType);
+    }
+
+    // Opens the detailed test view when a row is double-clicked
+    private void openTestDetails(int row) {
+        try {
+            DiagnosticTest selectedTest = allTests.get(row);
+
+            Optional<Object> detailedTest = diagnosticTestDAO.findDetailedTestByID(
+                    selectedTest.getDiagnosticTestID(),
+                    selectedTest.getTestType()
+            );
+
+            if (detailedTest.isPresent()) {
+                new DiagnosticTestDetailsFrame(detailedTest.get());
+            } else {
+                NotificationPopUp.showErrorMessage(this, "Error", "No se encontró información detallada.");
+            }
+        } catch (DatabaseQueryException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching detailed test", e);
+            NotificationPopUp.showErrorMessage(this, "Error", "No se pudo cargar la información de la prueba.");
         }
     }
 }

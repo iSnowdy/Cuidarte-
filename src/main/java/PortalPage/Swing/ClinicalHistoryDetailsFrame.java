@@ -9,9 +9,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 
+import static Utils.Swing.Fonts.COMBOBOX_FONT;
+
 public class ClinicalHistoryDetailsFrame extends JFrame {
     private final MedicalReport medicalReport;
-    private JButton generateMedicalReportButton;
 
     public ClinicalHistoryDetailsFrame(MedicalReport medicalReport) {
         this.medicalReport = medicalReport;
@@ -32,7 +33,7 @@ public class ClinicalHistoryDetailsFrame extends JFrame {
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // Panel superior con título y separador
+        // Header panel containing the title and separator
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.WHITE);
 
@@ -76,11 +77,17 @@ public class ClinicalHistoryDetailsFrame extends JFrame {
         scrollPane.setBackground(Color.WHITE);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        generateMedicalReportButton = new JButton("Generar informe en PDF");
-        generateMedicalReportButton.addActionListener(e -> {
-            PDFReportGenerator.generateMedicalReport(medicalReport, "C:\\Users\\andyl\\IdeaProjects\\Cuidarte\\src\\main\\resources\\medicalreport.pdf");
-        });
-        mainPanel.add(generateMedicalReportButton, BorderLayout.SOUTH);
+
+        JButton generateMedicalReportButton = new JButton("Generar informe en PDF");
+        generateMedicalReportButton.addActionListener(e -> generatePDFReport());
+
+        // Button panel that contains the Print to PDF function
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.add(Box.createVerticalStrut(20));
+        buttonPanel.add(generateMedicalReportButton);
+
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
     }
@@ -95,19 +102,27 @@ public class ClinicalHistoryDetailsFrame extends JFrame {
         panel.add(createDetailValue(value), gbc);
     }
 
+    // Label for the name of the field
     private JLabel createDetailLabel(String text) {
         JLabel label = new JLabel(text);
-        label.setFont(new Font("Arial", Font.BOLD, 16));
+        label.setFont(COMBOBOX_FONT.deriveFont(Font.BOLD));
         return label;
     }
 
+    // Value of the field
     private JTextArea createDetailValue(String value) {
         JTextArea textArea = new JTextArea(value);
-        textArea.setFont(new Font("Arial", Font.PLAIN, 16));
+        textArea.setFont(COMBOBOX_FONT);
         textArea.setWrapStyleWord(true);
         textArea.setLineWrap(true);
         textArea.setEditable(false);
         textArea.setOpaque(false);
         return textArea;
+    }
+
+    private void generatePDFReport() {
+        PDFReportGenerator.generateMedicalReport(
+                medicalReport,
+                "C:\\Users\\andyl\\IdeaProjects\\Cuidarte\\src\\main\\resources");
     }
 }

@@ -12,25 +12,16 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
+import static Utils.Swing.Fonts.MAIN_FONT;
+import static Utils.Swing.Fonts.PANEL_TITLE_FONT;
 
 public class PatientPortalPanel extends JPanel {
-    private final JFrame parentFrame;
-    private final NavigationController navigationController;
     private final Patient patient;
     private JPanel contentPanel;
     private JPanel gridPanel;
     private final ImageIconRedrawer iconRedrawer;
 
-    /**
-     * Constructor for PatientPortalPanel.
-     *
-     * @param parentFrame          The main application frame.
-     * @param navigationController The navigation controller instance.
-     * @param patient              The test patient instance.
-     */
-    public PatientPortalPanel(JFrame parentFrame, NavigationController navigationController, Patient patient) {
-        this.parentFrame = parentFrame;
-        this.navigationController = navigationController;
+    public PatientPortalPanel(Patient patient) {
         this.patient = patient;
         this.iconRedrawer = new ImageIconRedrawer();
 
@@ -38,64 +29,59 @@ public class PatientPortalPanel extends JPanel {
         addContent();
     }
 
-    /**
-     * Initializes the main panel layout and background color.
-     */
+    // Initialize main panel properties
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
     }
 
-    /**
-     * Builds and adds the content section.
-     */
+    // Build the main content
     private void addContent() {
-        this.contentPanel = new JPanel(new BorderLayout());
+        contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(Color.WHITE);
 
-        JLabel titleLabel = new JLabel("Portal del Paciente", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 34));
-        titleLabel.setForeground(MAIN_APP_COLOUR);
-        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0));
-
+        JLabel titleLabel = buildTitleLabel();
         contentPanel.add(titleLabel, BorderLayout.NORTH);
+
         addGridPanel();
         contentPanel.add(gridPanel, BorderLayout.CENTER);
+
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    /**
-     * Builds the grid panel containing all the action cards.
-     */
+    // Build the title label
+    private JLabel buildTitleLabel() {
+        JLabel titleLabel = new JLabel("Portal del Paciente", JLabel.CENTER);
+        titleLabel.setFont(PANEL_TITLE_FONT);
+        titleLabel.setForeground(MAIN_APP_COLOUR);
+        titleLabel.setBorder(new EmptyBorder(20, 0, 20, 0));
+        return titleLabel;
+    }
+
+    // Build the grid panel for the cards
     private void addGridPanel() {
-        this.gridPanel = new JPanel(new GridBagLayout());
+        gridPanel = new JPanel(new GridBagLayout());
         gridPanel.setBackground(Color.WHITE);
         gridPanel.setBorder(new EmptyBorder(20, 40, 40, 40));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(20, 20, 20, 20); // Space between cards
         gbc.fill = GridBagConstraints.NONE;
+        gbc.gridy = 0;
 
         gbc.gridx = 0;
-        gbc.gridy = 0;
         gridPanel.add(createCard("Historia Clínica", "/PortalPacienteImgs/healthcare-hospital-medical-43-svgrepo-com.png", "HC"), gbc);
 
         gbc.gridx = 1;
         gridPanel.add(createCard("Datos Paciente", "/PortalPacienteImgs/datos_pacientes.png", "DP"), gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gridPanel.add(createCard("Informes Hospitalización", "/PortalPacienteImgs/informes_hospitalizacion.png", "IH"), gbc);
-
-        gbc.gridx = 1;
+        gbc.gridx = 2;
         gridPanel.add(createCard("Pruebas Diagnósticas", "/PortalPacienteImgs/pruebas_diagnosticas.png", "PD"), gbc);
 
         contentPanel.add(gridPanel, BorderLayout.CENTER);
     }
 
-    /**
-     * Creates an individual card with fixed dimensions.
-     */
+    // Create a card component
     private JPanel createCard(String title, String iconPath, String identifier) {
         JPanel cardPanel = new JPanel(new BorderLayout());
         cardPanel.setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1, true));
@@ -106,25 +92,18 @@ public class PatientPortalPanel extends JPanel {
         cardPanel.setMinimumSize(cardSize);
 
         JPanel iconPanel = buildIconPanel(iconPath);
-        JLabel titleLabel = buildTitleLabel(title);
+        JLabel titleLabel = buildCardTitleLabel(title);
 
         cardPanel.add(iconPanel, BorderLayout.CENTER);
         cardPanel.add(titleLabel, BorderLayout.SOUTH);
 
         addHoverEffect(cardPanel);
-        cardPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                openFrameForIdentifier(identifier);
-            }
-        });
+        addClickEvent(cardPanel, identifier);
 
         return cardPanel;
     }
 
-    /**
-     * Builds the icon panel for a card.
-     */
+    // Build the icon panel for a card
     private JPanel buildIconPanel(String iconPath) {
         JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
         iconPanel.setBackground(Color.WHITE);
@@ -139,19 +118,15 @@ public class PatientPortalPanel extends JPanel {
         return iconPanel;
     }
 
-    /**
-     * Builds the title label for a card.
-     */
-    private JLabel buildTitleLabel(String title) {
+    // Build the title label for a card
+    private JLabel buildCardTitleLabel(String title) {
         JLabel titleLabel = new JLabel(title, JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setFont(MAIN_FONT.deriveFont(Font.BOLD));
         titleLabel.setPreferredSize(new Dimension(250, 20));
         return titleLabel;
     }
 
-    /**
-     * Adds a hover effect to a card.
-     */
+    // Add hover effect to a card
     private void addHoverEffect(JPanel cardPanel) {
         cardPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -168,42 +143,36 @@ public class PatientPortalPanel extends JPanel {
         });
     }
 
-    /**
-     * Opens a new frame based on the card's identifier.
-     */
+    // Add click event to a card
+    private void addClickEvent(JPanel cardPanel, String identifier) {
+        cardPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                openFrameForIdentifier(identifier);
+            }
+        });
+    }
+
+    // Open frame based on identifier
     private void openFrameForIdentifier(String identifier) {
         switch (identifier) {
             case "DP" -> openPatientDataFrame();
             case "HC" -> openClinicalHistoryFrame();
-            case "IH" -> openHospitalizationReportsFrame();
             case "PD" -> openAnalyticsFrame();
         }
     }
 
-    /**
-     * Opens the frame dedicated to patient data.
-     */
+    // Open patient data frame
     private void openPatientDataFrame() {
         new PatientDataFrame(patient);
     }
 
-    /**
-     * Opens the frame dedicated to clinical history.
-     */
+    // Open clinical history frame
     private void openClinicalHistoryFrame() {
         new ClinicalHistoryFrame(patient);
     }
 
-    /**
-     * Opens the frame dedicated to hospitalization reports.
-     */
-    private void openHospitalizationReportsFrame() {
-        new HospitalizationReportFrame(patient);
-    }
-
-    /**
-     * Opens the frame dedicated to diagnostic tests.
-     */
+    // Open diagnostic test frame
     private void openAnalyticsFrame() {
         new DiagnosticTestFrame(patient);
     }

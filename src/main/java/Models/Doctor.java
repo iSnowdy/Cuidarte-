@@ -20,7 +20,7 @@ public class Doctor extends User {
     public String toString() {
         return
                 super.toString() + "\n" +
-                        "Doctor Specialty: " + speciality;
+                        "Doctor Speciality: " + speciality;
     }
 
     // Getters and Setters

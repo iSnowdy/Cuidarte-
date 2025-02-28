@@ -194,6 +194,7 @@ public class Authenticator extends JPanel {
             String email = loginAndRegister.getEmailInputFromLogin();
             String password = loginAndRegister.getPasswordInputFromLogin();
 
+            // TODO: To keep track of login credentials
             System.out.println("Email is: " + email);
             System.out.println("Password is: " + password);
 

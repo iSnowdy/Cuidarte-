@@ -7,14 +7,14 @@ public class BiochemistryLab {
             glucose,
             urea,
             totalCholesterol, hdlCholesterol, ldlCholesterol, triglycerides,
-            gotAST, gptALT, gammaGT,
+            gotAst, gptAlt, gammaGt,
             alkalinePhosphatase;
     private double
             creatinine,
             uricAcid, totalBilirubin;
 
 
-    public BiochemistryLab(int biochemistryId, int testId, int glucose, int urea, double creatinine, double uricAcid, int totalCholesterol, int hdlCholesterol, int ldlCholesterol, int triglycerides, int gotAST, int gptALT, int gammaGT, int alkalinePhosphatase, double totalBilirubin) {
+    public BiochemistryLab(int biochemistryId, int testId, int glucose, int urea, double creatinine, double uricAcid, int totalCholesterol, int hdlCholesterol, int ldlCholesterol, int triglycerides, int gotAst, int gptAlt, int gammaGt, int alkalinePhosphatase, double totalBilirubin) {
         this.biochemistryID = biochemistryId;
         this.diagnosticTestID = testId;
         this.glucose = glucose;
@@ -25,9 +25,9 @@ public class BiochemistryLab {
         this.hdlCholesterol = hdlCholesterol;
         this.ldlCholesterol = ldlCholesterol;
         this.triglycerides = triglycerides;
-        this.gotAST = gotAST;
-        this.gptALT = gptALT;
-        this.gammaGT = gammaGT;
+        this.gotAst = gotAst;
+        this.gptAlt = gptAlt;
+        this.gammaGt = gammaGt;
         this.alkalinePhosphatase = alkalinePhosphatase;
         this.totalBilirubin = totalBilirubin;
     }
@@ -98,28 +98,28 @@ public class BiochemistryLab {
         this.triglycerides = triglycerides;
     }
 
-    public int getGotAST() {
-        return gotAST;
+    public int getGotAst() {
+        return gotAst;
     }
 
-    public void setGotAST(int gotAST) {
-        this.gotAST = gotAST;
+    public void setGotAst(int gotAst) {
+        this.gotAst = gotAst;
     }
 
-    public int getGptALT() {
-        return gptALT;
+    public int getGptAlt() {
+        return gptAlt;
     }
 
-    public void setGptALT(int gptALT) {
-        this.gptALT = gptALT;
+    public void setGptAlt(int gptAlt) {
+        this.gptAlt = gptAlt;
     }
 
-    public int getGammaGT() {
-        return gammaGT;
+    public int getGammaGt() {
+        return gammaGt;
     }
 
-    public void setGammaGT(int gammaGT) {
-        this.gammaGT = gammaGT;
+    public void setGammaGt(int gammaGt) {
+        this.gammaGt = gammaGt;
     }
 
     public int getAlkalinePhosphatase() {

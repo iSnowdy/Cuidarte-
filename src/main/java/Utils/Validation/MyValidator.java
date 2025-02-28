@@ -82,6 +82,7 @@ public class MyValidator {
         return passwordToValidate.length() >= 6 && passwordToValidate.matches("^(?=.*\\d)(?=.*[A-Za-z]).{6,}$");
     }
 
+    // TODO: For now I'll leave the prints here to not have to open the email
     public static boolean verifyPatientCode(int patientCode, int inputCode) {
         System.out.println("Patient code: " + patientCode);
         System.out.println("Input code: " + inputCode);

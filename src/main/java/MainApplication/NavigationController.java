@@ -57,7 +57,7 @@ public class NavigationController {
                     showLoginRequiredMessage();
                     return;
                 }
-                newPanel = new PatientPortalPanel(mainFrame, this, loggedInPatient);
+                newPanel = new PatientPortalPanel(loggedInPatient);
             }
             case "Nuestros Centros" -> newPanel = new CentresPanel(mainFrame, this);
             case "Quiénes Somos" -> newPanel = new AboutUsPanel(mainFrame, this);

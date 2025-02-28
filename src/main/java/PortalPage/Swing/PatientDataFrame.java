@@ -6,6 +6,7 @@ import Exceptions.DatabaseUpdateException;
 import LandingPage.Components.NotificationPopUp;
 import Models.Patient;
 import Utils.Swing.Colors;
+import Utils.Utility.CustomLogger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PatientDataFrame extends JFrame {
-    private static final Logger LOGGER = Logger.getLogger(PatientDataFrame.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger(PatientDataFrame.class);
 
     private final Patient patient;
     private final PatientDAO patientDAO;
@@ -25,32 +26,50 @@ public class PatientDataFrame extends JFrame {
 
     public PatientDataFrame(Patient patient) {
         this.patient = patient;
-        try {
-            this.patientDAO = new PatientDAO();
-        } catch (DatabaseQueryException e) {
-            throw new RuntimeException("Error initializing PatientDAO", e);
-        }
-
+        this.patientDAO = initializePatientDAO();
         initializeFrame();
         addComponents();
         loadPatientData();
         setVisible(true);
     }
 
+    // Initializes the PatientDAO while handling potential database errors
+    private PatientDAO initializePatientDAO() {
+        try {
+            return new PatientDAO();
+        } catch (DatabaseQueryException e) {
+            throw new RuntimeException("Error initializing PatientDAO", e);
+        }
+    }
+
+    // Configures the frame settings
     private void initializeFrame() {
         setTitle("Datos del Paciente");
-        setSize(700, 500);
+        setSize(800, 600);
         setMinimumSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
+    // Adds all UI components to the frame
     private void addComponents() {
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(Color.WHITE);
-        mainPanel.setBorder(new EmptyBorder(20, 40, 20, 40));
+        JPanel mainPanel = createMainPanel();
+        mainPanel.add(createTitlePanel(), BorderLayout.NORTH);
+        mainPanel.add(createFormPanel(), BorderLayout.CENTER);
+        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
+        getContentPane().add(mainPanel);
+    }
 
-        // Title Section with Spacing
+    // Creates the main panel with proper padding and layout
+    private JPanel createMainPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(new EmptyBorder(20, 40, 20, 40));
+        return panel;
+    }
+
+    // Creates the title panel with a header and a separator
+    private JPanel createTitlePanel() {
         JPanel titlePanel = new JPanel();
         titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
         titlePanel.setBackground(Color.WHITE);
@@ -59,35 +78,26 @@ public class PatientDataFrame extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
         titleLabel.setForeground(Colors.MAIN_APP_COLOUR);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0)); // Add padding around the title
+        titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
 
-        // Separator for better visual organization
         JSeparator separator = new JSeparator();
         separator.setForeground(Colors.MAIN_APP_COLOUR);
-        separator.setMaximumSize(new Dimension(Short.MAX_VALUE, 2)); // Full-width
+        separator.setMaximumSize(new Dimension(Short.MAX_VALUE, 2));
 
-        // Adding spacing using vertical struts
-        titlePanel.add(Box.createVerticalStrut(10)); // Space above title
+        titlePanel.add(Box.createVerticalStrut(10));
         titlePanel.add(titleLabel);
-        titlePanel.add(Box.createVerticalStrut(10)); // Space between title and separator
+        titlePanel.add(Box.createVerticalStrut(10));
         titlePanel.add(separator);
-        titlePanel.add(Box.createVerticalStrut(15)); // Space between separator and form
+        titlePanel.add(Box.createVerticalStrut(15));
 
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
-        mainPanel.add(createFormPanel(), BorderLayout.CENTER);
-        mainPanel.add(createButtonPanel(), BorderLayout.SOUTH);
-
-        getContentPane().add(mainPanel);
+        return titlePanel;
     }
 
+    // Creates the form panel with all patient details
     private JPanel createFormPanel() {
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 10, 10, 10);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
+        GridBagConstraints gbc = createGridBagConstraints();
 
         addField(formPanel, "DNI:", txtDNI = createTextField(false), gbc, 0);
         addField(formPanel, "Nombre:", txtName = createTextField(false), gbc, 1);
@@ -100,6 +110,17 @@ public class PatientDataFrame extends JFrame {
         return formPanel;
     }
 
+    // Configures GridBagConstraints for uniform field alignment
+    private GridBagConstraints createGridBagConstraints() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        return gbc;
+    }
+
+    // Adds a field with label and text box
     private void addField(JPanel panel, String label, JTextField textField, GridBagConstraints gbc, int row) {
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -109,12 +130,14 @@ public class PatientDataFrame extends JFrame {
         panel.add(textField, gbc);
     }
 
+    // Creates labels for form fields
     private JLabel createFormLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(new Font("Arial", Font.PLAIN, 16));
         return label;
     }
 
+    // Creates text fields with a standard design
     private JTextField createTextField(boolean isEditable) {
         JTextField textField = new JTextField(20);
         textField.setFont(new Font("Arial", Font.PLAIN, 16));
@@ -124,6 +147,7 @@ public class PatientDataFrame extends JFrame {
         return textField;
     }
 
+    // Creates the button panel with edit/save and close buttons
     private JPanel createButtonPanel() {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(Color.WHITE);
@@ -141,6 +165,7 @@ public class PatientDataFrame extends JFrame {
         return buttonPanel;
     }
 
+    // Creates a standard button with defined styles
     private JButton createButton(String text, Color bgColor) {
         JButton button = new JButton(text);
         button.setFont(new Font("Arial", Font.BOLD, 16));
@@ -150,6 +175,7 @@ public class PatientDataFrame extends JFrame {
         return button;
     }
 
+    // Loads patient data into the text fields
     private void loadPatientData() {
         txtDNI.setText(patient.getDNI());
         txtName.setText(patient.getFirstName());
@@ -160,6 +186,7 @@ public class PatientDataFrame extends JFrame {
         txtEmail.setText(patient.getEmail());
     }
 
+    // Toggles between edit and save modes
     private void toggleEditMode() {
         if (!isEditing) {
             enterEditMode();
@@ -168,6 +195,7 @@ public class PatientDataFrame extends JFrame {
         }
     }
 
+    // Enables edit mode for phone and email fields
     private void enterEditMode() {
         txtPhone.setEditable(true);
         txtEmail.setEditable(true);
@@ -177,6 +205,7 @@ public class PatientDataFrame extends JFrame {
         isEditing = true;
     }
 
+    // Saves patient data and updates the database
     private void savePatientData() {
         String newPhone = txtPhone.getText().trim();
         String newEmail = txtEmail.getText().trim();

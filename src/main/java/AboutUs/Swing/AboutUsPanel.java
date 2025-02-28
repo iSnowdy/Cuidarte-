@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
+import static Utils.Swing.Fonts.PANEL_TITLE_FONT;
 
 public class AboutUsPanel extends JPanel {
     private final Logger LOGGER = CustomLogger.getLogger(AboutUsPanel.class);
@@ -75,7 +76,7 @@ public class AboutUsPanel extends JPanel {
         gbc.gridy = 0;
 
         JLabel titleLabel = new JLabel("Quiénes Somos", JLabel.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 34));
+        titleLabel.setFont(PANEL_TITLE_FONT);
         titleLabel.setForeground(MAIN_APP_COLOUR);
         contentPanel.add(titleLabel, gbc);
 

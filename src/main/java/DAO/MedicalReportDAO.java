@@ -2,6 +2,7 @@ package DAO;
 
 import Exceptions.*;
 import Models.MedicalReport;
+import Utils.Utility.CustomLogger;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MedicalReportDAO extends BaseDAO<MedicalReport, Integer> {
-    private static final Logger LOGGER = Logger.getLogger(MedicalReportDAO.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger(MedicalReportDAO.class);
 
     public MedicalReportDAO() throws DatabaseOpeningException {
         super();

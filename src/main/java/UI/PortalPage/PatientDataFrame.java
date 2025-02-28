@@ -4,7 +4,7 @@ import Database.DAO.PatientDAO;
 import Exceptions.DatabaseQueryException;
 import Exceptions.DatabaseUpdateException;
 import Components.NotificationPopUp;
-import Database.AaModels.Patient;
+import Database.Models.Patient;
 import Utils.Swing.Colors;
 import Utils.Utility.CustomLogger;
 

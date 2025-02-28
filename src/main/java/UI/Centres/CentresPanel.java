@@ -7,7 +7,7 @@ import Exceptions.DatabaseOpeningException;
 import Exceptions.DatabaseQueryException;
 import Components.NotificationPopUp;
 import MainApplication.NavigationController;
-import Database.AaModels.Clinic;
+import Database.Models.Clinic;
 import Utils.Utility.CustomLogger;
 import Utils.Utility.GoogleMapsRedirect;
 import Utils.Utility.ImageIconRedrawer;

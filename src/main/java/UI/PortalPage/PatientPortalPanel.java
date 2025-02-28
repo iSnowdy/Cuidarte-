@@ -1,6 +1,6 @@
 package UI.PortalPage;
 
-import Database.AaModels.Patient;
+import Database.Models.Patient;
 import Utils.Utility.ImageIconRedrawer;
 
 import javax.swing.*;

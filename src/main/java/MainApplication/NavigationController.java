@@ -6,7 +6,7 @@ import UI.Calendar.ClinicSpecialitySelectionDialog;
 import UI.Centres.CentresPanel;
 import Components.NotificationPopUp;
 import UI.LandingPage.LandingPage;
-import Database.AaModels.Patient;
+import Database.Models.Patient;
 import UI.PortalPage.PatientPortalPanel;
 
 import javax.swing.*;
@@ -96,15 +96,17 @@ public class NavigationController {
         String selectedClinic = selectionDialog.getSelectedClinic();
         String selectedSpeciality = selectionDialog.getSelectedSpeciality();
 
-        if (selectedClinic != null && selectedSpeciality != null) {
-            proceedToCalendar(selectedClinic, selectedSpeciality);
-        } else {
-            NotificationPopUp.showErrorMessage(
+        // Prevent redirection if the user canceled
+        if (selectedClinic == null || selectedSpeciality == null) {
+            NotificationPopUp.showInfoMessage(
                     mainFrame,
                     "Error",
-                    "Hubo un error durante la selección de clínica y especialidad."
+                    "Ha de seleccionar una clínica y especialidad para continuar al calendario."
             );
+            return;
         }
+
+        proceedToCalendar(selectedClinic, selectedSpeciality);
     }
 
     private void proceedToCalendar(String selectedClinic, String selectedSpeciality) {

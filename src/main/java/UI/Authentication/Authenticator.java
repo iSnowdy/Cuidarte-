@@ -2,7 +2,7 @@ package UI.Authentication;
 
 import Exceptions.DatabaseInsertException;
 import Components.NotificationPopUp;
-import Database.AaModels.Patient;
+import Database.Models.Patient;
 import Database.DAO.PatientServices;
 import Utils.Utility.JavaMailSender;
 import Utils.Utility.CustomLogger;

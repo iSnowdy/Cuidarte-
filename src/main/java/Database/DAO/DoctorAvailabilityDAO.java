@@ -1,9 +1,9 @@
 package Database.DAO;
 
 import Exceptions.*;
-import Database.AaModels.DoctorAvailability;
-import Database.AaModels.TimeSlotStatus;
-import Database.AaModels.TimeSlot;
+import Database.Models.DoctorAvailability;
+import Database.Models.Enums.TimeSlotStatus;
+import Database.Models.TimeSlot;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -52,7 +52,7 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
     }
 
     @Override
-    public boolean update(DoctorAvailability entity) throws DatabaseQueryException {
+    public boolean update(DoctorAvailability entity) throws DatabaseUpdateException {
         String query =
                 "UPDATE disponibilidad_medico " +
                         "SET Fecha = ?, Hora_Inicio = ?, Hora_Fin = ?, Duracion_Cita = ? " +
@@ -75,6 +75,37 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
             return result;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating doctor availability with ID: " + entity.getDoctorAvailabilityID(), e);
+            throw new DatabaseUpdateException("Failed to update doctor availability");
+        }
+    }
+
+    public boolean updateTimeSlotStatus(String doctorDNI, LocalDate date, String time, TimeSlotStatus newStatus) throws DatabaseUpdateException {
+        String query =
+                "UPDATE franjas_horarias f " +
+                "JOIN disponibilidad_medico d " +
+                        "ON f.ID_Disponibilidad = d.ID_Disponibilidad " +
+                "SET f.Estado = ? " +
+                "WHERE d.DNI_Medico = ? " +
+                    "AND d.Fecha = ? " +
+                    "AND f.Hora = ?";
+
+        try {
+            boolean result = executeUpdate(
+                    query,
+                    newStatus.getValue(),
+                    doctorDNI,
+                    date,
+                    time
+            );
+
+            if (result) {
+                LOGGER.info("Updated doctor availability with DNI: " +
+                        doctorDNI + " to: " + newStatus.getValue() +
+                        " on the: " + date + " - " + time);
+            }
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating doctor availability with DNI: " + doctorDNI, e);
             throw new DatabaseUpdateException("Failed to update doctor availability");
         }
     }
@@ -179,14 +210,15 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
         return availableHours;
     }
 
+    // Retrieves the available time slots of a doctor working on a specific day
     public List<TimeSlot> findAvailableTimeSlotsByDoctorAndDate(String doctorDNI, int clinicID, LocalDate date) throws DatabaseQueryException {
         List<TimeSlot> availableTimeSlots = new ArrayList<>();
 
         String query =
                 "SELECT f.ID_Franja, f.ID_Disponibilidad, f.Hora, f.Estado " +
-                        "FROM franjas_horarias f " +
-                        "INNER JOIN disponibilidad_medico d ON f.ID_Disponibilidad = d.ID_Disponibilidad " +
-                        "WHERE d.DNI_Medico = ? AND d.ID_Clinica = ? AND d.Fecha = ? AND f.Estado = ?";
+                "FROM franjas_horarias f " +
+                "INNER JOIN disponibilidad_medico d ON f.ID_Disponibilidad = d.ID_Disponibilidad " +
+                "WHERE d.DNI_Medico = ? AND d.ID_Clinica = ? AND d.Fecha = ? AND f.Estado = ?";
 
         try (ResultSet resultSet = executeQuery(query, doctorDNI, clinicID, java.sql.Date.valueOf(date), TimeSlotStatus.DISPONIBLE.name())) {
             while (resultSet.next()) {
@@ -204,7 +236,6 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
         }
         return availableTimeSlots;
     }
-
 
     public List<DoctorAvailability> findAvailabilityByClinicAndDoctor(int clinicID, String doctorDNI) throws DatabaseQueryException {
         List<DoctorAvailability> availabilities = new ArrayList<>();

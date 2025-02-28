@@ -1,4 +1,6 @@
-package Database.AaModels;
+package Database.Models;
+
+import Database.Models.Enums.TestType;
 
 import java.sql.Date;
 

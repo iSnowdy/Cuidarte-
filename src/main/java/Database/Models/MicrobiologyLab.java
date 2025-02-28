@@ -1,4 +1,4 @@
-package Database.AaModels;
+package Database.Models;
 
 public class MicrobiologyLab {
     private int

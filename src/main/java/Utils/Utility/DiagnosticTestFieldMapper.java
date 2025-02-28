@@ -1,6 +1,6 @@
 package Utils.Utility;
 
-import Database.AaModels.TestType;
+import Database.Models.Enums.TestType;
 
 import java.util.HashMap;
 import java.util.Map;

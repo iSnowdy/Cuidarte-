@@ -1,6 +1,7 @@
 package Database.DAO;
 
-import Database.AaModels.*;
+import Database.Models.*;
+import Database.Models.Enums.TestType;
 import Exceptions.*;
 
 import java.sql.ResultSet;
@@ -42,7 +43,7 @@ public class DiagnosticTestDAO extends BaseDAO<DiagnosticTest, Integer> {
     }
 
     @Override
-    public boolean update(DiagnosticTest entity) throws DatabaseQueryException {
+    public boolean update(DiagnosticTest entity) throws DatabaseUpdateException {
         String query = "UPDATE pruebas_diagnosticas SET ID_Historia_Clinica = ?, Tipo_Prueba = ?, Fecha_Realizacion = ?, Resultados = ? WHERE ID_Prueba = ?";
 
         try {

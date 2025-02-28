@@ -1,6 +1,6 @@
 package UI.PortalPage;
 
-import Database.AaModels.MedicalReport;
+import Database.Models.MedicalReport;
 import Utils.Swing.Colors;
 import Utils.Utility.PDFReportGenerator;
 

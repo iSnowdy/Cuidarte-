@@ -1,4 +1,4 @@
-package Database.AaModels;
+package Database.Models;
 
 import java.sql.Date;
 import java.util.Optional;

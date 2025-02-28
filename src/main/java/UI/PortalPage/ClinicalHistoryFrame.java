@@ -4,9 +4,9 @@ import Database.DAO.DoctorDAO;
 import Database.DAO.MedicalReportDAO;
 import Exceptions.DatabaseOpeningException;
 import Exceptions.DatabaseQueryException;
-import Database.AaModels.Doctor;
-import Database.AaModels.MedicalReport;
-import Database.AaModels.Patient;
+import Database.Models.Doctor;
+import Database.Models.MedicalReport;
+import Database.Models.Patient;
 import Utils.Swing.Colors;
 import Utils.Utility.CustomLogger;
 

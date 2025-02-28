@@ -6,7 +6,7 @@ import Exceptions.DatabaseOpeningException;
 import Exceptions.DatabaseQueryException;
 import Components.NotificationPopUp;
 import MainApplication.NavigationController;
-import Database.AaModels.Doctor;
+import Database.Models.Doctor;
 import Utils.Utility.CustomLogger;
 import Utils.Utility.ImageIconRedrawer;
 import javax.swing.*;

@@ -1,4 +1,4 @@
-package Database.AaModels;
+package Database.Models.Enums;
 
 public enum AppointmentState {
     PENDING("Pendiente"),

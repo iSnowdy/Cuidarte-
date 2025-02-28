@@ -4,8 +4,8 @@ import Exceptions.DatabaseDeleteException;
 import Exceptions.DatabaseInsertException;
 import Exceptions.DatabaseQueryException;
 import Exceptions.DatabaseUpdateException;
-import Database.AaModels.TimeSlot;
-import Database.AaModels.TimeSlotStatus;
+import Database.Models.TimeSlot;
+import Database.Models.Enums.TimeSlotStatus;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

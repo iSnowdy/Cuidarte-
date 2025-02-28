@@ -1,7 +1,7 @@
 package Database.DAO;
 
 import Exceptions.*;
-import Database.AaModels.MedicalReport;
+import Database.Models.MedicalReport;
 import Utils.Utility.CustomLogger;
 
 import java.sql.*;

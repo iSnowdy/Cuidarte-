@@ -3,8 +3,8 @@ package UI.PortalPage;
 import Database.DAO.DiagnosticTestDAO;
 import Exceptions.DatabaseQueryException;
 import Components.NotificationPopUp;
-import Database.AaModels.DiagnosticTest;
-import Database.AaModels.Patient;
+import Database.Models.DiagnosticTest;
+import Database.Models.Patient;
 import Utils.Swing.Colors;
 import Utils.Utility.CustomLogger;
 

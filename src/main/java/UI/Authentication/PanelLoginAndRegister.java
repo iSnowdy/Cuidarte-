@@ -2,7 +2,7 @@ package UI.Authentication;
 
 import Components.CustomTextField;
 import Components.CustomizedButton;
-import Database.AaModels.Patient;
+import Database.Models.Patient;
 import Utils.Utility.ImageIconRedrawer;
 import Utils.Validation.MyValidator;
 import net.miginfocom.swing.MigLayout;

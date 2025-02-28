@@ -1,7 +1,9 @@
 package UI.Calendar;
 
-import Database.AaModels.*;
+import Database.Models.*;
 import Database.DAO.*;
+import Database.Models.Enums.AppointmentState;
+import Database.Models.Enums.TimeSlotStatus;
 import Exceptions.DatabaseOpeningException;
 import Exceptions.DatabaseQueryException;
 import Components.NotificationPopUp;
@@ -37,7 +39,7 @@ public class CalendarCustom extends JPanel {
     private DoctorDAO doctorDAO;
     private ClinicDAO clinicDAO;
     private AppointmentDAO appointmentDAO;
-    private DoctorAvailabilityDAO availabilityDAO;
+    private DoctorAvailabilityDAO doctorAvailabilityDAO;
     private TimeSlotDAO timeSlotDAO;
 
     private JComboBox<String> doctorComboBox;
@@ -69,6 +71,7 @@ public class CalendarCustom extends JPanel {
         initDAOs();
         loadDoctorData();
         setupLayout();
+        updateDoctorSchedule(true);
     }
 
     private void setupLayout() {
@@ -86,7 +89,7 @@ public class CalendarCustom extends JPanel {
             this.doctorDAO = new DoctorDAO();
             this.clinicDAO = new ClinicDAO();
             this.appointmentDAO = new AppointmentDAO();
-            this.availabilityDAO = new DoctorAvailabilityDAO();
+            this.doctorAvailabilityDAO = new DoctorAvailabilityDAO();
             this.timeSlotDAO = new TimeSlotDAO();
         } catch (DatabaseOpeningException e) {
             LOGGER.log(Level.SEVERE, "Error opening DAOs for Calendar", e);
@@ -133,7 +136,7 @@ public class CalendarCustom extends JPanel {
                     continue;
                 }
 
-                List<DoctorAvailability> doctorAvailabilityList = availabilityDAO.getDoctorAvailableDays(doctor.getDNI(), clinicID);
+                List<DoctorAvailability> doctorAvailabilityList = doctorAvailabilityDAO.getDoctorAvailableDays(doctor.getDNI(), clinicID);
 
                 List<LocalDate> availableDates = doctorAvailabilityList.stream()
                         .map(DoctorAvailability::getDate)  // Filter to only retrieve the date
@@ -206,7 +209,7 @@ public class CalendarCustom extends JPanel {
         JPanel timeSlotPanel = new JPanel(new GridLayout(5, 1, 5, 5));
 
         try {
-            List<TimeSlot> availableTimeSlots = availabilityDAO.findAvailableTimeSlotsByDoctorAndDate(
+            List<TimeSlot> availableTimeSlots = doctorAvailabilityDAO.findAvailableTimeSlotsByDoctorAndDate(
                     selectedDoctorEntity.getDNI(), clinicID, selectedDate);
 
             if (!availableTimeSlots.isEmpty()) {
@@ -227,6 +230,7 @@ public class CalendarCustom extends JPanel {
         }
 
         leftPanel.add(timeSlotPanel, BorderLayout.CENTER);
+        // Keep the button to change doctor here too
         leftPanel.add(changeDoctorButton, BorderLayout.NORTH);
 
         leftPanel.revalidate();
@@ -244,11 +248,15 @@ public class CalendarCustom extends JPanel {
             LocalDate appointmentDate = LocalDate.parse(dateString, dateFormatter);
 
             // Queries an appointment by patient and date
-            Optional<Appointment> optionalAppointment = appointmentDAO.getAppointmentsByPatientAndDate(patient.getDNI(), appointmentDate)
+            // It is assumed that a patient cannot have more than one appointment the same day and time
+            Optional<Appointment> optionalAppointment =
+                    appointmentDAO.getAppointmentsByPatientAndDate(patient.getDNI(), appointmentDate)
                     .stream()
                     .findFirst();
 
-            return optionalAppointment.map(a -> a.getAppointmentDateTime().toLocalDateTime().toLocalDate()).orElse(null);
+            // Extracts the date or if null if there's none
+            return optionalAppointment
+                    .map(a -> a.getAppointmentDateTime().toLocalDateTime().toLocalDate()).orElse(null);
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error extracting appointment date from text: " + appointmentText, e);
@@ -319,23 +327,29 @@ public class CalendarCustom extends JPanel {
     private void registerAppointment(LocalDate date, String time) {
         try {
             String appointmentReason = JOptionPane.showInputDialog(
-                    this, "Ingrese el motivo de la consulta: ", "Motivo de la cita", JOptionPane.QUESTION_MESSAGE
+                    this,
+                    "Ingrese el motivo de la consulta: ",
+                    "Motivo de la cita",
+                    JOptionPane.QUESTION_MESSAGE
             );
 
             if (appointmentReason == null || appointmentReason.trim().isEmpty()) {
-                NotificationPopUp.showErrorMessage(this, "Error", "Debe ingresar un motivo para la consulta");
+                NotificationPopUp.showErrorMessage(this,
+                        "Error",
+                        "Debe ingresar un motivo para la consulta");
                 return;
             }
 
             String dateTimeString = date.toString() + " " + time; // "YYYY-MM-DD HH:mm:00"
             Timestamp appointmentTimestamp = Timestamp.valueOf(dateTimeString);
 
+            // Now we persist the new appointment and also remove the time slot from the doctor's schedule
             Appointment newAppointment = new Appointment(
                     patient.getDNI(), selectedDoctorEntity.getDNI(), clinicID,
                     appointmentTimestamp, appointmentReason, AppointmentState.CONFIRMED
             );
-
             appointmentDAO.save(newAppointment);
+            doctorAvailabilityDAO.updateTimeSlotStatus(selectedDoctorEntity.getDNI(), date, time, TimeSlotStatus.RESERVADA);
 
             addAppointmentToHistory(
                     selectedDoctorEntity.getFirstName(), selectedDoctorEntity.getSurname(), date, String.valueOf(time)
@@ -347,13 +361,29 @@ public class CalendarCustom extends JPanel {
             doctorTimeSlots.computeIfAbsent(selectedDoctorEntity.getDNI(), k -> new ArrayList<>()).remove(time);
 
             updateDoctorSchedule(true);
-            NotificationPopUp.showInfoMessage(this, "Cita confirmada con éxito.", "Éxito");
+
+            String confirmationMessage = String.format(
+                    "Cita confirmada con éxito.\n\n" +
+                            "Doctor: %s, %s\n" +
+                            "Fecha: %s\n" +
+                            "Hora: %s\n" +
+                            "Motivo: %s",
+                    selectedDoctorEntity.getSurname(), selectedDoctorEntity.getFirstName(),
+                    date.format(dateFormatter), time,
+                    appointmentReason
+            );
+            NotificationPopUp.showInfoMessage(
+                    this, "Cita confirmada con éxito",
+                    confirmationMessage);
 
             returnToDoctorSelection();
 
         } catch (DatabaseQueryException e) {
             LOGGER.log(Level.SEVERE, "Error saving appointment", e);
-            NotificationPopUp.showErrorMessage(this, "Error", "No se pudo guardar la cita.");
+            NotificationPopUp.showErrorMessage(
+                    this,
+                    "Error",
+                    "No se pudo guardar la cita.");
         }
     }
 
@@ -362,35 +392,49 @@ public class CalendarCustom extends JPanel {
             List<Appointment> appointments = appointmentDAO.getAppointmentsByPatientAndDate(patient.getDNI(), date);
 
             if (appointments.isEmpty()) {
-                NotificationPopUp.showInfoMessage(this, "No hay detalles disponibles.", "Información");
+                NotificationPopUp.showInfoMessage(
+                        this,
+                        "No hay detalles disponibles.",
+                        "Información");
                 return;
             }
 
+            // From the List of appointments, retrieve only the ones that we are certain it belongs to
+            // our patient (kinda unnecessary) but also the ones that have not been cancelled.
             Optional<Appointment> optionalAppointment = appointments.stream()
-                    .filter(a -> a.getPatientDNI().equals(patient.getDNI()))
+                    .filter(a -> a.getPatientDNI().equals(patient.getDNI()) &&
+                            a.getAppointmentState() != AppointmentState.CANCELLED)
                     .findFirst();
 
             if (optionalAppointment.isEmpty()) {
-                NotificationPopUp.showInfoMessage(this, "No hay citas disponibles para este paciente en la fecha seleccionada.", "Información");
+                NotificationPopUp.showInfoMessage(
+                        this,
+                        "Información.",
+                        "No hay citas disponibles para este paciente en la fecha seleccionada");
                 return;
             }
 
             Appointment appointment = optionalAppointment.get();
             boolean isFuture = date.isAfter(LocalDate.now());
+            boolean isCancelled = appointment.getAppointmentState() == AppointmentState.CANCELLED;
 
+            // Finds the data of the doctor assigned to that appointment
             Optional<Doctor> doctorOptional = doctorDAO.findById(appointment.getDoctorDNI());
             String doctorName = doctorOptional
                     .map(d -> d.getSurname() + ", " + d.getFirstName())
                     .orElse("Doctor no encontrado");
 
-            String detailsMessage = "Doctor: " + doctorName +
+            String detailsMessage =
+                    "Doctor: " + doctorName +
                     "\nFecha: " + date.format(dateFormatter) +
                     "\nHora: " + appointment.getAppointmentDateTime().toLocalDateTime().toLocalTime().format(timeFormatter) +
                     "\nEstado: " + appointment.getAppointmentState().getValue() +
                     "\nMotivo: " + appointment.getDescription();
 
+            // We only give the option to cancel an appointment if it is in the future
+            // and it has already not been cancelled
             Object[] options;
-            if (isFuture) {
+            if (isFuture && !isCancelled) {
                 options = new Object[]{"Cancelar cita", "Cerrar"};
             } else {
                 options = new Object[]{"Cerrar"};
@@ -402,7 +446,7 @@ public class CalendarCustom extends JPanel {
                     null, options, options[options.length - 1]
             );
 
-            if (isFuture && selection == 0) {
+            if (isFuture && !isCancelled && selection == 0) {
                 confirmCancelAppointment(appointment);
             }
         } catch (DatabaseQueryException e) {
@@ -424,6 +468,7 @@ public class CalendarCustom extends JPanel {
 
         showEmptyCalendar();
         changeDoctorButton.setVisible(selectedDoctor != null); // Hide the button again
+        doctorComboBox.setSelectedIndex(-1);
     }
 
     private void thisMonth() {
@@ -531,19 +576,33 @@ public class CalendarCustom extends JPanel {
 
     private void confirmCancelAppointment(Appointment appointmentToCancel) {
         boolean confirmed =
-                NotificationPopUp.showConfirmationMessage(this, "Cancelar cita",
-                        "¿Estás seguro de que deseas cancelar esta cita?\n\n" + appointmentToCancel.formatedAppointment());
+                NotificationPopUp.showConfirmationMessage(
+                        this,
+                        "Cancelar cita",
+                        "¿Estás seguro de que deseas cancelar esta cita?\n\n" +
+                                appointmentToCancel.formatedAppointment());
 
         if (confirmed) {
             try {
+                // Simply update to cancelled. We do not delete appointments as to create a historic
                 appointmentToCancel.setAppointmentState(AppointmentState.CANCELLED);
                 appointmentDAO.update(appointmentToCancel);
+                // And free up the time slot for the doctor
+                LocalDate date = appointmentToCancel.getAppointmentDateTime().toLocalDateTime().toLocalDate();
+                String time = appointmentToCancel.getAppointmentDateTime().toLocalDateTime().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                doctorAvailabilityDAO.updateTimeSlotStatus(
+                        appointmentToCancel.getDoctorDNI()
+                        ,
+                        date,
+                        time,
+                        TimeSlotStatus.DISPONIBLE
+                );
 
                 NotificationPopUp.showInfoMessage(this, "Cita cancelada", "Cita cancelada con éxito.");
 
                 // Refresh UI
                 historyList.updateUI();
-                syncAppointmentsWithHistory();
+                loadAppointmentHistory();
                 updateDoctorSchedule(true);
 
             } catch (DatabaseQueryException e) {
@@ -597,6 +656,7 @@ public class CalendarCustom extends JPanel {
         String appointmentText = "Cita con " + doctorLastName + ", " + doctorFirstName +
                 " el " + formattedDate + " a las " + formattedTime;
 
+        // Full format example: Cita con [doctor surname, doctor first name] el [date] a las [time]
         historyModel.addElement(appointmentText);
     }
 

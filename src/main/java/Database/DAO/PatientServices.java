@@ -2,7 +2,7 @@ package Database.DAO;
 
 import Exceptions.*;
 import Interfaces.IPatientService;
-import Database.AaModels.Patient;
+import Database.Models.Patient;
 import Utils.Utility.PasswordHasher;
 import Utils.Validation.MyValidator;
 

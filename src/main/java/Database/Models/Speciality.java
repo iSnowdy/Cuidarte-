@@ -1,4 +1,4 @@
-package Database.AaModels;
+package Database.Models;
 
 public class Speciality {
     private int id; // Auto-generated in the DB

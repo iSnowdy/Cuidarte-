@@ -1,6 +1,7 @@
 package UI.PortalPage;
 
-import Database.AaModels.*;
+import Database.Models.*;
+import Database.Models.Enums.TestType;
 import Utils.Swing.Colors;
 import Utils.Utility.CustomLogger;
 import Utils.Utility.DiagnosticTestFieldMapper;

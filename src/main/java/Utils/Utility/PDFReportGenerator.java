@@ -1,8 +1,8 @@
 package Utils.Utility;
 
 import Components.NotificationPopUp;
-import Database.AaModels.TestType;
-import Database.AaModels.MedicalReport;
+import Database.Models.Enums.TestType;
+import Database.Models.MedicalReport;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;

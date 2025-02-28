@@ -1,7 +1,7 @@
 package Database.DAO;
 
 import Exceptions.*;
-import Database.AaModels.Doctor;
+import Database.Models.Doctor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,7 +42,7 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
     }
 
     @Override
-    public boolean update(Doctor entity) throws DatabaseQueryException {
+    public boolean update(Doctor entity) throws DatabaseUpdateException {
         String query =
                 "UPDATE medicos " +
                 "SET Nombre = ?, Apellidos = ?, Numero_Telefono = ?, Email = ?, Especialidad = ?, Descripcion = ? " +

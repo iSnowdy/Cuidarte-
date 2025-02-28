@@ -1,4 +1,6 @@
-package Database.AaModels;
+package Database.Models;
+
+import Database.Models.Enums.AppointmentState;
 
 import java.sql.Timestamp;
 

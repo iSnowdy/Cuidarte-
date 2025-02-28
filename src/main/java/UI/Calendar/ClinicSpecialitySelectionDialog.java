@@ -4,7 +4,7 @@ import Database.DAO.ClinicDAO;
 import Exceptions.DatabaseOpeningException;
 import Exceptions.DatabaseQueryException;
 import Components.NotificationPopUp;
-import Database.AaModels.Clinic;
+import Database.Models.Clinic;
 import Utils.Utility.CustomLogger;
 
 import javax.swing.*;
@@ -185,7 +185,13 @@ public class ClinicSpecialitySelectionDialog extends JDialog {
     // Creates the "Cancel" button
     private JButton createCancelButton() {
         JButton button = new JButton("Cancelar");
-        button.addActionListener(e -> dispose());
+        // If the user clicks on "Cancelar", empty the information on the selects
+        // so that the NavigationController does not proceed to the Calendar
+        button.addActionListener(e -> {
+            selectedClinic = null;
+            selectedSpeciality = null;
+            dispose();
+        });
         return button;
     }
 

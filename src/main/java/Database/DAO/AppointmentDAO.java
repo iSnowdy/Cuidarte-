@@ -1,8 +1,8 @@
 package Database.DAO;
 
 import Exceptions.*;
-import Database.AaModels.Appointment;
-import Database.AaModels.AppointmentState;
+import Database.Models.Appointment;
+import Database.Models.Enums.AppointmentState;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,7 +46,7 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
     }
 
     @Override
-    public boolean update(Appointment entity) throws DatabaseQueryException {
+    public boolean update(Appointment entity) throws DatabaseUpdateException {
         String query =
                 "UPDATE citas_medicas " +
                 "SET DNI_Paciente = ?, DNI_Medico = ?, ID_Clinica = ?, Fecha_Hora = ?, Estado_Cita = ?, " +
@@ -64,6 +64,7 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
                     entity.getDoctorObservations(),
                     entity.getId()
             );
+
             if (result) LOGGER.info("Updated appointment with ID: " + entity.getId());
             return result;
         } catch (SQLException e) {
@@ -119,9 +120,13 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
         return appointments;
     }
 
+    // Retrieves from the DB all the appointments of the given patient except those that have been cancelled
     public List<Appointment> findAppointmentsByPatient(String patientDNI) throws DatabaseQueryException {
         List<Appointment> appointments = new ArrayList<>();
-        String query = "SELECT * FROM citas_medicas WHERE DNI_Paciente = ? ORDER BY Fecha_Hora ASC";
+        String query =
+                "SELECT * FROM citas_medicas " +
+                "WHERE DNI_Paciente = ? AND Estado_Cita != 'Cancelada' " +
+                "ORDER BY Fecha_Hora ASC";
 
         try (ResultSet resultSet = executeQuery(query, patientDNI)) {
             while (resultSet.next()) {
@@ -160,12 +165,13 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
         return bookedAppointments;
     }
 
+    // Retrieves all the appointments of a specific patient on a specific date
     public List<Appointment> getAppointmentsByPatientAndDate(String patientDNI, LocalDate date) throws DatabaseQueryException {
         List<Appointment> appointments = new ArrayList<>();
 
         String query =
                 "SELECT * FROM citas_medicas " +
-                        "WHERE DNI_Paciente = ? AND DATE(Fecha_Hora) = ?";
+                "WHERE DNI_Paciente = ? AND DATE(Fecha_Hora) = ?";
 
         try (ResultSet resultSet = executeQuery(query, patientDNI, java.sql.Date.valueOf(date))) {
             while (resultSet.next()) {
@@ -177,26 +183,6 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
             throw new DatabaseQueryException("Could not fetch appointments for the patient on the specified date.");
         }
 
-        return appointments;
-    }
-
-    public List<Appointment> getAppointmentsByDoctorAndDate(String doctorDNI, LocalDate date) throws DatabaseQueryException {
-        List<Appointment> appointments = new ArrayList<>();
-
-        String query =
-                "SELECT * FROM citas_medicas " +
-                        "WHERE DNI_Medico = ? AND DATE(Fecha_Hora) = ? AND Estado_Cita != 'Cancelada'";
-
-        try (ResultSet resultSet = executeQuery(query, doctorDNI, java.sql.Date.valueOf(date))) {
-            while (resultSet.next()) {
-                appointments.add(mapResultSetToAppointment(resultSet));
-            }
-            LOGGER.info("Loaded " + appointments.size() +
-                    " appointments for doctor with DNI " + doctorDNI + " on " + date);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error fetching appointments for Doctor DNI: " + doctorDNI + " at: " + date, e);
-            throw new DatabaseQueryException("Error fetching appointments for doctor");
-        }
         return appointments;
     }
 

@@ -4,7 +4,7 @@ import Exceptions.DatabaseDeleteException;
 import Exceptions.DatabaseInsertException;
 import Exceptions.DatabaseQueryException;
 import Exceptions.DatabaseUpdateException;
-import Models.Patient;
+import Database.AaModels.Patient;
 
 import java.util.List;
 import java.util.Optional;

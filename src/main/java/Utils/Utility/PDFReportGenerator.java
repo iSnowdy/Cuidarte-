@@ -1,8 +1,8 @@
 package Utils.Utility;
 
-import LandingPage.Components.NotificationPopUp;
-import Models.Enums.TestType;
-import Models.MedicalReport;
+import Components.NotificationPopUp;
+import Database.AaModels.TestType;
+import Database.AaModels.MedicalReport;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -28,7 +28,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

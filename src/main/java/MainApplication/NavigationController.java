@@ -1,13 +1,13 @@
 package MainApplication;
 
-import AboutUs.Swing.AboutUsPanel;
-import Calendar.Component.CalendarCustom;
-import Calendar.Component.ClinicSpecialitySelectionDialog;
-import Centres.Swing.CentresPanel;
-import LandingPage.Components.NotificationPopUp;
-import LandingPage.Main.LandingPage;
-import Models.Patient;
-import PortalPage.Swing.PatientPortalPanel;
+import UI.AboutUs.AboutUsPanel;
+import UI.Calendar.CalendarCustom;
+import UI.Calendar.ClinicSpecialitySelectionDialog;
+import UI.Centres.CentresPanel;
+import Components.NotificationPopUp;
+import UI.LandingPage.LandingPage;
+import Database.AaModels.Patient;
+import UI.PortalPage.PatientPortalPanel;
 
 import javax.swing.*;
 import java.sql.Date;

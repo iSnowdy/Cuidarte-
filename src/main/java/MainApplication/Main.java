@@ -1,8 +1,7 @@
 package MainApplication;
 
-import DatabaseConfig.ConnectionManager;
-import LandingPage.Main.LandingPage;
-import MainApplication.NavigationController;
+import Database.Configuration.ConnectionManager;
+import UI.LandingPage.LandingPage;
 
 import javax.swing.*;
 

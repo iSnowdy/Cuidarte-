@@ -1,6 +1,6 @@
 package Utils.Utility;
 
-import LandingPage.Components.NotificationPopUp;
+import Components.NotificationPopUp;
 
 import javax.swing.*;
 import java.awt.*;

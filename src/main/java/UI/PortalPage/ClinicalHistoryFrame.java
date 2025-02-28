@@ -32,6 +32,7 @@ public class ClinicalHistoryFrame extends JFrame {
     private final DoctorDAO doctorDAO;
 
     private List<MedicalReport> medicalReports;
+    private List<MedicalReport> filteredMedicalReports;
     private Map<String, String> doctorSpecialties; // Maps doctor names to their specialties
 
     private JTable historyTable;
@@ -42,6 +43,8 @@ public class ClinicalHistoryFrame extends JFrame {
 
     public ClinicalHistoryFrame(Patient patient) {
         this.patient = patient;
+        this.filteredMedicalReports = new ArrayList<>();
+
         try {
             this.medicalReportDAO = new MedicalReportDAO();
             this.doctorDAO = new DoctorDAO();
@@ -214,7 +217,8 @@ public class ClinicalHistoryFrame extends JFrame {
                 if (evt.getClickCount() == 2) {
                     int selectedRow = historyTable.getSelectedRow();
                     if (selectedRow >= 0) {
-                        MedicalReport selectedReport = medicalReports.get(selectedRow);
+                        // Use the filtered list instead the one containing all reports
+                        MedicalReport selectedReport = filteredMedicalReports.get(selectedRow);
                         new ClinicalHistoryDetailsFrame(selectedReport);
                     }
                 }
@@ -229,6 +233,7 @@ public class ClinicalHistoryFrame extends JFrame {
         String motiveFilter = motiveFilterField.getText().trim().toLowerCase();
 
         historyTableModel.setRowCount(0);
+        filteredMedicalReports.clear(); // Resets the filtered list
 
         for (MedicalReport report : medicalReports) {
             String doctorName = report.getDoctorDNI();
@@ -238,6 +243,8 @@ public class ClinicalHistoryFrame extends JFrame {
             if (!"All".equals(selectedSpeciality) && !speciality.equals(selectedSpeciality)) continue;
             if (!"All".equals(selectedDoctor) && !doctorName.equals(selectedDoctor)) continue;
             if (!motive.contains(motiveFilter)) continue;
+
+            filteredMedicalReports.add(report);
 
             historyTableModel.addRow(new Object[]{report.getVisitDate(), speciality, doctorName, report.getAppointmentMotive()});
         }

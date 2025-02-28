@@ -6,6 +6,7 @@ import Components.NotificationPopUp;
 import Database.AaModels.DiagnosticTest;
 import Database.AaModels.Patient;
 import Utils.Swing.Colors;
+import Utils.Utility.CustomLogger;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,6 +14,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -22,17 +24,21 @@ import static Utils.Swing.Fonts.MAIN_FONT;
 import static Utils.Swing.Fonts.PATIENT_PORTAL_SUB_PANEL_FONT;
 
 public class DiagnosticTestFrame extends JFrame {
-    private static final Logger LOGGER = Logger.getLogger(DiagnosticTestFrame.class.getName());
+    private static final Logger LOGGER = CustomLogger.getLogger(DiagnosticTestFrame.class);
 
     private final Patient patient;
     private final DiagnosticTestDAO diagnosticTestDAO;
+
     private List<DiagnosticTest> allTests;
+    private List<DiagnosticTest> filteredTests;
+
     private JTable diagnosticTestData;
     private DefaultTableModel tableModel;
     private JComboBox<String> testTypeCombo, dateOrderCombo;
 
     public DiagnosticTestFrame(Patient patient) {
         this.patient = patient;
+        this.filteredTests = new ArrayList<>();
 
         try {
             this.diagnosticTestDAO = new DiagnosticTestDAO();
@@ -175,15 +181,17 @@ public class DiagnosticTestFrame extends JFrame {
         });
     }
 
-    // Adds a listener to detect double clicks on a row
+    // Adds a listener to detect double-clicks on a row
     private void addTableClickListener() {
         diagnosticTestData.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 if (evt.getClickCount() == 2) {
-                    int row = diagnosticTestData.getSelectedRow();
-                    if (row != -1) {
-                        openTestDetails(row);
+                    int selectedRow = diagnosticTestData.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        // Use the filtered list to get the correct test
+                        DiagnosticTest selectedTest = filteredTests.get(selectedRow);
+                        openTestDetails(selectedTest);
                     }
                 }
             }
@@ -193,6 +201,7 @@ public class DiagnosticTestFrame extends JFrame {
     // Updates the table based on selected filters
     private void updateDiagnosticTestsTable() {
         tableModel.setRowCount(0);
+        filteredTests.clear(); // Resets the list containing the filtered objects
 
         try {
             allTests = diagnosticTestDAO.findByPatientDNI(patient.getDNI());
@@ -208,7 +217,10 @@ public class DiagnosticTestFrame extends JFrame {
 
         for (DiagnosticTest test : allTests) {
             if (shouldIncludeTest(test)) {
-                tableModel.addRow(new Object[]{test.getTestDate(), test.getTestType().getValue(), test.getResults()});
+                filteredTests.add(test);
+                tableModel.addRow(new Object[]{
+                        test.getTestDate(), test.getTestType().getValue(), test.getResults()
+                });
             }
         }
     }
@@ -220,9 +232,8 @@ public class DiagnosticTestFrame extends JFrame {
     }
 
     // Opens the detailed test view when a row is double-clicked
-    private void openTestDetails(int row) {
+    private void openTestDetails(DiagnosticTest selectedTest) {
         try {
-            DiagnosticTest selectedTest = allTests.get(row);
             Optional<Object> detailedTest = diagnosticTestDAO.findDetailedTestByID(
                     selectedTest.getDiagnosticTestID(),
                     selectedTest.getTestType()
@@ -231,7 +242,10 @@ public class DiagnosticTestFrame extends JFrame {
             if (detailedTest.isPresent()) {
                 new DiagnosticTestDetailsFrame(detailedTest.get());
             } else {
-                NotificationPopUp.showErrorMessage(this, "Error", "No se encontró información detallada.");
+                NotificationPopUp.showErrorMessage(
+                        this,
+                        "Error",
+                        "No se encontró información detallada.");
             }
         } catch (DatabaseQueryException e) {
             LOGGER.log(Level.SEVERE, "Error fetching detailed test", e);

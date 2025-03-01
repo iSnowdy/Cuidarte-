@@ -27,12 +27,12 @@ public class PasswordHasher {
 
     public static boolean verifyPassword(String enteredPassword, int salt, String storedHash) {
         String enteredHash = hashPassword(enteredPassword, salt);
-        return enteredHash.equals(storedHash);
-    }
 
-    // TODO: Remove this method later after debugging
-    public static void debugPrintPassword(String password, int salt) {
-        System.out.println("Raw password: " + password);
-        System.out.println("Hashed password: " + hashPassword(password, salt));
+        System.out.println("Stored Hash (DB): " + storedHash);
+        System.out.println("Entered Hash: " + enteredHash);
+        System.out.println("Salt: " + salt);
+        System.out.println("Comparison Result: " + enteredHash.equals(storedHash));
+
+        return enteredHash.equals(storedHash);
     }
 }

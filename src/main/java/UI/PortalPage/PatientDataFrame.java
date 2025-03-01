@@ -1,5 +1,6 @@
 package UI.PortalPage;
 
+import Components.CustomPasswordField;
 import Database.DAO.PatientDAO;
 import Exceptions.DatabaseQueryException;
 import Exceptions.DatabaseUpdateException;
@@ -7,6 +8,8 @@ import Components.NotificationPopUp;
 import Database.Models.Patient;
 import Utils.Swing.Colors;
 import Utils.Utility.CustomLogger;
+import Utils.Utility.PasswordHasher;
+import Utils.Validation.MyValidator;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,7 +23,7 @@ public class PatientDataFrame extends JFrame {
     private final Patient patient;
     private final PatientDAO patientDAO;
 
-    private JTextField txtDNI, txtName, txtSurname, txtPhone, txtEmail, txtBirthdate, txtAge;
+    private JTextField txtDNI, txtName, txtSurname, txtPhone, txtEmail, txtBirthdate, txtAge, txtPassword;
     private JButton btnEditSave, btnClose;
     private boolean isEditing = false;
 
@@ -106,6 +109,7 @@ public class PatientDataFrame extends JFrame {
         addField(formPanel, "Edad:", txtAge = createTextField(false), gbc, 4);
         addField(formPanel, "Teléfono:", txtPhone = createTextField(false), gbc, 5);
         addField(formPanel, "Email:", txtEmail = createTextField(false), gbc, 6);
+        addField(formPanel, "Nueva contraseña:", txtPassword = createTextField(false), gbc, 7);
 
         return formPanel;
     }
@@ -199,30 +203,67 @@ public class PatientDataFrame extends JFrame {
     private void enterEditMode() {
         txtPhone.setEditable(true);
         txtEmail.setEditable(true);
+        txtPassword.setEditable(true);
         txtPhone.setBackground(Color.WHITE);
         txtEmail.setBackground(Color.WHITE);
+        txtPassword.setBackground(Color.WHITE);
         btnEditSave.setText("Guardar");
         isEditing = true;
     }
 
-    // Saves patient data and updates the database
+    // Saves patient data and updates the database with validation
     private void savePatientData() {
-        String newPhone = txtPhone.getText().trim();
         String newEmail = txtEmail.getText().trim();
+        String newPhone = txtPhone.getText().trim();
+        String newPassword = txtPassword.getText().trim();
+
+
+        // Email, password and phone number validation
+        if (!newEmail.isEmpty() && !MyValidator.isValidEmailAddress(newEmail)) {
+            NotificationPopUp.showErrorMessage(this, "Error", "El correo electrónico ingresado no es válido.");
+            return;
+        }
+
+        if (!newPhone.isEmpty() && !MyValidator.isValidPhoneNumber(newPhone)) {
+            NotificationPopUp.showErrorMessage(this, "Error", "El número de teléfono introducido no es válido");
+            return;
+        }
+
+        // Validates password if any
+        if (!newPassword.isEmpty() && !MyValidator.isValidPassword(newPassword)) {
+            NotificationPopUp.showErrorMessage(this, "Error", "La contraseña debe tener al menos 6 caracteres y un número.");
+            return;
+        }
 
         try {
-            patient.setPhoneNumber(newPhone);
-            patient.setEmail(newEmail);
+            // Updates stuff if needed
+            if (!newEmail.isEmpty() && !newEmail.equals(patient.getEmail())) {
+                patient.setEmail(newEmail);
+            }
+
+            if (!newPhone.isEmpty()) {
+                patient.setPhoneNumber(newPhone);
+            }
+
+            if (!newPassword.isEmpty()) {
+                patient.setPassword(PasswordHasher.hashPassword(newPassword, patient.getSalt()));
+            }
+
+            // Persist
             patientDAO.update(patient);
 
+            NotificationPopUp.showInfoMessage(this, "Datos actualizados correctamente.", "Éxito");
+
+            // Disable edit mode
             txtPhone.setEditable(false);
             txtEmail.setEditable(false);
+            txtPassword.setEditable(false);
             txtPhone.setBackground(Colors.TEXTFIELD_BACKGROUND_COLOUR);
             txtEmail.setBackground(Colors.TEXTFIELD_BACKGROUND_COLOUR);
+            txtPassword.setBackground(Colors.TEXTFIELD_BACKGROUND_COLOUR);
             btnEditSave.setText("Editar");
             isEditing = false;
 
-            NotificationPopUp.showInfoMessage(this, "Datos actualizados correctamente.", "Éxito");
         } catch (DatabaseUpdateException e) {
             LOGGER.log(Level.SEVERE, "Error updating patient data", e);
             NotificationPopUp.showErrorMessage(this, "Error", "No se pudieron actualizar los datos.");

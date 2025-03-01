@@ -174,6 +174,8 @@ public class Authenticator extends JPanel {
             if (MyValidator.verifyPatientCode(patientCode, inputCode)) {
                 patientServices.registerPatient(patient);
                 showMessage(MessageTypes.SUCCESS, "Código correcto. Registro completado.");
+                System.out.println("Patient password: " + patient.getPassword());
+                System.out.println("Patient generated salt: " + patient.getSalt());
                 this.userLoggedIn(true);
                 if (loginCallBack != null) loginCallBack.accept(patient);
 

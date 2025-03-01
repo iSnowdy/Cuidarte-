@@ -7,9 +7,12 @@ import Components.ShadowedLabel;
 import Database.DAO.PatientDAO;
 import Database.DAO.PatientServices;
 import Database.Models.Patient;
+import Exceptions.DatabaseOpeningException;
+import Exceptions.DatabaseQueryException;
 import Exceptions.DatabaseUpdateException;
 import Utils.Utility.ImageIconRedrawer;
 import Utils.Utility.JavaMailSender;
+import Utils.Utility.PasswordHasher;
 import Utils.Validation.MyValidator;
 import net.miginfocom.swing.MigLayout;
 
@@ -19,6 +22,8 @@ import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -42,6 +47,9 @@ public class PanelLoginAndRegister extends JLayeredPane {
     // Login fields
     private CustomTextField emailLoginTextField;
     private CustomPasswordField passwordLoginTextField;
+
+    // Temporary storage for password reset stuff
+    private final Map<String, String> tempPasswords = new HashMap<>();
 
     private final int ICON_WIDTH = 20;
     private final int ICON_HEIGHT = 20;
@@ -164,7 +172,7 @@ public class PanelLoginAndRegister extends JLayeredPane {
     }
 
     private void handleForgotPassword() {
-        String email = emailLoginTextField.getText();
+        String email = emailLoginTextField.getText().trim();
 
         if (email.isEmpty()) {
             showMessageCallBack.accept(MessageTypes.ERROR, "Por favor, " +
@@ -182,11 +190,15 @@ public class PanelLoginAndRegister extends JLayeredPane {
         JavaMailSender mailSender = new JavaMailSender(patient.getEmail());
         String newTempPassword = mailSender.sendPasswordResetEmail(patient.getFirstName() + " " + patient.getSurname());
 
-        if (updatePassword(patient, newTempPassword)) {
-            showMessageCallBack.accept(MessageTypes.SUCCESS, "Se ha enviado una nueva contraseña a su correo:\n" + email);
-        } else {
-            showMessageCallBack.accept(MessageTypes.ERROR, "Hubo un error al actualizar la contraseña.");
-        }
+        // Store the generated password in memory for now
+        tempPasswords.put(patient.getDNI(), newTempPassword);
+
+        SwingUtilities.invokeLater(() -> {
+            String enteredPassword = PasswordVerificationDialog.showPasswordInputDialog(this);
+            if (enteredPassword != null && !enteredPassword.trim().isEmpty()) {
+                verifyAndPersistPassword(patient, enteredPassword);
+            }
+        });
     }
 
     private Optional<Patient> findPatientByEmail(String email) {
@@ -198,15 +210,30 @@ public class PanelLoginAndRegister extends JLayeredPane {
         }
     }
 
-    // Updates a patient's password in the DB
-    private boolean updatePassword(Patient patient, String newPassword) {
+    // Handles password verification and update through the dialog created
+    public boolean verifyAndPersistPassword(Patient patient, String enteredPassword) {
+        String storedTempPassword = tempPasswords.get(patient.getDNI());
+
+        if (storedTempPassword == null || !storedTempPassword.equals(enteredPassword)) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "La contraseña ingresada no coincide con la enviada a" +
+                    "su correo.");
+            return false;
+        }
+        // Sets the new password after hashing it
+        patient.setPassword(PasswordHasher.hashPassword(enteredPassword, patient.getSalt()));
+
         try {
-            String email = patient.getEmail();
-            String oldPassword = patient.getPassword();
-            PatientServices patientService = new PatientServices();
-            return patientService.resetPassword(email, oldPassword, newPassword);
-        } catch (DatabaseUpdateException e) {
-            e.printStackTrace();
+            if (new PatientDAO().update(patient)) { // Persists
+                // Removes the temp password for memory now that it has been updated
+                tempPasswords.remove(patient.getDNI());
+                showMessageCallBack.accept(MessageTypes.SUCCESS, "Su contraseña ha sido actualizada correctamente.");
+                return true;
+            } else {
+                showMessageCallBack.accept(MessageTypes.ERROR, "Hubo un error al actualizar la contraseña.");
+                return false;
+            }
+        } catch (DatabaseOpeningException | DatabaseQueryException e) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "Hubo un error al actualizar la contraseña.");
             return false;
         }
     }

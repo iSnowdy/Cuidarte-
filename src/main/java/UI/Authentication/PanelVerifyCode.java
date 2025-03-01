@@ -10,8 +10,10 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Optional;
 
+import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 import static Utils.Swing.Colors.MY_RED;
 import static Utils.Swing.Fonts.MAIN_FONT;
+import static Utils.Swing.Fonts.PATIENT_PORTAL_SUB_PANEL_FONT;
 
 
 public class PanelVerifyCode extends JPanel {
@@ -33,7 +35,7 @@ public class PanelVerifyCode extends JPanel {
         setBorder(new EmptyBorder(250, 500, 250, 500)); // TODO: Resize if needed
 
         verifyCodePanel = createPanelRound();
-        titleLabel = createLabel("Código de Verificación", MAIN_FONT, new Color(63, 63, 63));
+        titleLabel = createLabel("Código de Verificación", PATIENT_PORTAL_SUB_PANEL_FONT, MAIN_APP_COLOUR);
         instructionsLabel = createLabel("Recibirás un código de verificación en tu correo.", MAIN_FONT, new Color(63, 63, 63));
 
         inputCode = new CustomTextField();

@@ -10,12 +10,7 @@ import Database.Models.Patient;
 import UI.PortalPage.PatientPortalPanel;
 
 import javax.swing.*;
-import java.sql.Date;
-import java.util.Optional;
 
-/**
- * Handles navigation between different sections of the application.
- */
 public class NavigationController {
     private final JFrame mainFrame;
     private final LandingPage landingPage;
@@ -23,27 +18,12 @@ public class NavigationController {
     private Patient loggedInPatient = null;
     private boolean isLoggedIn = false;
 
-    /**
-     * Constructor for NavigationController.
-     *
-     * @param mainFrame   The main application frame.
-     * @param landingPage The landing page instance.
-     */
     public NavigationController(JFrame mainFrame, LandingPage landingPage) {
         this.mainFrame = mainFrame;
         this.landingPage = landingPage;
-        Date sqlDate = new Date(System.currentTimeMillis());
-        this.loggedInPatient = new Patient(
-                "123456789B", "Juanito", "Testeo",
-                "681269245", "andylopezrey@hotmail.com",
-                Optional.of(sqlDate), 54, "Cuidarte0");
     }
 
-    /**
-     * Handles panel switching with login validation.
-     *
-     * @param panelName The name of the panel to switch to.
-     */
+    // Handles navigation between different panels based on the panel name
     public void switchPanel(String panelName) {
         JPanel newPanel;
 
@@ -59,16 +39,16 @@ public class NavigationController {
                 }
                 newPanel = new PatientPortalPanel(loggedInPatient);
             }
-            case "Nuestros Centros" -> newPanel = new CentresPanel(mainFrame, this);
-            case "Quiénes Somos" -> newPanel = new AboutUsPanel(mainFrame, this);
+            case "Nuestros Centros" -> newPanel = new CentresPanel(mainFrame);
+            case "Quiénes Somos" -> newPanel = new AboutUsPanel(mainFrame);
             default -> newPanel = landingPage.getMainPanel();
         }
 
-        // Ensure the content updates only if different
+        // Ensure the content updates only if it is different from the current panel
         switchToPanel(newPanel);
     }
 
-
+    // Displays a warning message if the user tries to access a restricted section without logging in
     public void showLoginRequiredMessage() {
         NotificationPopUp.showWarningMessage(
                 mainFrame,
@@ -76,19 +56,21 @@ public class NavigationController {
                 "Debe iniciar sesión o registrarse antes de acceder.");
     }
 
+    // Switches to a new panel if it is different from the current one
     public void switchToPanel(JPanel panel) {
         if (landingPage.getMainPanel() != panel) {
             landingPage.setMainContent(panel);
         }
     }
 
+    // Handles redirection to the appointment booking process
     public void appointmentRedirect() {
         if (!isUserLoggedIn()) {
             showLoginRequiredMessage();
             return;
         }
 
-        // Open clinic-speciality selection dialog
+        // Open clinic-specialty selection dialog
         ClinicSpecialitySelectionDialog selectionDialog = new ClinicSpecialitySelectionDialog(mainFrame);
         selectionDialog.setVisible(true);
 
@@ -96,7 +78,7 @@ public class NavigationController {
         String selectedClinic = selectionDialog.getSelectedClinic();
         String selectedSpeciality = selectionDialog.getSelectedSpeciality();
 
-        // Prevent redirection if the user canceled
+        // Prevents redirection if the user canceled the selection
         if (selectedClinic == null || selectedSpeciality == null) {
             NotificationPopUp.showInfoMessage(
                     mainFrame,
@@ -109,6 +91,7 @@ public class NavigationController {
         proceedToCalendar(selectedClinic, selectedSpeciality);
     }
 
+    // Opens the calendar for scheduling appointments based on the selected clinic and specialty
     private void proceedToCalendar(String selectedClinic, String selectedSpeciality) {
         JFrame calendarFrame = new JFrame("Agenda de Citas - " + selectedClinic);
         calendarFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -121,31 +104,24 @@ public class NavigationController {
         calendarFrame.setVisible(true);
     }
 
-
-    /**
-     * Sets the login state and user session.
-     *
-     * @param patient The authenticated user.
-     */
-
+    // Sets the login state and assigns the authenticated patient to the session
     public void loginUser(Patient patient) {
         this.loggedInPatient = patient;
         this.isLoggedIn = true;
     }
 
-    /**
-     * Logs out the current user.
-     */
-
+    // Logs out the current user and resets the session
     public void logoutUser() {
         this.loggedInPatient = null;
         this.isLoggedIn = false;
     }
 
+    // Returns whether a user is logged in
     public boolean isUserLoggedIn() {
         return isLoggedIn;
     }
 
+    // Retrieves the currently logged-in patient
     public Patient getLoggedInPatient() {
         return loggedInPatient;
     }

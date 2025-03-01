@@ -1,6 +1,5 @@
 package UI.Centres;
 
-import Components.CustomScrollBar;
 import Components.CustomizedButton;
 import Database.DAO.ClinicDAO;
 import Exceptions.DatabaseOpeningException;
@@ -24,34 +23,28 @@ import static Utils.Swing.Fonts.PANEL_TITLE_FONT;
 
 public class CentresPanel extends JPanel {
     private final Logger LOGGER = CustomLogger.getLogger(CentresPanel.class);
-
-    private final JFrame parentFrame;
-    private final NavigationController navigationController;
-    private JPanel contentPanel;
-    private JScrollPane scrollPane;
     private final ImageIconRedrawer iconRedrawer;
 
-    public CentresPanel(JFrame parentFrame, NavigationController navigationController) {
-        this.parentFrame = parentFrame;
-        this.navigationController = navigationController;
+    public CentresPanel(JFrame parentFrame) {
         this.iconRedrawer = new ImageIconRedrawer();
 
         initPanel();
         addContentComponent();
     }
 
+    // Initializes the main panel
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
     }
 
+    // Adds the content panel with the clinics
     private void addContentComponent() {
-        contentPanel = buildContentPanel();
-        scrollPane = buildScrollPane(contentPanel);
-        add(scrollPane, BorderLayout.CENTER);
+        JPanel contentPanel = buildContentPanel();
+        add(contentPanel, BorderLayout.CENTER);
     }
 
-    // Content panel with titles and centre entries
+    // Creates the content panel with titles and clinic entries
     private JPanel buildContentPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
@@ -78,8 +71,8 @@ public class CentresPanel extends JPanel {
         };
 
         List<Clinic> clinics = loadClinicsFromDB();
-        // Checks if it's empty. If it is, then just add a random label as a placeholder
-        // If not, then iterate the list adding each clinic as a panel
+        // Checks if it's empty. If it is, then just add a placeholder label
+        // Otherwise, iterate through the list and add each clinic as a panel
         if (clinics.isEmpty()) {
             gbc.gridy++;
             JLabel noDataLabel = new JLabel("No hay clínicas disponibles en este momento.", JLabel.CENTER);
@@ -88,9 +81,8 @@ public class CentresPanel extends JPanel {
         } else {
             for (int i = 0; i < clinics.size(); i++) {
                 gbc.gridy++;
-                // Add each centre entry panel
+                // Add each clinic entry panel
                 panel.add(createCenterPanel(clinics.get(i), clinicImagePaths[i]), gbc);
-
             }
         }
         return panel;
@@ -112,7 +104,7 @@ public class CentresPanel extends JPanel {
         }
     }
 
-    // Centre panel that contains an image and text information
+    // Creates a clinic panel that contains an image and text information
     private JPanel createCenterPanel(Clinic clinic, String imagePath) {
         JPanel roundPanel = createRoundedPanel();
         JPanel imagePanel = buildImagePanel(imagePath);
@@ -124,7 +116,7 @@ public class CentresPanel extends JPanel {
         return roundPanel;
     }
 
-    // Creates the rounded panel for each centre
+    // Creates the rounded panel for each clinic
     private JPanel createRoundedPanel() {
         JPanel panel = new JPanel(new BorderLayout()) {
             @Override
@@ -145,7 +137,7 @@ public class CentresPanel extends JPanel {
         return panel;
     }
 
-    // Builds the image panel for a centre
+    // Builds the image panel for a clinic
     private JPanel buildImagePanel(String imagePath) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panel.setBackground(Color.WHITE);
@@ -159,8 +151,7 @@ public class CentresPanel extends JPanel {
         return panel;
     }
 
-    // Builds the entire Text Panel by using the information contained inside the Clinic
-    // Model retrieved from the DB
+    // Builds the text panel using clinic information retrieved from the DB
     private JPanel buildTextPanel(Clinic clinic) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -210,16 +201,5 @@ public class CentresPanel extends JPanel {
         // Action listener to open Google Maps
         button.addActionListener(e -> GoogleMapsRedirect.openGoogleMaps(address, this));
         return button;
-    }
-
-    //Builds a scroll pane with a custom scrollbar
-    private JScrollPane buildScrollPane(JPanel panel) {
-        JScrollPane sp = new JScrollPane(panel);
-        sp.getVerticalScrollBar().setUI(new CustomScrollBar());
-        sp.getVerticalScrollBar().setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
-        sp.getVerticalScrollBar().setUnitIncrement(30); // Increase mouse wheel scroll speed
-        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        sp.setBorder(null);
-        return sp;
     }
 }

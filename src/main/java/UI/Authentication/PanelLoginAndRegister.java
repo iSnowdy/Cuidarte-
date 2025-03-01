@@ -1,9 +1,15 @@
 package UI.Authentication;
 
+import Components.CustomPasswordField;
 import Components.CustomTextField;
 import Components.CustomizedButton;
+import Components.ShadowedLabel;
+import Database.DAO.PatientDAO;
+import Database.DAO.PatientServices;
 import Database.Models.Patient;
+import Exceptions.DatabaseUpdateException;
 import Utils.Utility.ImageIconRedrawer;
+import Utils.Utility.JavaMailSender;
 import Utils.Validation.MyValidator;
 import net.miginfocom.swing.MigLayout;
 
@@ -17,6 +23,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
+import static Utils.Swing.Colors.SECONDARY_APP_COLOUR;
+import static Utils.Swing.Fonts.AUTH_TITLE_LABEL_FONT;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
 
@@ -27,16 +35,13 @@ public class PanelLoginAndRegister extends JLayeredPane {
     private final BiConsumer<MessageTypes, String> showMessageCallBack; // Function obtained from Authenticator
 
     // Register fields
-    private CustomTextField dniTextField;
-    private CustomTextField fullNameTextField;
-    private CustomTextField emailTextField;
-    private CustomTextField phoneTextField;
-    private CustomTextField birthDateTextField;
-    private CustomTextField passwordTextField;
+    private CustomTextField
+            dniTextField, birthDateTextField, fullNameTextField, emailTextField, phoneTextField;
+    private CustomPasswordField passwordTextField;
 
     // Login fields
     private CustomTextField emailLoginTextField;
-    private CustomTextField passwordLoginTextField;
+    private CustomPasswordField passwordLoginTextField;
 
     private final int ICON_WIDTH = 20;
     private final int ICON_HEIGHT = 20;
@@ -71,14 +76,14 @@ public class PanelLoginAndRegister extends JLayeredPane {
     private void initRegister(ActionListener registerAction) {
         registerPanel.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]10[]10[]10[]40[]push"));
 
-        registerPanel.add(createTitleLabel("Registrarse"));
+        registerPanel.add(createShadowedTitleLabel("Registrarse"));
 
         dniTextField = createTextField("/LoginRegisterImgs/dni.png", "DNI: ");
         fullNameTextField = createTextField("/LoginRegisterImgs/usuario.png", "Nombre completo: ");
         emailTextField = createTextField("/LoginRegisterImgs/correo.png", "Email: ");
         phoneTextField = createTextField("/LoginRegisterImgs/telefono.png", "Número de teléfono: ");
         birthDateTextField = createTextField("/LoginRegisterImgs/calendario.png", "Fecha de nacimiento: ");
-        passwordTextField = createTextField("/LoginRegisterImgs/contraseña.png", "Contraseña: ");
+        passwordTextField = createPasswordTextField("Contraseña: ");
 
         registerPanel.add(dniTextField, "w 60%");
         registerPanel.add(fullNameTextField, "w 60%");
@@ -94,10 +99,10 @@ public class PanelLoginAndRegister extends JLayeredPane {
     private void initLogin(ActionListener loginAction) {
         loginPanel.setLayout(new MigLayout("wrap", "push[center]push", "push[]35[]10[]10[]40[]push"));
 
-        loginPanel.add(createTitleLabel("Iniciar Sesión"));
+        loginPanel.add(createShadowedTitleLabel("Iniciar Sesión"));
 
         emailLoginTextField = createTextField("/LoginRegisterImgs/correo.png", "Email: ");
-        passwordLoginTextField = createTextField("/LoginRegisterImgs/contraseña.png", "Contraseña: ");
+        passwordLoginTextField = createPasswordTextField("Contraseña: ");
 
         loginPanel.add(emailLoginTextField, "w 60%");
         loginPanel.add(passwordLoginTextField, "w 60%");
@@ -109,11 +114,8 @@ public class PanelLoginAndRegister extends JLayeredPane {
         loginPanel.add(forgotPasswordButton);
     }
 
-    private JLabel createTitleLabel(String text) {
-        JLabel label = new JLabel(text);
-        label.setFont(MAIN_FONT);
-        label.setForeground(MAIN_APP_COLOUR);
-        return label;
+    private ShadowedLabel createShadowedTitleLabel(String text) {
+        return new ShadowedLabel(text, AUTH_TITLE_LABEL_FONT, MAIN_APP_COLOUR);
     }
 
     private CustomTextField createTextField(String iconPath, String hintText) {
@@ -124,14 +126,27 @@ public class PanelLoginAndRegister extends JLayeredPane {
 
         textField.setPrefixIcon(imageIcon);
         textField.setHintText(hintText);
+        textField.setFont(MAIN_FONT);
         return textField;
+    }
+
+    private CustomPasswordField createPasswordTextField(String hintText) {
+        CustomPasswordField customPasswordField = new CustomPasswordField();
+
+        imageIconRedrawer.setImageIcon(new ImageIcon(getClass().getResource("/LoginRegisterImgs/contraseña.png")));
+        ImageIcon imageIcon = imageIconRedrawer.redrawImageIcon(ICON_WIDTH, ICON_HEIGHT);
+
+        customPasswordField.setPrefixIcon(imageIcon);
+        customPasswordField.setHintText(hintText);
+        return customPasswordField;
     }
 
     private CustomizedButton createButton(String text, ActionListener action) {
         CustomizedButton button = new CustomizedButton();
         button.setBackground(MAIN_APP_COLOUR);
-        button.setForeground(Color.RED);
-        button.setFont(new Font("Times New Roman", Font.PLAIN, 16));;
+        button.setForeground(Color.WHITE);
+        button.setFont(MAIN_FONT);
+        ;
         button.setText(text);
         button.addActionListener(action);
         return button;
@@ -139,12 +154,61 @@ public class PanelLoginAndRegister extends JLayeredPane {
 
     private JButton createForgotPasswordButton() {
         JButton button = new JButton("¿Olvidó su contraseña?");
-        button.setFont(MAIN_FONT);
-        button.setForeground(Color.YELLOW);
-        button.setBackground(MAIN_APP_COLOUR);
+        button.setFont(MAIN_FONT.deriveFont(Font.ITALIC));
+        button.setForeground(Color.BLACK);
+        button.setBackground(SECONDARY_APP_COLOUR);
         button.setContentAreaFilled(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.addActionListener(e -> handleForgotPassword());
         return button;
+    }
+
+    private void handleForgotPassword() {
+        String email = emailLoginTextField.getText();
+
+        if (email.isEmpty()) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "Por favor, " +
+                    "introduzca su email para recuperar la contraseña.");
+            return;
+        }
+
+        Optional<Patient> optionalPatient = findPatientByEmail(email);
+        if (optionalPatient.isEmpty()) {
+            showMessageCallBack.accept(MessageTypes.ERROR, "No se encontró una cuentra con el correo:\n" + email);
+            return;
+        }
+
+        Patient patient = optionalPatient.get();
+        JavaMailSender mailSender = new JavaMailSender(patient.getEmail());
+        String newTempPassword = mailSender.sendPasswordResetEmail(patient.getFirstName() + " " + patient.getSurname());
+
+        if (updatePassword(patient, newTempPassword)) {
+            showMessageCallBack.accept(MessageTypes.SUCCESS, "Se ha enviado una nueva contraseña a su correo:\n" + email);
+        } else {
+            showMessageCallBack.accept(MessageTypes.ERROR, "Hubo un error al actualizar la contraseña.");
+        }
+    }
+
+    private Optional<Patient> findPatientByEmail(String email) {
+        try {
+            PatientDAO patientDAO = new PatientDAO();
+            return patientDAO.findByEmail(email);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    // Updates a patient's password in the DB
+    private boolean updatePassword(Patient patient, String newPassword) {
+        try {
+            String email = patient.getEmail();
+            String oldPassword = patient.getPassword();
+            PatientServices patientService = new PatientServices();
+            return patientService.resetPassword(email, oldPassword, newPassword);
+        } catch (DatabaseUpdateException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // Switch between login and register forms

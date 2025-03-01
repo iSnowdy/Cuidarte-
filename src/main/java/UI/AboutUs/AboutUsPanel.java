@@ -1,14 +1,13 @@
 package UI.AboutUs;
 
-import Components.CustomScrollBar;
 import Database.DAO.DoctorDAO;
 import Exceptions.DatabaseOpeningException;
 import Exceptions.DatabaseQueryException;
 import Components.NotificationPopUp;
-import MainApplication.NavigationController;
 import Database.Models.Doctor;
 import Utils.Utility.CustomLogger;
 import Utils.Utility.ImageIconRedrawer;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -22,70 +21,58 @@ import static Utils.Swing.Fonts.PANEL_TITLE_FONT;
 public class AboutUsPanel extends JPanel {
     private final Logger LOGGER = CustomLogger.getLogger(AboutUsPanel.class);
 
-    private final JFrame parentFrame;
-    private final NavigationController navigationController;
     private JPanel contentPanel;
-    private JScrollPane scrollPane;
     private final ImageIconRedrawer iconRedrawer;
 
     private final int IMAGE_WIDTH = 300;
     private final int IMAGE_HEIGHT = 240;
 
-    /**
-     * Constructor for AboutUsPanel.
-     *
-     * @param parentFrame The main application frame.
-     * @param navigationController The navigation controller instance.
-     */
-    public AboutUsPanel(JFrame parentFrame, NavigationController navigationController) {
-        this.parentFrame = parentFrame;
-        this.navigationController = navigationController;
+    public AboutUsPanel(JFrame parentFrame) {
         this.iconRedrawer = new ImageIconRedrawer();
 
         initPanel();
         addContent();
 
-        // Limit the size of the component to 70% of the parent frame
+        // Set panel width to 70% of parent frame
         Dimension parentSize = parentFrame.getSize();
         int newWidth = (int) (parentSize.width * 0.7);
         setPreferredSize(new Dimension(newWidth, parentSize.height));
     }
 
-    /**
-     * Initializes the panel settings.
-     */
+    // Initializes the main panel settings
     private void initPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
     }
 
-    /**
-     * Adds the main content of the "About Us" page.
-     */
+    // Adds the main content of the "About Us" section
     private void addContent() {
         contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(Color.WHITE);
-        contentPanel.setBorder(new EmptyBorder(20, 40, 40, 40));
+        contentPanel.setBorder(new EmptyBorder(40, 50, 50, 50)); // Increased padding for better spacing
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(15, 15, 15, 15); // Spacing between elements
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.weightx = 1;
         gbc.gridx = 0;
         gbc.gridy = 0;
 
+        // Title label
         JLabel titleLabel = new JLabel("Quiénes Somos", JLabel.CENTER);
         titleLabel.setFont(PANEL_TITLE_FONT);
         titleLabel.setForeground(MAIN_APP_COLOUR);
         contentPanel.add(titleLabel, gbc);
 
+        // Paths for doctor images
         String[] imagePaths = {
                 "/AboutUs/alejandro_ramirez_director_hospital.jpeg", "/AboutUs/mariana_torres_jefa_enfermeria.jpeg",
                 "/AboutUs/ricardo_gomez_jefe_urgencias.jpeg", "/AboutUs/laura_fernandez_jefa_cirugia.jpeg",
                 "/AboutUs/doctor_random1.jpg", "/AboutUs/doctor_random2.jpg", "/AboutUs/doctor_random3.jpg"
         };
 
+        // Load head doctors from the database
         List<Doctor> headDoctors = loadHeadDoctorsFromDB();
         if (headDoctors.isEmpty()) {
             gbc.gridy++;
@@ -99,17 +86,11 @@ public class AboutUsPanel extends JPanel {
             }
         }
 
-        scrollPane = new JScrollPane(contentPanel);
-        // Custom ScrollBar
-        scrollPane.getVerticalScrollBar().setUI(new CustomScrollBar());
-        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, Integer.MAX_VALUE));
-        // Increase the speed of scrolling
-        scrollPane.getVerticalScrollBar().setUnitIncrement(30);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setBorder(null);
-        add(scrollPane, BorderLayout.CENTER);
+        // Add content directly to the panel without a JScrollPane
+        add(contentPanel, BorderLayout.CENTER);
     }
 
+    // Retrieves all department heads from the database
     private List<Doctor> loadHeadDoctorsFromDB() {
         try {
             DoctorDAO doctorDAO = new DoctorDAO();
@@ -125,12 +106,12 @@ public class AboutUsPanel extends JPanel {
         }
     }
 
-    // Creates a profile panel for each staff member
+    // Creates a profile panel for each doctor
     private JPanel createProfilePanel(Doctor doctor, String doctorImagePath) {
         // Main Panel
         JPanel profilePanel = new JPanel(new BorderLayout());
         profilePanel.setBackground(Color.WHITE);
-        profilePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        profilePanel.setBorder(new EmptyBorder(20, 20, 20, 20)); // Padding
 
         // Image Panel
         JPanel imagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -147,7 +128,7 @@ public class AboutUsPanel extends JPanel {
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         textPanel.setBackground(Color.WHITE);
-        textPanel.setBorder(new EmptyBorder(0, 20, 0, 0));
+        textPanel.setBorder(new EmptyBorder(0, 30, 0, 0)); // Left padding for separation
 
         JLabel nameLabel = new JLabel(doctor.getFirstName() + " " + doctor.getSurname());
         nameLabel.setFont(new Font("Arial", Font.BOLD, 18));

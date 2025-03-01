@@ -4,8 +4,7 @@ import Exceptions.*;
 import Database.Models.Appointment;
 import Database.Models.Enums.AppointmentState;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +69,80 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating appointment with ID: " + entity.getId(), e);
             throw new DatabaseUpdateException("Failed to update appointment");
+        }
+    }
+
+    // Updates: the appointment itself, frees up the time slot, and occupies the new one
+    public boolean updateAppointment(Appointment appointment, LocalDate newDate, String newTime) throws DatabaseUpdateException {
+        String updateAppointmentQuery =
+                "UPDATE citas_medicas " +
+                        "SET Fecha_Hora = ?, Estado_Cita = ?, Motivo_Consulta = ?, Observaciones_Medicas = ? " +
+                        "WHERE ID_Cita = ?";
+
+        String freeOldTimeSlotQuery =
+                "UPDATE franjas_horarias f " +
+                        "JOIN disponibilidad_medico d ON f.ID_Disponibilidad = d.ID_Disponibilidad " +
+                        "SET f.Estado = 'Disponible' " +
+                        "WHERE d.DNI_Medico = ? " +
+                        "AND d.Fecha = ? " +
+                        "AND f.Hora = ?";
+
+        String reserveNewTimeSlotQuery =
+                "UPDATE franjas_horarias f " +
+                        "JOIN disponibilidad_medico d ON f.ID_Disponibilidad = d.ID_Disponibilidad " +
+                        "SET f.Estado = 'Reservada' " +
+                        "WHERE d.DNI_Medico = ? " +
+                        "AND d.Fecha = ? " +
+                        "AND f.Hora = ?";
+
+        try {
+            connection.setAutoCommit(false);
+
+            // Free up the old time slot
+            executeUpdate(
+                    freeOldTimeSlotQuery,
+                    appointment.getDoctorDNI(),
+                    Date.valueOf(appointment.getAppointmentDateTime().toLocalDateTime().toLocalDate()),
+                    Time.valueOf(appointment.getAppointmentDateTime().toLocalDateTime().toLocalTime())
+            );
+
+            // Occupies the new one
+            executeUpdate(
+                    reserveNewTimeSlotQuery,
+                    appointment.getDoctorDNI(),
+                    Date.valueOf(newDate),
+                    Time.valueOf(newTime)
+            );
+
+            // Finally, update the Appointment table
+            executeUpdate(
+                    updateAppointmentQuery,
+                    Timestamp.valueOf(newDate.toString() + " " + newTime), // YYYY-MM-DD HH:MM:SS
+                    appointment.getAppointmentState().getValue(),
+                    appointment.getDescription(),
+                    appointment.getDoctorObservations(),
+                    appointment.getId()
+            );
+
+            connection.commit();
+            LOGGER.info("Updated appointment ID: " + appointment.getId() +
+                    " to new date: " + newDate + " at " + newTime);
+            return true;
+
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                LOGGER.log(Level.SEVERE, "Failed to rollback transaction.", rollbackEx);
+            }
+            LOGGER.log(Level.SEVERE, "Error updating appointment ID: " + appointment.getId(), e);
+            throw new DatabaseUpdateException("Failed to update appointment.");
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException autoCommitEx) {
+                LOGGER.log(Level.SEVERE, "Failed to reset auto-commit mode.", autoCommitEx);
+            }
         }
     }
 

@@ -7,6 +7,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 
+import static Utils.Swing.Colors.*;
+import static Utils.Swing.Fonts.*;
+
 public class Cell extends JButton {
     private LocalDate date;
     private boolean isTitle, isToday, isHovered, hasPastAppointment, hasFutureAppointment, isAvailableDay;
@@ -58,8 +61,8 @@ public class Cell extends JButton {
     // Marks this cell as a title cell (day of the week)
     public void maskAsTitleCell() {
         this.isTitle = true;
-        setFont(new Font("Arial", Font.BOLD, 12));
-        setForeground(Color.DARK_GRAY);
+        setForeground(MAIN_APP_COLOUR);
+        setFont(DAYS_OF_THE_MONTH_FONT);
     }
 
     // Marks this cell if it represents a past or future appointment
@@ -97,6 +100,7 @@ public class Cell extends JButton {
     // Updates the appearance depending on whether the cell is in the current month
     public void currentMonth(boolean isCurrentMonth) {
         setForeground(isCurrentMonth ? Color.BLACK : new Color(169, 169, 169));
+        setFont(DAY_NUMBER_FONT);
     }
 
     public void resetCell() {
@@ -123,7 +127,6 @@ public class Cell extends JButton {
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = prepareGraphics(g);
 
-        drawBackground(g2);
         drawHoverEffect(g2);
         drawTitleUnderline(g2);
         drawHighlight(g2);
@@ -148,7 +151,7 @@ public class Cell extends JButton {
     // Draws an underline if the cell is a title cell (day of the week)
     private void drawTitleUnderline(Graphics2D g2) {
         if (isTitle) {
-            g2.setColor(Color.DARK_GRAY);
+            g2.setColor(MAIN_APP_COLOUR);
             g2.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
         }
     }
@@ -160,30 +163,22 @@ public class Cell extends JButton {
         int size = 35;
 
         if (isToday) {
-            drawRoundedHighlight(g2, new Color(0, 100, 255), x, y, size); // 🔵 Blue for today
+            drawRoundedHighlight(g2, SECONDARY_APP_COLOUR, x, y, size);
         }
         if (hasPastAppointment) {
-            drawRoundedHighlight(g2, new Color(178, 34, 34), x, y, size); // 🔴 Dark Red for past appointments
+            drawRoundedHighlight(g2, MY_RED, x, y, size);
         }
         if (hasFutureAppointment) {
-            drawRoundedHighlight(g2, new Color(50, 205, 50), x, y, size); // 🟢 Green for future appointments
+            drawRoundedHighlight(g2, MAIN_APP_COLOUR, x, y, size);
         }
         if (isAvailableDay) {
-            drawRoundedHighlight(g2, new Color(255, 215, 0), x, y, size); // 🟡 Gold for available days
+            drawRoundedHighlight(g2, new Color(255, 255, 102, 150), x, y, size);
         }
     }
 
     // Draws a rounded rectangle highlight (used for today & appointments)
     private void drawRoundedHighlight(Graphics2D g2, Color color, int x, int y, int size) {
         g2.setColor(color);
-        g2.fillRoundRect(x, y, size, size, 100, 100);
-    }
-
-    // Draws the background for available days
-    private void drawBackground(Graphics2D g2) {
-        if (isAvailableDay) {
-            g2.setColor(new Color(255, 255, 102, 150)); // 🟡 Soft Yellow for available days
-            g2.fillRect(0, 0, getWidth(), getHeight());
-        }
+        g2.fillRoundRect(x, y, size, size, 400, 400);
     }
 }

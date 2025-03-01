@@ -45,6 +45,19 @@ public class PatientServices implements IPatientService {
         return patientDAO.update(patient);
     }
 
+    public boolean resetPassword(String email, String oldPassword, String newPassword) throws DatabaseUpdateException {
+        Optional<Patient> patientOptional = patientDAO.findByEmail(email);
+        if (patientOptional.isEmpty()) throw new DatabaseUpdateException("Patient not found");
+
+        Patient patient = patientOptional.get();
+        if (!PasswordHasher.verifyPassword(oldPassword, patient.getSalt(), patient.getPassword())) {
+            throw new DatabaseUpdateException("Password does not match");
+        }
+
+        patient.setPassword(PasswordHasher.hashPassword(newPassword, patient.getSalt()));
+        return patientDAO.update(patient);
+    }
+
     @Override
     public boolean changePassword(String DNI, String oldPassword, String newPassword) throws DatabaseUpdateException {
         Optional<Patient> patientOptional = patientDAO.findById(DNI);

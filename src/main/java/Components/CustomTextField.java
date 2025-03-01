@@ -75,30 +75,11 @@ public class CustomTextField extends JTextField {
     }
 
     // Getters and Setters
-
-    public String getHintText() {
-        return hintText;
-    }
-
     public void setHintText(String hintText) {
         this.hintText = hintText;
     }
-
-    public Icon getPrefixIcon() {
-        return prefixIcon;
-    }
-
     public void setPrefixIcon(Icon prefixIcon) {
         this.prefixIcon = prefixIcon;
-        setIconBorder();
-    }
-
-    public Icon getSuffixIcon() {
-        return suffixIcon;
-    }
-
-    public void setSuffixIcon(Icon suffixIcon) {
-        this.suffixIcon = suffixIcon;
         setIconBorder();
     }
 }

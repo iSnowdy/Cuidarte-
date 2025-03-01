@@ -3,6 +3,7 @@ package Utils.Utility;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.security.SecureRandom;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -120,5 +121,32 @@ public class JavaMailSender {
                         "\n\n" +
                         "Saludos,\n" +
                         "El equipo de Cuidarte+";
+    }
+
+    public String sendPasswordResetEmail(String patientName) {
+        String tempPassword = generateTemporaryPassword();
+        this.emailSubject = "Recuperación de contraseña - Cuidarte+";
+        this.emailBody =
+                "Hola " + patientName + ",\n\n" +
+                        "Hemos recibido una solicitud para restablecer tu contraseña.\n" +
+                        "Tu nueva contraseña temporal es:\n\n" +
+                        tempPassword + "\n\n" +
+                        "Por favor, inicia sesión con esta contraseña y cámbiala en la configuración de tu cuenta.\n\n" +
+                        "Saludos,\n" +
+                        "El equipo de Cuidarte+";
+
+        sendEmailInBackground();
+        return tempPassword;
+    }
+
+    // Generates a random temporary password of 10 characters
+    public String generateTemporaryPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(10);
+        for (int i = 0; i < 10; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return password.toString();
     }
 }

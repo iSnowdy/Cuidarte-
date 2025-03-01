@@ -1,6 +1,7 @@
 package UI.LandingPage;
 
 import Components.CustomizedButton;
+import Components.NotificationPopUp;
 import UI.Authentication.Authenticator;
 import Components.DropDownMenu;
 import Components.GradientTextLabel;
@@ -14,6 +15,7 @@ import java.awt.event.MouseAdapter;
 
 import static Utils.Swing.Colors.*;
 import static Utils.Swing.Fonts.MAIN_FONT;
+import static Utils.Swing.Fonts.PANEL_TITLE_FONT;
 
 public class HeaderPanel extends JPanel {
     private JFrame mainFrame;
@@ -21,15 +23,14 @@ public class HeaderPanel extends JPanel {
     private final NavigationController navigationController;
     private DropDownMenu dropDownMenu;
 
-    private JLabel appLogo;
-    private CustomizedButton registerButton;
-    private CustomizedButton loginButton;
-    private JLabel menuIcon;
+    private JLabel
+            appLogo, welcomeLabel,
+            menuIcon,
+            plusLabel, subtitleLabel;
     private GradientTextLabel titleLabel;
-    private JLabel plusLabel;
-    private JLabel subtitleLabel;
-    private CustomizedButton appointmentButton;
-    private CustomizedButton callButton;
+    private CustomizedButton
+            registerButton, loginButton, logoutButton,
+            appointmentButton, callButton;
     private JSeparator separator;
 
     private final String mainPhoneNumber = "+34 800 500 220";
@@ -49,6 +50,7 @@ public class HeaderPanel extends JPanel {
     // Initialize all UI components
     private void initComponents() {
         initLogo();
+        initWelcomeLabel();
         initButtons();
         initMenuIcon();
         initSeparator();
@@ -57,7 +59,14 @@ public class HeaderPanel extends JPanel {
 
     // Initializes the application logo
     private void initLogo() {
-        appLogo = new JLabel(createIcon("/General/app-logo.png", 70, 70)); // Adjusted size
+        appLogo = new JLabel(createIcon("/General/app-logo.png", 80, 80)); // Adjusted size
+    }
+
+    // Welcome Label displaying the user's name if they are logged in
+    private void initWelcomeLabel() {
+        welcomeLabel = new JLabel();
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD + Font.ITALIC, 30));
+        welcomeLabel.setForeground(SUBTITLE_COLOUR);
     }
 
     // Initializes all buttons
@@ -67,25 +76,65 @@ public class HeaderPanel extends JPanel {
 
         registerButton = createButton("Registrarse", MAIN_APP_COLOUR, MAIN_FONT, Color.WHITE, MAIN_APP_COLOUR);
         registerButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        registerButton.addActionListener(e -> initiateRegister());
 
         loginButton = createButton("Iniciar Sesión", SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR);
         loginButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
         loginButton.addActionListener(e -> initiateLogin());
 
-        appointmentButton = createButton("Pedir Cita", MY_RED, MAIN_FONT, Color.WHITE, MY_RED.darker());
+        logoutButton = createButton("Cerrar Sesión", MY_RED, MAIN_FONT, Color.WHITE, MY_RED);
+        logoutButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        logoutButton.addActionListener(e -> handleLogout());
+
+        appointmentButton = createButton("Pedir Cita", MY_RED, MAIN_FONT, Color.WHITE, MY_RED);
         appointmentButton.setIcon(createIcon("/LandingPage/calendar-appointment.png", 35, 35));
         appointmentButton.setPreferredSize(new Dimension(160, 50));
         appointmentButton.addActionListener(e -> navigationController.appointmentRedirect());
 
-        callButton = createButton(mainPhoneNumber, SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR.darker());
+        callButton = createButton("¡Llámenos!", SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR.darker());
         callButton.setIcon(createIcon("/LandingPage/phone-call.png", 35, 35));
         callButton.setPreferredSize(new Dimension(160, 50));
         callButton.addActionListener(e -> initiateCall());
     }
 
+    // Deletes user cache and refreshes the UI (displays back the login/register buttons)
+    private void handleLogout() {
+        navigationController.logoutUser();
+        NotificationPopUp.showInfoMessage(
+                this,
+                "Sesión cerrada",
+                "Sesión cerrada con éxito.\n\n" +
+                        "¡Nos vemos! Esperamos verle pronto."
+        );
+        updateUIComponents();
+    }
+
+    // Updates the UI components based on login status
+    private void updateUIComponents() {
+        if (navigationController.isUserLoggedIn()) {
+            welcomeLabel.setText("Hola, " + navigationController.getLoggedInPatient().getFirstName() + "!");
+
+            // Show welcome message and logout button, hide login/register buttons
+            welcomeLabel.setVisible(true);
+            logoutButton.setVisible(true);
+            registerButton.setVisible(false);
+            loginButton.setVisible(false);
+        } else {
+            welcomeLabel.setText(""); // Clear welcome message
+
+            // Show login/register buttons, hide logout button and welcome message
+            welcomeLabel.setVisible(false);
+            logoutButton.setVisible(false);
+            registerButton.setVisible(true);
+            loginButton.setVisible(true);
+        }
+        revalidate();
+        repaint();
+    }
+
     // Initializes the dropdown menu icon with an appropriate size
     private void initMenuIcon() {
-        int iconSize = 30; // Slightly reduced size
+        int iconSize = 40; // Slightly reduced size
         menuIcon = new JLabel(createIcon("/LandingPage/dropdown-menu.png", iconSize, iconSize));
         menuIcon.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         menuIcon.addMouseListener(new MouseAdapter() {
@@ -138,25 +187,32 @@ public class HeaderPanel extends JPanel {
     // The CallBack on Authenticator will notify us when the Patient has successfully logged in
     // Upon the notification, the patient data will be passed down to the NavigationController
     // and the frame will be closed
-    private void initiateLogin() {
+    // Opens the authentication frame with the specified mode (Login or Register)
+    private void openAuthenticationFrame(boolean startInRegister) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Inicio de Sesión");
+            JFrame frame = new JFrame(startInRegister ? "Inicio de Sesión" : "Registro de Usuario");
             frame.setSize(1000, 800);
             frame.setLocationRelativeTo(this);
 
             Authenticator authenticator = new Authenticator(patient -> {
                 navigationController.loginUser(patient);
-
+                updateUIComponents();
                 frame.dispose();
-            });
+            }, startInRegister);
 
             frame.add(authenticator);
             frame.setVisible(true);
         });
     }
 
-    private void initiateRegister() {
+    // Open the frame in login mode
+    private void initiateLogin() {
+        openAuthenticationFrame(false);
+    }
 
+    // Open the frame in register mode
+    private void initiateRegister() {
+        openAuthenticationFrame(true);
     }
 
     // Call
@@ -169,54 +225,78 @@ public class HeaderPanel extends JPanel {
     private void layoutComponents() {
         setLayout(new BorderLayout());
 
-        // Top panel with a different background color
+        // Top panel with background color
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(true);
-        topPanel.setBackground(new Color(230, 240, 255)); // TODO: Contrast?
-        topPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20)); // Paddings
+        topPanel.setBackground(new Color(230, 240, 255));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20)); // Padding for spacing
 
-        // Panel for buttons and menu icon, aligned to the right
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0)); // Spacing
+        // Logo & Welcome Panel (Left Side)
+        JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        logoPanel.setOpaque(false);
+        logoPanel.add(appLogo);
+        logoPanel.add(Box.createHorizontalStrut(10)); // Space between logo and text
+        logoPanel.add(welcomeLabel);
+
+        // Right Panel (Buttons and Dropdown)
+        JPanel rightPanel = new JPanel(new GridBagLayout());
         rightPanel.setOpaque(false);
-        rightPanel.add(loginButton);
-        rightPanel.add(registerButton);
-        rightPanel.add(menuIcon);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridy = 0;  // All items in the same row
+        gbc.insets = new Insets(5, 10, 5, 10); // Padding between elements
 
-        topPanel.add(appLogo, BorderLayout.WEST);
+        gbc.gridx = 0;
+        rightPanel.add(loginButton, gbc);
+
+        gbc.gridx++;
+        gbc.insets = new Insets(5, 10, 5, 30); // Increase right padding for space
+        rightPanel.add(registerButton, gbc);
+
+        gbc.gridx++;
+        rightPanel.add(logoutButton, gbc); // Initially hidden
+
+        gbc.gridx++;
+        gbc.insets = new Insets(5, 30, 5, 10); // More space before the dropdown menu
+        rightPanel.add(menuIcon, gbc);
+
+
+        // Add components to top panel
+        topPanel.add(logoPanel, BorderLayout.WEST);
         topPanel.add(rightPanel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
 
-        // Center panel containing title and subtitle
+        // Center Panel
         JPanel centerPanel = new JPanel();
         centerPanel.setOpaque(false);
         centerPanel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 0, 5, 0); // Spacing
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+        GridBagConstraints gbcCenter = new GridBagConstraints();
+        gbcCenter.insets = new Insets(5, 0, 5, 0);
+        gbcCenter.gridx = 0;
+        gbcCenter.gridy = 0;
 
-        // Panel to hold "Cuidarte" and "+"
+        // Title Section
         JPanel titlePanel = new JPanel();
         titlePanel.setOpaque(false);
-        titlePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0)); // Ensures small gap between text and "+"
+        titlePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
         titlePanel.add(titleLabel);
         titlePanel.add(plusLabel);
 
-        centerPanel.add(titlePanel, gbc);
-
-        gbc.gridy = 1;
-        centerPanel.add(subtitleLabel, gbc);
-        gbc.gridy = 2;
-        centerPanel.add(separator, gbc);
+        centerPanel.add(titlePanel, gbcCenter);
+        gbcCenter.gridy = 1;
+        centerPanel.add(subtitleLabel, gbcCenter);
+        gbcCenter.gridy = 2;
+        centerPanel.add(separator, gbcCenter);
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // Bottom panel with the appointment and call buttons
+        // Bottom Buttons (Appointment and Call)
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
         bottomPanel.setOpaque(false);
         bottomPanel.add(appointmentButton);
         bottomPanel.add(callButton);
 
         add(bottomPanel, BorderLayout.SOUTH);
+
+        updateUIComponents();
     }
 }

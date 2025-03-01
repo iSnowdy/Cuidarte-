@@ -10,36 +10,25 @@ import java.awt.event.MouseEvent;
 import static Utils.Swing.Colors.MAIN_APP_COLOUR;
 import static Utils.Swing.Fonts.MAIN_FONT;
 
-/**
- * Custom dropdown menu for navigation between different sections.
- */
 public class DropDownMenu extends JPopupMenu {
     private final String[] menuItems = {"Página Principal", "Mi Portal", "Nuestros Centros", "Quiénes Somos"};
     private final NavigationController navigationController;
     private JPanel selectedPanel = null;
 
-    /**
-     * Constructor that initializes the dropdown menu.
-     *
-     * @param navigationController The controller responsible for switching panels.
-     */
     public DropDownMenu(NavigationController navigationController) {
         this.navigationController = navigationController;
         initDropDownMenu();
     }
 
-    /**
-     * Initializes the dropdown menu UI.
-     */
+    // Initializes the dropdown menu UI
     private void initDropDownMenu() {
         setBorder(BorderFactory.createLineBorder(MAIN_APP_COLOUR, 1));
         setBackground(Color.WHITE);
+        setPreferredSize(new Dimension(180, 160)); // Menu size
         addMenuItems();
     }
 
-    /**
-     * Adds items to the dropdown menu.
-     */
+    // Adds items to the dropdown menu
     private void addMenuItems() {
         for (String menuItem : menuItems) {
             JPanel itemPanel = createMenuItem(menuItem);
@@ -47,15 +36,10 @@ public class DropDownMenu extends JPopupMenu {
         }
     }
 
-    /**
-     * Creates a styled menu item with hover and click effects.
-     *
-     * @param menuItemText The text displayed in the menu item.
-     * @return A JPanel representing the menu item.
-     */
+    // Creates a menu item with hover effects
     private JPanel createMenuItem(String menuItemText) {
         JPanel itemPanel = new JPanel(new BorderLayout());
-        itemPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        itemPanel.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15)); // Padding
         itemPanel.setBackground(Color.WHITE);
         itemPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -90,36 +74,37 @@ public class DropDownMenu extends JPopupMenu {
         return itemPanel;
     }
 
-    /**
-     * Highlights the selected menu item by changing its background color.
-     *
-     * @param selected The menu item panel that was clicked.
-     */
+    // Highlights the selected menu item
     private void highlightSelectedItem(JPanel selected) {
         if (selectedPanel != null) {
-            // Reset previous panel color
             selectedPanel.setBackground(Color.WHITE);
-
-            // Reset previous text color
             JLabel previousLabel = (JLabel) selectedPanel.getComponent(0);
             previousLabel.setForeground(Color.BLACK);
         }
 
-        // Apply highlight effect to new selection
         selected.setBackground(MAIN_APP_COLOUR);
         JLabel newLabel = (JLabel) selected.getComponent(0);
-        newLabel.setForeground(Color.WHITE); // Ensure text color changes
+        newLabel.setForeground(Color.WHITE);
 
         selectedPanel = selected;
     }
 
-
-    /**
-     * Displays the dropdown menu under the specified component.
-     *
-     * @param component The component that triggers the dropdown menu.
-     */
+    // Displays the dropdown menu with adjusted right margin
     public void showMenu(Component component) {
-        show(component, 0, component.getHeight());
+        int menuWidth = getPreferredSize().width; // Get the dropdown menu width
+        int menuHeight = getPreferredSize().height; // Get the dropdown menu height
+
+        // Get screen location of the component (menu button)
+        Point location = component.getLocationOnScreen();
+
+        // Get the rightmost position of the app frame
+        int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+        int componentRightEdge = location.x + component.getWidth();
+
+        // Calculate offset to prevent it from touching the right border and the buttons
+        int xOffset = (componentRightEdge + menuWidth > screenWidth) ? -menuWidth + component.getWidth() : 0;
+        int yOffset = component.getHeight() + 10; // y axis spacing
+
+        show(component, xOffset, yOffset);
     }
 }

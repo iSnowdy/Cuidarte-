@@ -7,6 +7,7 @@ import Database.Models.Enums.TimeSlotStatus;
 import Exceptions.DatabaseOpeningException;
 import Exceptions.DatabaseQueryException;
 import Components.NotificationPopUp;
+import Exceptions.DatabaseUpdateException;
 import Utils.Utility.CustomLogger;
 import Utils.Utility.ImageIconRedrawer;
 
@@ -25,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static Utils.Swing.Colors.SECONDARY_APP_COLOUR;
+import static Utils.Swing.Fonts.*;
 
 public class CalendarCustom extends JPanel {
     private final Logger LOGGER = CustomLogger.getLogger(CalendarCustom.class);
@@ -40,7 +42,6 @@ public class CalendarCustom extends JPanel {
     private ClinicDAO clinicDAO;
     private AppointmentDAO appointmentDAO;
     private DoctorAvailabilityDAO doctorAvailabilityDAO;
-    private TimeSlotDAO timeSlotDAO;
 
     private JComboBox<String> doctorComboBox;
     private Map<String, List<LocalDate>> doctorScheduleMap;
@@ -90,7 +91,6 @@ public class CalendarCustom extends JPanel {
             this.clinicDAO = new ClinicDAO();
             this.appointmentDAO = new AppointmentDAO();
             this.doctorAvailabilityDAO = new DoctorAvailabilityDAO();
-            this.timeSlotDAO = new TimeSlotDAO();
         } catch (DatabaseOpeningException e) {
             LOGGER.log(Level.SEVERE, "Error opening DAOs for Calendar", e);
             NotificationPopUp.showErrorMessage(
@@ -435,7 +435,7 @@ public class CalendarCustom extends JPanel {
             // and it has already not been cancelled
             Object[] options;
             if (isFuture && !isCancelled) {
-                options = new Object[]{"Cancelar cita", "Cerrar"};
+                options = new Object[]{"Modificar cita","Cancelar cita", "Cerrar"};
             } else {
                 options = new Object[]{"Cerrar"};
             }
@@ -446,8 +446,12 @@ public class CalendarCustom extends JPanel {
                     null, options, options[options.length - 1]
             );
 
-            if (isFuture && !isCancelled && selection == 0) {
-                confirmCancelAppointment(appointment);
+            if (isFuture && !isCancelled) {
+                if (selection == 0) {
+                    modifyAppointment(appointment);
+                } else if (selection == 1) {
+                    confirmCancelAppointment(appointment);
+                }
             }
         } catch (DatabaseQueryException e) {
             LOGGER.log(Level.SEVERE, "Error loading appointment details for date " + date, e);
@@ -514,8 +518,10 @@ public class CalendarCustom extends JPanel {
         selectionPanel.setBackground(SECONDARY_APP_COLOUR);
 
         JLabel titleLabel = new JLabel("Selecciona un doctor:", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setForeground(Color.WHITE);
+        // Top and bottom padding
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         // Button to allow switching doctor
         changeDoctorButton = new JButton("← Cambiar Doctor");
@@ -536,14 +542,16 @@ public class CalendarCustom extends JPanel {
         appointmentHistoryPanel.setBackground(SECONDARY_APP_COLOUR);
 
         JLabel historyLabel = new JLabel("Historial de Citas", SwingConstants.CENTER);
-        historyLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        historyLabel.setFont(COMBOBOX_FONT.deriveFont(Font.BOLD));
         historyLabel.setForeground(Color.WHITE);
+        // Bottom padding
+        historyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         historyModel = new DefaultListModel<>();
         historyList = new JList<>(historyModel);
         historyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         historyList.setBackground(Color.WHITE);
-        historyList.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        historyList.setFont(MAIN_FONT);
 
         historyList.addMouseListener(new MouseAdapter() {
             @Override
@@ -572,6 +580,95 @@ public class CalendarCustom extends JPanel {
 
         // Loads the appointments of the patient from the DB
         loadAppointmentHistory();
+    }
+
+    // It will prompt the user to manually input a new date and time
+    // Then proceed to call the method to persist the changes. This method will:
+    // update the appointment itself, free the old time slot and occupy the new time slot
+    private void modifyAppointment(Appointment appointment) {
+        // New date
+        LocalDate newDate = selectNewDate(appointment.getAppointmentDateTime().toLocalDateTime().toLocalDate());
+        if (newDate == null) return;
+
+        // New time slot
+        String newTime = selectNewTimeSlot(appointment.getDoctorDNI(), newDate);
+        if (newTime == null) return;
+
+        boolean confirm = NotificationPopUp.showConfirmationMessage(
+                this,
+                "Modificar Cita",
+                "¿Seguro que desea modificar la cita a la nueva fecha y hora?\n\n" +
+                        "Nueva Fecha: " + newDate + "\n" +
+                        "Nueva Hora: " + newTime
+        );
+
+        if (!confirm) return;
+
+        try {
+            boolean updated = appointmentDAO.updateAppointment(appointment, newDate, newTime);
+            if (updated) {
+                NotificationPopUp.showInfoMessage(
+                        this,
+                        "Cita Modificada",
+                        "La cita ha sido modificada con éxito.");
+
+                loadAppointmentHistory();
+                updateDoctorSchedule(true);
+            } else {
+                NotificationPopUp.showErrorMessage(
+                        this,
+                        "Error",
+                        "No se pudo modificar la cita.");
+            }
+        } catch (DatabaseUpdateException e) {
+            LOGGER.log(Level.SEVERE, "Error modifying appointment", e);
+            NotificationPopUp.showErrorMessage(
+                    this,
+                    "Error",
+                    "Error al modificar la cita.");
+        }
+    }
+
+    private LocalDate selectNewDate(LocalDate currentAppointmentDate) {
+        String newDateString = JOptionPane.showInputDialog(
+                this,
+                "Ingrese la nueva fecha de la cita (YYYY-MM-DD):",
+                currentAppointmentDate.toString()
+        );
+
+        // Checker to validate the user's input of date
+        // On the caller method there's a null checker to return again
+        try {
+            return (newDateString != null) ? LocalDate.parse(newDateString) : null;
+        } catch (Exception e) {
+            NotificationPopUp.showErrorMessage(this, "Error", "Fecha inválida.");
+            return null;
+        }
+    }
+
+    private String selectNewTimeSlot(String doctorDNI, LocalDate newDate) {
+        try {
+            List<TimeSlot> availableSlots = doctorAvailabilityDAO.findAvailableTimeSlotsByDoctorAndDate(
+                    doctorDNI, clinicID, newDate);
+
+            if (availableSlots.isEmpty()) {
+                NotificationPopUp.showErrorMessage(this, "Error", "No hay horarios disponibles.");
+                return null;
+            }
+
+            String[] options = availableSlots.stream()
+                    .map(slot -> slot.getHour().toString()).toArray(String[]::new);
+            return (String) JOptionPane.showInputDialog(
+                    this,
+                    "Seleccione un horario:",
+                    "Modificar Cita",
+                    JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        } catch (DatabaseQueryException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching available time slots", e);
+            NotificationPopUp.showErrorMessage(this, "Error", "No se pudo cargar los horarios.");
+            return null;
+        }
     }
 
     private void confirmCancelAppointment(Appointment appointmentToCancel) {
@@ -672,12 +769,13 @@ public class CalendarCustom extends JPanel {
         nextButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         monthYearLabel = new JLabel("", SwingConstants.CENTER);
-        monthYearLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        monthYearLabel.setFont(PANEL_TITLE_FONT);
         monthYearLabel.setForeground(SECONDARY_APP_COLOUR);
 
         monthPanel.add(backButton, BorderLayout.WEST);
         monthPanel.add(monthYearLabel, BorderLayout.CENTER);
         monthPanel.add(nextButton, BorderLayout.EAST);
+        monthPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         rightPanel.add(monthPanel, BorderLayout.NORTH);
 
         slide = new PanelSlide();

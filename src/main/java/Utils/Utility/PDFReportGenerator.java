@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 
 public class PDFReportGenerator {
     private static final Logger LOGGER = CustomLogger.getLogger(PDFReportGenerator.class);
-    private static final String LOGO_PATH = "C:\\Users\\andyl\\IdeaProjects\\Cuidarte\\src\\main\\resources\\General\\app-logo.png";
+    private static final String LOGO_PATH = "C:\\Users\\andyl\\IdeaProjects\\Cuidarte\\src\\main\\resources\\General\\white-app-logo.png";
     private static final String PDF_FONT = "Helvetica";
 
     public static void generateMedicalReport(MedicalReport report, String destFolder) {

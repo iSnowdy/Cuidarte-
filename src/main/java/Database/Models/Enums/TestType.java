@@ -25,3 +25,12 @@ public enum TestType {
         throw new IllegalArgumentException("No matching constant for [" + text + "]");
     }
 }
+
+/*
+Fecha antigua: 2025-03-05
+Hora antigua: 11 AM
+
+Fecha nueva: 2025-03-08
+Hora nueva: 12:00:00
+
+ */

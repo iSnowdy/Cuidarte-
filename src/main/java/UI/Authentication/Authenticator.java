@@ -46,8 +46,9 @@ public class Authenticator extends JPanel {
 
     private boolean isUserLoggedIn = false;
 
-    public Authenticator(Consumer<Patient> loginCallBack) {
+    public Authenticator(Consumer<Patient> loginCallBack, boolean startInRegister) {
         this.loginCallBack = loginCallBack;
+        this.isLogin = startInRegister;
 
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
@@ -67,6 +68,9 @@ public class Authenticator extends JPanel {
 
         initComponents();
         setupAnimations();
+
+        // Initial view depending if we click on Login or Register
+        switchToLoginOrRegister(startInRegister);
     }
 
     private void initComponents() {
@@ -265,19 +269,24 @@ public class Authenticator extends JPanel {
     private void updateEveryFrameAnimation(float fraction) {
         double fractionCover = isLogin ? 1f - fraction : fraction;
         double fractionLogin = isLogin ? fraction : 1f - fraction;
-        double size = coverSize + (fraction <= 0.5f ? fraction * coverSize : addSize - (fraction * coverSize));
 
-        // Rounding using Math.max and decimalFormat as to not use a very small number (MigLayout throws error)
-        fractionCover = Math.max(0.001, fractionCover);
-        fractionLogin = Math.max(0.001, fractionLogin);
-        fractionCover = Double.parseDouble(decimalFormat.format(fractionCover));
-        fractionLogin = Double.parseDouble(decimalFormat.format(fractionLogin));
+        double newSize;
+        if (fraction <= 0.5f) {
+            newSize = coverSize * (1 + fraction * 0.2);  // Up to 20% resizing during anim
+        } else {
+            newSize = coverSize * (1.2 - (fraction - 0.5) * 0.4); // Original size
+        }
+
+        // Rounding to avoid issues with MigLayout
+        fractionCover = Math.max(0.001, Double.parseDouble(decimalFormat.format(fractionCover)));
+        fractionLogin = Math.max(0.001, Double.parseDouble(decimalFormat.format(fractionLogin)));
 
         if (fraction >= 0.5f) {
             loginAndRegister.showRegisterForm(isLogin);
             cover.animateText(!isLogin);
         }
-        layout.setComponentConstraints(cover, "width " + size + "%, pos " + fractionCover + "al 0 n 100%");
+
+        layout.setComponentConstraints(cover, "width " + Math.min(Math.max(newSize, coverSize), coverSize * 1.2) + "%, pos " + fractionCover + "al 0 n 100%");
         layout.setComponentConstraints(loginAndRegister, "width " + loginSize + "%, pos " + fractionLogin + "al 0 n 100%");
         backGround.revalidate();
     }
@@ -289,6 +298,28 @@ public class Authenticator extends JPanel {
         animator.setResolution(0);
         return animator;
     }
+
+    // Método que se llama cuando se presiona el botón de "Iniciar Sesión" o "Registrarse"
+    private void switchToLoginOrRegister(boolean toLogin) {
+        if (animator.isRunning()) return; // Si la animación ya está en marcha, evitar interrupciones
+
+        isLogin = toLogin;
+
+        // Ajustar las posiciones iniciales ANTES de iniciar la animación
+        double fractionCover = isLogin ? 1f : 0f;  // Si es login, el cover empieza en la derecha (1), si es registro en la izquierda (0)
+        double fractionLogin = isLogin ? 0f : 1f;  // Lo contrario para loginAndRegister
+
+        layout.setComponentConstraints(cover, "width " + coverSize + "%, pos " + fractionCover + "al 0 n 100%");
+        layout.setComponentConstraints(loginAndRegister, "width " + loginSize + "%, pos " + fractionLogin + "al 0 n 100%");
+
+        // Forzar revalidación para aplicar los cambios antes de la animación
+        backGround.revalidate();
+        backGround.repaint();
+
+        // Iniciar la animación
+        animator.start();
+    }
+
 
     public void userLoggedIn(boolean isLoggedIn) {
         this.isUserLoggedIn = isLoggedIn;

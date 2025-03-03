@@ -30,7 +30,8 @@ public class HeaderPanel extends JPanel {
     private GradientTextLabel titleLabel;
     private CustomizedButton
             registerButton, loginButton, logoutButton,
-            appointmentButton, callButton;
+            appointmentButton, callButton,
+            sendMessageButton;
     private JSeparator separator;
 
     private final String mainPhoneNumber = "+34 800 500 220";
@@ -95,6 +96,11 @@ public class HeaderPanel extends JPanel {
         callButton.setIcon(createIcon("/LandingPage/phone-call.png", 35, 35));
         callButton.setPreferredSize(new Dimension(160, 50));
         callButton.addActionListener(e -> initiateCall());
+
+        // TODO: Check this style
+        sendMessageButton = createButton("Mensajes", SECONDARY_APP_COLOUR, MAIN_FONT, Color.WHITE, SECONDARY_APP_COLOUR.darker());
+        sendMessageButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        sendMessageButton.addActionListener(e -> openMessageDialog());
     }
 
     // Deletes user cache and refreshes the UI (displays back the login/register buttons)
@@ -119,6 +125,7 @@ public class HeaderPanel extends JPanel {
             logoutButton.setVisible(true);
             registerButton.setVisible(false);
             loginButton.setVisible(false);
+            sendMessageButton.setVisible(true);
         } else {
             welcomeLabel.setText(""); // Clear welcome message
 
@@ -127,6 +134,7 @@ public class HeaderPanel extends JPanel {
             logoutButton.setVisible(false);
             registerButton.setVisible(true);
             loginButton.setVisible(true);
+            sendMessageButton.setVisible(false);
         }
         revalidate();
         repaint();
@@ -256,6 +264,9 @@ public class HeaderPanel extends JPanel {
         rightPanel.add(logoutButton, gbc); // Initially hidden
 
         gbc.gridx++;
+        rightPanel.add(sendMessageButton, gbc); // Also initially hidden
+
+        gbc.gridx++;
         gbc.insets = new Insets(5, 30, 5, 10); // More space before the dropdown menu
         rightPanel.add(menuIcon, gbc);
 
@@ -298,5 +309,17 @@ public class HeaderPanel extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
 
         updateUIComponents();
+    }
+
+    private void openMessageDialog() {
+        JFrame messageFrame = new JFrame("Mensajes");
+        messageFrame.setSize(800, 600);
+        messageFrame.setLocationRelativeTo(this);
+        messageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        String patientDNI = navigationController.getLoggedInPatient().getDNI();
+        messageFrame.add(new MessagePanel(patientDNI));
+
+        messageFrame.setVisible(true);
     }
 }

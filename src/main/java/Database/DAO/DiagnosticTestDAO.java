@@ -134,22 +134,13 @@ public class DiagnosticTestDAO extends BaseDAO<DiagnosticTest, Integer> {
 
     // Retrieves detailed information for a specific diagnostic test based on type
     public Optional<Object> findDetailedTestByID(int testID, TestType testType) throws DatabaseQueryException {
-        String query = "";
-
-        switch (testType) {
-            case BLOOD_LAB:
-                query = "SELECT * FROM hemogramas WHERE ID_Prueba = ?";
-                break;
-            case BIOCHEMISTRY_LAB:
-                query = "SELECT * FROM bioquimicas WHERE ID_Prueba = ?";
-                break;
-            case IMMUNOLOGY_LAB:
-                query = "SELECT * FROM inmunologias WHERE ID_Prueba = ?";
-                break;
-            case MICROBIOLOGY_LAB:
-                query = "SELECT * FROM microbiologias WHERE ID_Prueba = ?";
-                break;
-        }
+        String query = switch (testType) {
+            case BLOOD_LAB -> "SELECT * FROM hemogramas WHERE ID_Prueba = ?";
+            case BIOCHEMISTRY_LAB -> "SELECT * FROM bioquimicas WHERE ID_Prueba = ?";
+            case IMMUNOLOGY_LAB -> "SELECT * FROM inmunologias WHERE ID_Prueba = ?";
+            case MICROBIOLOGY_LAB -> "SELECT * FROM microbiologias WHERE ID_Prueba = ?";
+            case RADIOGRAPHY_LAB -> "SELECT * FROM radiografias WHERE ID_Prueba = ?";
+        };
 
         try (ResultSet resultSet = executeQuery(query, testID)) {
             if (resultSet.next()) {
@@ -224,6 +215,14 @@ public class DiagnosticTestDAO extends BaseDAO<DiagnosticTest, Integer> {
                         rs.getInt("ID_Microbiologia"),
                         rs.getInt("ID_Prueba"),
                         rs.getString("Resultado")
+                );
+
+            case RADIOGRAPHY_LAB:
+                return new Radiography(
+                        rs.getInt("ID_Radiografia"),
+                        rs.getInt("ID_Prueba"),
+                        rs.getString("Resultado"),
+                        rs.getString("URLImagen")
                 );
 
             default:

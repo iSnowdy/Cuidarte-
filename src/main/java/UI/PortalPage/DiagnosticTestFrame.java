@@ -131,7 +131,8 @@ public class DiagnosticTestFrame extends JFrame {
 
     // Creates the test type combo box
     private JComboBox<String> createTestTypeComboBox() {
-        JComboBox<String> comboBox = new JComboBox<>(new String[]{"Todos", "Hemograma", "Bioquímica", "Inmunología", "Microbiología"});
+        JComboBox<String> comboBox =
+                new JComboBox<>(new String[]{"Todos", "Hemograma", "Bioquímica", "Inmunología", "Microbiología", "Radiografía"});
         comboBox.addActionListener(e -> updateDiagnosticTestsTable());
         return comboBox;
     }

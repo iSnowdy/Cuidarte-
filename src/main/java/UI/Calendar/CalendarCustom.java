@@ -484,8 +484,6 @@ public class CalendarCustom extends JPanel {
     private void handleDoctorSelection() {
         String selectedName = (String) doctorComboBox.getSelectedItem();
 
-        System.out.println("SELECTED: " + selectedName);
-
         if (selectedName != null) {
             selectedDoctorEntity = doctorScheduleMap.keySet()
                     .stream()
@@ -494,8 +492,6 @@ public class CalendarCustom extends JPanel {
                     .flatMap(Optional::stream)
                     .findFirst()
                     .orElse(null);
-
-            System.out.println("ENTITY IS: " + selectedDoctorEntity.getDNI());
 
             if (selectedDoctorEntity == null) {
                 LOGGER.log(Level.SEVERE, "Doctor " + selectedName + " no encontrado en la base de datos.");
@@ -560,9 +556,7 @@ public class CalendarCustom extends JPanel {
                     int index = historyList.getSelectedIndex();
                     if (index >= 0) {
                         String selectedAppointment = historyModel.getElementAt(index);
-                        System.out.println("Selected appointment is: " + selectedAppointment);
                         LocalDate date = extractDateFromAppointment(selectedAppointment);
-                        System.out.println("Date is: " + date);
                         showAppointmentDetails(date);
                     }
                 }

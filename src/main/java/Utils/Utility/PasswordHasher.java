@@ -27,12 +27,6 @@ public class PasswordHasher {
 
     public static boolean verifyPassword(String enteredPassword, int salt, String storedHash) {
         String enteredHash = hashPassword(enteredPassword, salt);
-
-        System.out.println("Stored Hash (DB): " + storedHash);
-        System.out.println("Entered Hash: " + enteredHash);
-        System.out.println("Salt: " + salt);
-        System.out.println("Comparison Result: " + enteredHash.equals(storedHash));
-
         return enteredHash.equals(storedHash);
     }
 }

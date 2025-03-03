@@ -4,7 +4,8 @@ public enum TestType {
     BLOOD_LAB("Hemograma"),
     BIOCHEMISTRY_LAB("Bioquímica"),
     IMMUNOLOGY_LAB("Inmunología"),
-    MICROBIOLOGY_LAB("Microbiología");
+    MICROBIOLOGY_LAB("Microbiología"),
+    RADIOGRAPHY_LAB("Radiografía");
 
     private final String value;
 

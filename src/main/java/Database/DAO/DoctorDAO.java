@@ -163,6 +163,25 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
         return doctors;
     }
 
+    public List<Doctor> findDoctorsByDNIs(List<String> doctorDNIs) throws DatabaseQueryException {
+        List<Doctor> doctors = new ArrayList<>();
+        if (doctorDNIs.isEmpty()) return doctors;
+
+        String placeholders = String.join(",", Collections.nCopies(doctorDNIs.size(), "?"));
+        String query = "SELECT * FROM medicos WHERE DNI_Medico IN (" + placeholders + ")";
+
+        try (ResultSet resultSet = executeQuery(query, doctorDNIs.toArray())) {
+            while (resultSet.next()) {
+                doctors.add(mapResultSetToDoctor(resultSet));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching doctors by DNIs", e);
+            throw new DatabaseQueryException("Error fetching doctors");
+        }
+
+        return doctors;
+    }
+
     private Doctor mapResultSetToDoctor(ResultSet rs) throws SQLException {
         return new Doctor(
                 rs.getString("DNI_Medico"),

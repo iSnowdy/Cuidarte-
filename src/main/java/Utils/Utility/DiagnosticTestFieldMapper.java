@@ -1,6 +1,7 @@
 package Utils.Utility;
 
 import Database.Models.Enums.TestType;
+import MainApplication.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,37 +63,42 @@ public class DiagnosticTestFieldMapper {
                 {"Resultado del Cultivo", ""}
         });
 
+        FIELD_MAPPINGS.put(TestType.RADIOGRAPHY_LAB, new String[][]{
+                {"Resultado de la Radiografía", ""},
+                {"Imagen", ""}
+        });
+
         // Hemograma
-        VALUE_RANGES.put("Eritrocitos", new double[]{4.2, 5.9});
-        VALUE_RANGES.put("Hemoglobina", new double[]{12.0, 16.0});
-        VALUE_RANGES.put("Hematocrito", new double[]{37.0, 47.0});
-        VALUE_RANGES.put("VCM", new double[]{80.0, 100.0});
-        VALUE_RANGES.put("HCM", new double[]{27.0, 31.0});
+        VALUE_RANGES.put("Eritrocitos", new double[]{4.2, 5.9}); // TODO: Quitar (hematies)
+        VALUE_RANGES.put("Hemoglobina", new double[]{13.0, 16.7});
+        VALUE_RANGES.put("Hematocrito", new double[]{40.0, 50.0});
+        VALUE_RANGES.put("VCM", new double[]{80.0, 99.0});
+        VALUE_RANGES.put("HCM", new double[]{27.0, 32.0});
         VALUE_RANGES.put("CHCM", new double[]{32.0, 36.0});
         VALUE_RANGES.put("ADE", new double[]{11.5, 14.5});
-        VALUE_RANGES.put("Plaquetas", new double[]{150.0, 450.0});
-        VALUE_RANGES.put("VPM", new double[]{9.0, 13.0});
+        VALUE_RANGES.put("Plaquetas", new double[]{150.0, 400.0});
+        VALUE_RANGES.put("VPM", new double[]{7.5, 11.0});
         VALUE_RANGES.put("ADP", new double[]{10.0, 15.0});
-        VALUE_RANGES.put("Plaquetocrito", new double[]{0.2, 0.5});
-        VALUE_RANGES.put("Leucocitos", new double[]{4.0, 10.0});
+        VALUE_RANGES.put("Plaquetocrito", new double[]{0.12, 0.36});
+        VALUE_RANGES.put("Leucocitos", new double[]{4.0, 11.0});
         VALUE_RANGES.put("Neutrófilos", new double[]{40.0, 75.0});
-        VALUE_RANGES.put("Linfocitos", new double[]{20.0, 45.0});
-        VALUE_RANGES.put("Monocitos", new double[]{2.0, 10.0});
-        VALUE_RANGES.put("Eosinófilos", new double[]{1.0, 6.0});
-        VALUE_RANGES.put("Basófilos", new double[]{0.5, 1.5});
+        VALUE_RANGES.put("Linfocitos", new double[]{16.0, 45.0});
+        VALUE_RANGES.put("Monocitos", new double[]{2.5, 13.0});
+        VALUE_RANGES.put("Eosinófilos", new double[]{0.5, 7.0});
+        VALUE_RANGES.put("Basófilos", new double[]{0, 2});
 
         // Bioquímica
         VALUE_RANGES.put("Glucosa", new double[]{70.0, 110.0});
         VALUE_RANGES.put("Urea", new double[]{10.0, 50.0});
         VALUE_RANGES.put("Creatinina", new double[]{0.6, 1.3});
         VALUE_RANGES.put("Ácido Úrico", new double[]{2.4, 7.0});
-        VALUE_RANGES.put("Colesterol Total", new double[]{125.0, 200.0});
+        VALUE_RANGES.put("Colesterol Total", new double[]{150.0, 200.0}); // < 200
         VALUE_RANGES.put("Colesterol HDL", new double[]{40.0, 60.0});
         VALUE_RANGES.put("Colesterol LDL", new double[]{50.0, 130.0});
-        VALUE_RANGES.put("Triglicéridos", new double[]{40.0, 150.0});
-        VALUE_RANGES.put("GOT (AST)", new double[]{0.0, 40.0});
-        VALUE_RANGES.put("GPT (ALT)", new double[]{0.0, 45.0});
-        VALUE_RANGES.put("Gamma-GT", new double[]{0.0, 60.0});
+        VALUE_RANGES.put("Triglicéridos", new double[]{100.0, 150.0}); // < 150
+        VALUE_RANGES.put("GOT (AST)", new double[]{5.0, 35.0});
+        VALUE_RANGES.put("GPT (ALT)", new double[]{0.0, 55.0});
+        VALUE_RANGES.put("Gamma-GT", new double[]{12.0, 64.0});
         VALUE_RANGES.put("Fosfatasa Alcalina", new double[]{30.0, 120.0});
         VALUE_RANGES.put("Bilirrubina Total", new double[]{0.2, 1.2});
 

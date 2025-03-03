@@ -3,6 +3,7 @@ package Utils.Utility;
 import Components.NotificationPopUp;
 import Database.Models.Enums.TestType;
 import Database.Models.MedicalReport;
+import Database.Models.Radiography;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -24,6 +25,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -122,11 +124,34 @@ public class PDFReportGenerator {
     private static void generateDiagnosticTestContent(Document document, Object detailedTest,
                                                       List<Method> methods, TestType testType,
                                                       PdfFont font) {
-        document.add(new Paragraph("\nInformación de la Prueba Diagnóstica\n").setFont(font).setBold());
+        document.add(new Paragraph(testType.getValue()).setFont(font).setBold());
 
-        Table table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
+        if (testType == TestType.RADIOGRAPHY_LAB) {
+            generateRadiographyContent(document, (Radiography) detailedTest, font);
+        } else {
+            generateStandardDiagnosticTestContent(document, detailedTest, methods, testType, font);
+        }
+    }
+
+    private static void generateStandardDiagnosticTestContent(Document document, Object detailedTest,
+                                                              List<Method> methods, TestType testType,
+                                                              PdfFont font) {
+        Table table = new Table(UnitValue.createPercentArray(3)).useAllAvailableWidth();
+
+        table.addHeaderCell(new Cell().add(new Paragraph("Parámetro").setFont(font).setBold())
+                .setBackgroundColor(new DeviceRgb(173, 216, 230))
+                .setTextAlignment(TextAlignment.CENTER));
+
+        table.addHeaderCell(new Cell().add(new Paragraph("Valor Obtenido").setFont(font).setBold())
+                .setBackgroundColor(new DeviceRgb(173, 216, 230))
+                .setTextAlignment(TextAlignment.CENTER));
+
+        table.addHeaderCell(new Cell().add(new Paragraph("Rango Normal").setFont(font).setBold())
+                .setBackgroundColor(new DeviceRgb(173, 216, 230))
+                .setTextAlignment(TextAlignment.CENTER));
 
         String[][] fieldMapping = DiagnosticTestFieldMapper.getFieldMappings(testType);
+
         for (int i = 0; i < methods.size(); i++) {
             Method method = methods.get(i);
             String displayName = fieldMapping[i][0];
@@ -134,23 +159,36 @@ public class PDFReportGenerator {
 
             try {
                 Object value = method.invoke(detailedTest);
-
                 if (value == null) continue;
 
-                table.addCell(new Cell().add(new Paragraph(displayName)
-                                .setFont(font)
-                                .setBold())
-                        .setBackgroundColor(new DeviceRgb(173, 216, 230))
-                        .setTextAlignment(TextAlignment.CENTER));
+                double[] range = DiagnosticTestFieldMapper.getValueRange(displayName);
+                String rangeText = (range[0] == Double.MIN_VALUE && range[1] == Double.MAX_VALUE)
+                        ? "No definido"
+                        : String.format("%.2f - %.2f", range[0], range[1]);
 
-                table.addCell(new Cell().add(new Paragraph(value.toString() + " " + units)
-                                .setFont(font))
-                        .setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph(displayName).setFont(font)).setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph(value.toString() + " " + units).setFont(font)).setTextAlignment(TextAlignment.CENTER));
+                table.addCell(new Cell().add(new Paragraph(rangeText).setFont(font)).setTextAlignment(TextAlignment.CENTER));
+
             } catch (Exception e) {
                 LOGGER.severe("Error retrieving field: " + method + " - " + e.getMessage());
             }
         }
         document.add(table);
+    }
+
+    private static void generateRadiographyContent(Document document, Radiography radiography, PdfFont font) {
+        document.add(new Paragraph("Resultado de la Radiografía:").setFont(font).setBold());
+        document.add(new Paragraph(radiography.getResult()).setFont(font));
+
+        try {
+            Image image = new Image(ImageDataFactory.create(radiography.getImageURL()))
+                    .setAutoScale(true);
+            document.add(image);
+        } catch (MalformedURLException e) {
+            LOGGER.severe("Error loading radiography image: " + e.getMessage());
+            document.add(new Paragraph("No se pudo cargar la imagen.").setFont(font).setFontColor(ColorConstants.RED));
+        }
     }
 
     private static void addTextSection(Document document, String title, String content, PdfFont font) {

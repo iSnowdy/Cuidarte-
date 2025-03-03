@@ -116,6 +116,57 @@ public class DiagnosticTestDetailsFrame extends JFrame {
     // It will then call the getter using that field name and finally, with the mapping util
     // add the translated and unit measure to the UI
     private void generateDetails(JPanel panel, GridBagConstraints gbc) {
+        if (testType == TestType.RADIOGRAPHY_LAB) {
+            generateRadiographyDetails(panel, gbc);
+        } else {
+            generateStandardDetails(panel, gbc);
+        }
+    }
+
+    private void generateRadiographyDetails(JPanel panel, GridBagConstraints gbc) {
+        Radiography radiography = (Radiography) detailedTest;
+
+        // Result text
+        JLabel resultLabel = createDetailLabel("Resultado:");
+        JScrollPane resultValue = createWrappedLabel(radiography.getResult());
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0.3;
+        panel.add(resultLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        panel.add(resultValue, gbc);
+
+        // Image of the radiography
+        JLabel imageLabel = createDetailLabel("Imagen de la Radiografía:");
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(imageLabel, gbc);
+
+        try {
+            String imageURL = radiography.getImageURL();
+            System.out.println("URL Imagen: " + imageURL);
+            ImageIcon imageIcon = new ImageIcon(imageURL);
+            Image image = imageIcon.getImage().getScaledInstance(400, 400, Image.SCALE_SMOOTH);
+            JLabel imageDisplay = new JLabel(new ImageIcon(image));
+
+            gbc.gridy = 2;
+            panel.add(imageDisplay, gbc);
+        } catch (Exception e) {
+            LOGGER.severe("Error loading radiography image: " + e.getMessage());
+            JLabel errorLabel = new JLabel("No se pudo cargar la imagen.");
+            gbc.gridy = 2;
+            panel.add(errorLabel, gbc);
+        }
+    }
+
+    private void generateStandardDetails(JPanel panel, GridBagConstraints gbc) {
         Field[] fields = detailedTest.getClass().getDeclaredFields();
         String[][] fieldMappings = DiagnosticTestFieldMapper.getFieldMappings(testType);
 
@@ -229,12 +280,12 @@ public class DiagnosticTestDetailsFrame extends JFrame {
         try {
             double numericValue = Double.parseDouble(value.toString());
 
-            if (isCriticalValue(fieldName, numericValue)) {
-                label.setForeground(Color.RED);
-            } else if (isSlightlyOutOfRange(fieldName, numericValue)) {
-                label.setForeground(Color.ORANGE);
+            if (isAboveNormalRange(fieldName, numericValue)) {
+                label.setForeground(Color.RED); // Above normal range → Red
+            } else if (isBelowNormalRange(fieldName, numericValue)) {
+                label.setForeground(Color.ORANGE); // Below normal range → Orange
             } else {
-                label.setForeground(Color.BLACK);
+                label.setForeground(Color.BLACK); // Normal range → Black
             }
         } catch (NumberFormatException e) {
             label.setForeground(Color.BLACK); // Default color if value is not numeric
@@ -243,18 +294,17 @@ public class DiagnosticTestDetailsFrame extends JFrame {
         return label;
     }
 
-    // Determines if a value is critically out of range
-    private boolean isCriticalValue(String fieldName, double value) {
+    // Checks if the value is below the normal range
+    private boolean isBelowNormalRange(String fieldName, double value) {
         double[] normalRange = DiagnosticTestFieldMapper.getValueRange(fieldName);
-        return value < normalRange[0] * 0.7 || value > normalRange[1] * 1.3; // 30% out of range
+        return value < normalRange[0];
     }
 
-    // Determines if a value is slightly out of range
-    private boolean isSlightlyOutOfRange(String fieldName, double value) {
+    // Checks if the value is above the normal range
+    private boolean isAboveNormalRange(String fieldName, double value) {
         double[] normalRange = DiagnosticTestFieldMapper.getValueRange(fieldName);
-        return value < normalRange[0] * 0.9 || value > normalRange[1] * 1.1; // 10% out of range
+        return value > normalRange[1];
     }
-
 
     // Determines the test type based on the detailed test class
     private TestType determineTestType(Object detailedTest) {
@@ -262,7 +312,8 @@ public class DiagnosticTestDetailsFrame extends JFrame {
                 BloodCountLab.class, TestType.BLOOD_LAB,
                 BiochemistryLab.class, TestType.BIOCHEMISTRY_LAB,
                 ImmunologyLab.class, TestType.IMMUNOLOGY_LAB,
-                MicrobiologyLab.class, TestType.MICROBIOLOGY_LAB
+                MicrobiologyLab.class, TestType.MICROBIOLOGY_LAB,
+                Radiography.class, TestType.RADIOGRAPHY_LAB
         );
 
         return typeMapping.getOrDefault(detailedTest.getClass(), null);

@@ -193,6 +193,23 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
         return appointments;
     }
 
+    // Extracts all the doctor's DNI that have had an appointment with that patient
+    public List<String> findDoctorDNIsByPatient(String patientDNI) throws DatabaseQueryException {
+        List<String> doctorDNIs = new ArrayList<>();
+        String query = "SELECT DISTINCT DNI_Medico FROM citas_medicas WHERE DNI_Paciente = ?";
+
+        try (ResultSet resultSet = executeQuery(query, patientDNI)) {
+            while (resultSet.next()) {
+                doctorDNIs.add(resultSet.getString("DNI_Medico"));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error fetching doctor DNIs for patient: " + patientDNI, e);
+            throw new DatabaseQueryException("Error fetching doctor DNIs");
+        }
+
+        return doctorDNIs;
+    }
+
     // Retrieves from the DB all the appointments of the given patient except those that have been cancelled
     public List<Appointment> findAppointmentsByPatient(String patientDNI) throws DatabaseQueryException {
         List<Appointment> appointments = new ArrayList<>();

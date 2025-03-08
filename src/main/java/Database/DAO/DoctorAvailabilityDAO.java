@@ -110,7 +110,6 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
         }
     }
 
-
     @Override
     public boolean delete(Integer doctorAvailabilityID) throws DatabaseDeleteException {
         String query = "DELETE FROM disponibilidad_medico WHERE ID_Disponibilidad = ?";
@@ -181,35 +180,6 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
         return availableDays;
     }
 
-    public List<String> findAvailableHoursByDoctorAndDate(String doctorDNI, int clinicID, LocalDate date) throws DatabaseQueryException {
-        List<String> availableHours = new ArrayList<>();
-
-        String query =
-                "SELECT Hora_Inicio, Hora_Fin, Duracion_Cita " +
-                        "FROM disponibilidad_medico " +
-                        "WHERE DNI_Medico = ? AND ID_Clinica = ? AND Fecha = ?";
-
-        try (ResultSet resultSet = executeQuery(query, doctorDNI, clinicID, java.sql.Date.valueOf(date))) {
-            if (resultSet.next()) {
-                Time startTime = resultSet.getTime("Hora_Inicio");
-                Time endTime = resultSet.getTime("Hora_Fin");
-                int duration = resultSet.getInt("Duracion_Cita");
-
-                LocalTime start = startTime.toLocalTime();
-                LocalTime end = endTime.toLocalTime();
-
-                while (start.plusMinutes(duration).isBefore(end) || start.plusMinutes(duration).equals(end)) {
-                    availableHours.add(start.toString()); // "HH:mm"
-                    start = start.plusMinutes(duration);
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error fetching available hours for doctor " + doctorDNI + " at clinic " + clinicID + " on " + date, e);
-            throw new DatabaseQueryException("Could not fetch available hours");
-        }
-        return availableHours;
-    }
-
     // Retrieves the available time slots of a doctor working on a specific day
     public List<TimeSlot> findAvailableTimeSlotsByDoctorAndDate(String doctorDNI, int clinicID, LocalDate date) throws DatabaseQueryException {
         List<TimeSlot> availableTimeSlots = new ArrayList<>();
@@ -235,25 +205,6 @@ public class DoctorAvailabilityDAO extends BaseDAO<DoctorAvailability, Integer> 
             throw new DatabaseQueryException("Could not fetch available time slots");
         }
         return availableTimeSlots;
-    }
-
-    public List<DoctorAvailability> findAvailabilityByClinicAndDoctor(int clinicID, String doctorDNI) throws DatabaseQueryException {
-        List<DoctorAvailability> availabilities = new ArrayList<>();
-        String query =
-                "SELECT * FROM disponibilidad_medico " +
-                        "WHERE ID_Clinica = ? AND DNI_Medico = ?";
-
-        try (ResultSet resultSet = executeQuery(query, clinicID, doctorDNI)) {
-            while (resultSet.next()) {
-                availabilities.add(mapResultSetToDoctorAvailability(resultSet));
-            }
-            LOGGER.info("Found " + availabilities.size() + " availability slots for doctor "
-                    + doctorDNI + " in clinic ID " + clinicID);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error fetching availability for doctor " + doctorDNI + " in clinic " + clinicID, e);
-            throw new DatabaseQueryException("Could not fetch doctor availability");
-        }
-        return availabilities;
     }
 
     private DoctorAvailability mapResultSetToDoctorAvailability(ResultSet resultSet) throws SQLException {

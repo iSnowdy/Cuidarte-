@@ -29,7 +29,6 @@ public class Main {
             JFrame mainFrame = new JFrame("Patient Portal");
             mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             mainFrame.setSize(3000, 1000);
-            //mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             mainFrame.setLocationRelativeTo(null);
 
             LandingPage landingPage = new LandingPage(mainFrame);

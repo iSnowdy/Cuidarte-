@@ -13,15 +13,6 @@ public class Appointment {
     private String description;
     private String doctorObservations;
 
-    public Appointment(String patientDNI, String doctorDNI, int clinicID, Timestamp appointmentDateTime, String description) {
-        this.patientDNI = patientDNI;
-        this.doctorDNI = doctorDNI;
-        this.clinicID = clinicID;
-        this.appointmentDate = appointmentDateTime;
-        this.description = description;
-        this.appointmentState = AppointmentState.CONFIRMED;
-    }
-
     public Appointment(String patientDNI, String doctorDNI, int clinicID, Timestamp appointmentDateTime, String description, AppointmentState appointmentState) {
         this.patientDNI = patientDNI;
         this.doctorDNI = doctorDNI;
@@ -29,17 +20,6 @@ public class Appointment {
         this.appointmentDate = appointmentDateTime;
         this.description = description;
         this.appointmentState = appointmentState;
-    }
-
-    // Constructors needed to map a ResultSet -> Appointment
-    public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Timestamp appointmentDate, AppointmentState appointmentState, String description) {
-        this.id = id;
-        this.patientDNI = patientDNI;
-        this.doctorDNI = doctorDNI;
-        this.clinicID = clinicID;
-        this.appointmentDate = appointmentDate;
-        this.appointmentState = appointmentState;
-        this.description = description;
     }
 
     public Appointment(int id, String patientDNI, String doctorDNI,  int clinicID, Timestamp appointmentDate, AppointmentState appointmentState, String description, String doctorObservations) {

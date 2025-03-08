@@ -12,14 +12,6 @@ public class MedicalReport {
             temperature, weight, height;
     private int systolic, diastolic, heartRate, saturation;
 
-
-    public MedicalReport() {}
-
-    public MedicalReport(String patientDNI, String doctorDNI) {
-        this.patientDNI = patientDNI;
-        this.doctorDNI = doctorDNI;
-    }
-
     public MedicalReport(String patientDNI, String doctorDNI,
                          String medicalHistory, String allergies, String appointmentMotive, String physicalExploration, String treatment,
                          int systolic, int diastolic, int heartRate, int saturation,

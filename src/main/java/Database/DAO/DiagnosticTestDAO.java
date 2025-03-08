@@ -230,7 +230,6 @@ public class DiagnosticTestDAO extends BaseDAO<DiagnosticTest, Integer> {
         }
     }
 
-
     private DiagnosticTest mapResultSetToDiagnosticTest(ResultSet resultSet) throws SQLException {
         return new DiagnosticTest(
                 resultSet.getInt("ID_Prueba"),

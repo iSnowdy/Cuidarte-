@@ -13,7 +13,6 @@ public class BiochemistryLab {
             creatinine,
             uricAcid, totalBilirubin;
 
-
     public BiochemistryLab(int biochemistryId, int testId, int glucose, int urea, double creatinine, double uricAcid, int totalCholesterol, int hdlCholesterol, int ldlCholesterol, int triglycerides, int gotAst, int gptAlt, int gammaGt, int alkalinePhosphatase, double totalBilirubin) {
         this.biochemistryID = biochemistryId;
         this.diagnosticTestID = testId;

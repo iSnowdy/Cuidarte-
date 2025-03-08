@@ -20,8 +20,8 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
     public boolean save(Doctor entity) throws DatabaseInsertException {
         String query =
                 "INSERT INTO medicos " +
-                "(DNI_Medico, Nombre, Apellidos, Numero_Telefono, Email, Especialidad, Descripcion) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        "(DNI_Medico, Nombre, Apellidos, Numero_Telefono, Email, Especialidad, Descripcion) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try {
             boolean result = executeUpdate(query,
@@ -45,8 +45,8 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
     public boolean update(Doctor entity) throws DatabaseUpdateException {
         String query =
                 "UPDATE medicos " +
-                "SET Nombre = ?, Apellidos = ?, Numero_Telefono = ?, Email = ?, Especialidad = ?, Descripcion = ? " +
-                "WHERE DNI_Medico = ?";
+                        "SET Nombre = ?, Apellidos = ?, Numero_Telefono = ?, Email = ?, Especialidad = ?, Descripcion = ? " +
+                        "WHERE DNI_Medico = ?";
 
         try {
             boolean result = executeUpdate(
@@ -199,10 +199,10 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
 
         String query =
                 "SELECT * " +
-                "FROM medicos m " +
-                "JOIN disponibilidad_medico dm " +
+                        "FROM medicos m " +
+                        "JOIN disponibilidad_medico dm " +
                         "ON m.DNI_Medico = dm.DNI_Medico " +
-                "WHERE dm.ID_Clinica = ? AND m.Especialidad = ?";
+                        "WHERE dm.ID_Clinica = ? AND m.Especialidad = ?";
 
         try (ResultSet resultSet = executeQuery(query, clinicID, speciality)) {
             while (resultSet.next()) {
@@ -222,8 +222,8 @@ public class DoctorDAO extends BaseDAO<Doctor, String> {
 
         String query =
                 "SELECT * " +
-                "FROM disponibilidad_medico dm " +
-                "WHERE dm.ID_Clinica = ?";
+                        "FROM disponibilidad_medico dm " +
+                        "WHERE dm.ID_Clinica = ?";
 
         try (ResultSet resultSet = executeQuery(query, clinicID)) {
             while (resultSet.next()) {

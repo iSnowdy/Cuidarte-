@@ -92,7 +92,6 @@ public class PanelDate extends JPanel {
         repaint();
     }
 
-
     private void markAppointmentCell(Cell cell, LocalDate date, LocalDate today) {
         cell.markAsAppointmentDay(date.isAfter(today));
         cell.addActionListener(e -> onAppointmentSelected.accept(date));
@@ -101,31 +100,5 @@ public class PanelDate extends JPanel {
     private void markAvailableCell(Cell cell, LocalDate date) {
         cell.markAsAvailableDay();
         cell.addActionListener(e -> onDateSelected.accept(date));
-    }
-
-    // Handles UI behavior for appointment days
-    private void handleAppointmentCell(Cell cell, LocalDate date, LocalDate today) {
-        boolean isFuture = date.isAfter(today);
-        cell.markAsAppointmentDay(isFuture);
-        removeExistingListeners(cell);
-        cell.addActionListener(e -> onAppointmentSelected.accept(date));
-    }
-
-    // Handles UI behavior for available days
-    private void handleAvailableCell(Cell cell, LocalDate date) {
-        boolean isAvailable = date.getMonthValue() == month && (availableDays != null && availableDays.contains(date.getDayOfMonth()));
-        cell.setEnabled(isAvailable);
-        cell.setForeground(isAvailable ? Color.BLACK : Color.LIGHT_GRAY);
-
-        if (isAvailable) {
-            cell.addActionListener(e -> onDateSelected.accept(date));
-        }
-    }
-
-    // Removes existing listeners to prevent duplicates
-    private void removeExistingListeners(Cell cell) {
-        for (ActionListener al : cell.getActionListeners()) {
-            cell.removeActionListener(al);
-        }
     }
 }

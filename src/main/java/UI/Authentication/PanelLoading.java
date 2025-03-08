@@ -21,25 +21,16 @@ public class PanelLoading extends JPanel {
         add(loadingLabel, BorderLayout.CENTER);
     }
 
-    /**
-     * Sets a new GIF loading icon.
-     * @param path Resource path of the GIF.
-     */
+    // Sets the gif
     public void setLoadingIcon(String path) {
         ImageIcon icon = new ImageIcon(getClass().getResource(path));
         loadingLabel.setIcon(icon);
     }
 
-    /**
-     * Displays the loading panel.
-     */
     public void showLoading() {
         setVisible(true);
     }
 
-    /**
-     * Hides the loading panel.
-     */
     public void hideLoading() {
         setVisible(false);
     }

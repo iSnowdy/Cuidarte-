@@ -24,19 +24,4 @@ public class GoogleMapsRedirect {
             e.printStackTrace();
         }
     }
-
-    public static void showErrorNotification(Component parentComponent) {
-        Window window = SwingUtilities.getWindowAncestor(parentComponent);
-        if (window instanceof JFrame) {
-            NotificationPopUp.showCustomNotification(
-                    (JFrame) window,
-                    "Error al abrir Google Maps",
-                    "No se pudo abrir Google Maps.",
-                    "Aceptar",
-                    event -> System.out.println("Notificación cerrada")
-            );
-        } else {
-            System.err.println("No se pudo obtener el componente padre");
-        }
-    }
 }

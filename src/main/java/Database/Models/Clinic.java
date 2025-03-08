@@ -5,13 +5,6 @@ public class Clinic {
     private String
             name, address, email, phoneNumber;
 
-    public Clinic(String name, String address, String email, String phoneNumber) {
-        this.name = name;
-        this.address = address;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-    }
-
     // Constructor needed to map a ResultSet -> Clinic
     public Clinic(int id, String name, String address, String email, String phoneNumber) {
         this.id = id;

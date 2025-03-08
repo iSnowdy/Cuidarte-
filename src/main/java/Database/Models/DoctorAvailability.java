@@ -12,15 +12,6 @@ public class DoctorAvailability {
     private Time endTime;
     private int appointmentDuration;
 
-    public DoctorAvailability(String doctorDNI, int clinicID, Date date, Time startTime, Time endTime, int appointmentDuration) {
-        this.doctorDNI = doctorDNI;
-        this.clinicID = clinicID;
-        this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.appointmentDuration = appointmentDuration;
-    }
-
     // Maps data from the DB to the DTO
     public DoctorAvailability(int doctorAvailabilityID, String doctorDNI, int clinicID, Date date, Time startTime, Time endTime, int appointmentDuration) {
         this.doctorAvailabilityID = doctorAvailabilityID;

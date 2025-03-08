@@ -22,8 +22,8 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
     public boolean save(Appointment entity) throws DatabaseInsertException {
         String query =
                 "INSERT INTO " +
-                "citas_medicas (DNI_Paciente, DNI_Medico, ID_Clinica, Fecha_Hora, Estado_Cita, Motivo_Consulta, Observaciones_Medicas) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        "citas_medicas (DNI_Paciente, DNI_Medico, ID_Clinica, Fecha_Hora, Estado_Cita, Motivo_Consulta, Observaciones_Medicas) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try {
             boolean result = executeUpdate(
@@ -48,9 +48,9 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
     public boolean update(Appointment entity) throws DatabaseUpdateException {
         String query =
                 "UPDATE citas_medicas " +
-                "SET DNI_Paciente = ?, DNI_Medico = ?, ID_Clinica = ?, Fecha_Hora = ?, Estado_Cita = ?, " +
-                    "Motivo_Consulta = ?, Observaciones_Medicas = ? " +
-                "WHERE ID_Cita = ?";
+                        "SET DNI_Paciente = ?, DNI_Medico = ?, ID_Clinica = ?, Fecha_Hora = ?, Estado_Cita = ?, " +
+                        "Motivo_Consulta = ?, Observaciones_Medicas = ? " +
+                        "WHERE ID_Cita = ?";
 
         try {
             boolean result = executeUpdate(query,
@@ -215,8 +215,8 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
         List<Appointment> appointments = new ArrayList<>();
         String query =
                 "SELECT * FROM citas_medicas " +
-                "WHERE DNI_Paciente = ? AND Estado_Cita != 'Cancelada' " +
-                "ORDER BY Fecha_Hora ASC";
+                        "WHERE DNI_Paciente = ? AND Estado_Cita != 'Cancelada' " +
+                        "ORDER BY Fecha_Hora ASC";
 
         try (ResultSet resultSet = executeQuery(query, patientDNI)) {
             while (resultSet.next()) {
@@ -236,11 +236,11 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
 
         String query =
                 "SELECT TIME(Fecha_Hora) AS Hora " +
-                "FROM citas_medicas " +
-                "WHERE " +
-                    "DNI_Medico = ? AND " +
-                    "DATE(Fecha_Hora) = ? AND " +
-                    "Estado_Cita != 'Cancelada'";
+                        "FROM citas_medicas " +
+                        "WHERE " +
+                        "DNI_Medico = ? AND " +
+                        "DATE(Fecha_Hora) = ? AND " +
+                        "Estado_Cita != 'Cancelada'";
 
         try (ResultSet resultSet = executeQuery(query, doctorDNI, date)) {
             while (resultSet.next()) {
@@ -261,7 +261,7 @@ public class AppointmentDAO extends BaseDAO<Appointment, Integer> {
 
         String query =
                 "SELECT * FROM citas_medicas " +
-                "WHERE DNI_Paciente = ? AND DATE(Fecha_Hora) = ?";
+                        "WHERE DNI_Paciente = ? AND DATE(Fecha_Hora) = ?";
 
         try (ResultSet resultSet = executeQuery(query, patientDNI, java.sql.Date.valueOf(date))) {
             while (resultSet.next()) {
